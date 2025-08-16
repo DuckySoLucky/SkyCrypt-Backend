@@ -1,7 +1,8 @@
 package models
 
 type EnchantingOutput struct {
-	Data map[string]EnchantingGameData `json:"data"`
+	Data     map[string]EnchantingGameData `json:"data"`
+	Unlocked bool                          `json:"unlocked"`
 }
 
 type EnchantingGameData struct {

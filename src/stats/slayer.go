@@ -68,6 +68,7 @@ func getSlayerLevel(experience int, slayerId string) models.SlayerLevel {
 func GetSlayers(userProfile *models.Member) models.SlayersOutput {
 	output := models.SlayersOutput{
 		Data: make(map[string]models.SlayerData),
+		Stats:  make(map[string]float64),
 	}
 
 	totalExperience := 0
@@ -87,10 +88,6 @@ func GetSlayers(userProfile *models.Member) models.SlayersOutput {
 		}
 
 		stats := constants.GetBonusStats(output.Data[slayerId].Level.Level, statsBonus)
-		if output.Stats == nil {
-			output.Stats = make(map[string]float64)
-		}
-
 		for stat, value := range stats {
 			if _, exists := output.Stats[stat]; !exists {
 				output.Stats[stat] = 0

@@ -1,17 +1,11 @@
 package routes
 
 import (
-	"fmt"
-	"skycrypt/src/api"
-	"skycrypt/src/stats"
-	"time"
-
-	skyhelpernetworthgo "github.com/DuckySoLucky/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
 )
 
 func NetworthHandler(c *fiber.Ctx) error {
-	timeNow := time.Now()
+	/*timeNow := time.Now()
 
 	uuid := c.Params("uuid")
 	profileId := c.Params("profileId")
@@ -73,6 +67,8 @@ func NetworthHandler(c *fiber.Ctx) error {
 			"normal":      networth,
 			"nonCosmetic": nonCosmeticNetworth,
 		},
+	})*/
+	return c.JSON(fiber.Map{
+		"networth": nil,
 	})
-
 }

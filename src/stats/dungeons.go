@@ -8,7 +8,7 @@ import (
 )
 
 func getSecrets(data *models.Dungeons) models.SecretsOutput {
-	secretsFound := data.Secrets
+	secretsFound := max(data.Secrets, 1)
 	totalRuns := 0.0
 	for _, dungeonType := range data.DungeonTypes {
 		for tier, tierCompletion := range dungeonType.TierCompletions {
@@ -22,6 +22,13 @@ func getSecrets(data *models.Dungeons) models.SecretsOutput {
 		}
 	}
 
+	if totalRuns == 0 {
+		return models.SecretsOutput{
+			Found:         int(secretsFound),
+			SecretsPerRun: 0,
+		}
+	}
+
 	return models.SecretsOutput{
 		Found:         int(secretsFound),
 		SecretsPerRun: utility.RoundFloat(secretsFound/totalRuns, 2),
@@ -30,7 +37,7 @@ func getSecrets(data *models.Dungeons) models.SecretsOutput {
 
 func getDungeonStats(userProfile *models.Member) models.DungeonStatsOutput {
 	return models.DungeonStatsOutput{
-		Secrets:                  getSecrets(userProfile.Dungeons),
+		Secrets:                  getSecrets(&userProfile.Dungeons),
 		HighestFloorBeatenNormal: userProfile.Dungeons.DungeonTypes["catacombs"].HighestTierCompleted,
 		HighestFloorBeatenMaster: userProfile.Dungeons.DungeonTypes["master_catacombs"].HighestTierCompleted,
 		BloodMobKills:            GetBestiaryFamily(userProfile, "Undead").Kills,
@@ -166,8 +173,10 @@ func getClassData(userProfile *models.Member) models.ClassData {
 		classLevelWithProgressSum += output.Classes[class].LevelWithProgress
 	}
 
-	output.ClassAverage = float64(classLevelSum) / float64(len(output.Classes))
-	output.ClassAverageWithProgress = classLevelWithProgressSum / float64(len(output.Classes))
+	if len(output.Classes) > 0 {
+		output.ClassAverage = float64(classLevelSum) / float64(len(output.Classes))
+		output.ClassAverageWithProgress = classLevelWithProgressSum / float64(len(output.Classes))
+	}
 
 	return output
 }

@@ -182,7 +182,7 @@ func GetSkillLevelCaps(userProfile *models.Member, player *models.Player) map[st
 		caps["farming"] += userProfile.JacobsContest.Perks.FarmingLevelCap
 	}
 
-	if userProfile.Pets.PetCare != nil {
+	if userProfile.Pets != nil && userProfile.Pets.PetCare != nil {
 		caps["taming"] += len(userProfile.Pets.PetCare.PetTypesSacrificed)
 	}
 

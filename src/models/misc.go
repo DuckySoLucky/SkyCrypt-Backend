@@ -1,6 +1,6 @@
 package models
 
 type FairySouls struct {
-	Found int `json:"found,omitempty"`
-	Total int `json:"total,omitempty"`
+	Found int `json:"found"`
+	Total int `json:"total"`
 }

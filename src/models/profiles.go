@@ -26,30 +26,30 @@ type Member struct {
 	PlayerData          *playerData            `json:"player_data"`
 	CoopInvitation      *coopInvitation        `json:"coop_invitation"`
 	Profile             *profileData           `json:"profile"`
-	JacobsContest       *jacobsContest         `json:"jacobs_contest,omitempty"`
+	JacobsContest       jacobsContest          `json:"jacobs_contest,omitempty"`
 	Pets                *pets                  `json:"pets_data,omitempty"`
-	Leveling            *leveling              `json:"leveling,omitempty"`
-	Currencies          *currencies            `json:"currencies,omitempty"`
+	Leveling            leveling               `json:"leveling,omitempty"`
+	Currencies          currencies             `json:"currencies,omitempty"`
 	FairySouls          *fairySouls            `json:"fairy_soul,omitempty"`
 	Inventory           *inventory             `json:"inventory,omitempty"`
 	SharedInventory     *sharedInventory       `json:"shared_inventory,omitempty"`
-	Rift                *rift                  `json:"rift,omitempty"`
-	AccessoryBagStorage *accessoryBagStorage   `json:"accessory_bag_storage,omitempty"`
-	CrimsonIsle         *crimsonIsleData       `json:"nether_island_player_data,omitempty"`
-	Mining              *mining                `json:"mining_core,omitempty"`
+	Rift                rift                   `json:"rift,omitempty"`
+	AccessoryBagStorage accessoryBagStorage    `json:"accessory_bag_storage,omitempty"`
+	CrimsonIsle         crimsonIsleData        `json:"nether_island_player_data,omitempty"`
+	Mining              mining                 `json:"mining_core,omitempty"`
 	Objectives          *objectives            `json:"objectives,omitempty"`
 	GlaciteTunnels      *glaciteData           `json:"glacite_player_data,omitempty"`
-	Forge               *forge                 `json:"forge,omitempty"`
-	Quests              *quests                `json:"quests,omitempty"`
-	Garden              *gardenProfileData     `json:"garden_player_data,omitempty"`
-	PlayerStats         *playerStats           `json:"player_stats,omitempty"`
-	TrophyFish          *memberTrophyFish      `json:"trophy_fish,omitempty"`
-	Experimentation     *experimentationData   `json:"experimentation,omitempty"`
-	Dungeons            *Dungeons              `json:"dungeons,omitempty"`
-	Slayer              *slayer                `json:"slayer,omitempty"`
+	Forge               forge                  `json:"forge,omitempty"`
+	Quests              quests                 `json:"quests,omitempty"`
+	Garden              gardenProfileData      `json:"garden_player_data,omitempty"`
+	PlayerStats         playerStats            `json:"player_stats,omitempty"`
+	TrophyFish          memberTrophyFish       `json:"trophy_fish,omitempty"`
+	Experimentation     experimentationData    `json:"experimentation,omitempty"`
+	Dungeons            Dungeons               `json:"dungeons,omitempty"`
+	Slayer              slayer                 `json:"slayer,omitempty"`
 	Bestiary            *bestiary              `json:"bestiary,omitempty"`
-	Collections         *map[string]int        `json:"collection,omitempty"`
-	ItemData            *itemData              `json:"item_data,omitempty"`
+	Collections         map[string]int         `json:"collection,omitempty"`
+	ItemData            itemData               `json:"item_data,omitempty"`
 	WinterPlayerData    winterPlayerIslandData `json:"winter_player_data,omitempty"`
 }
 
@@ -220,12 +220,12 @@ type accessoryBagStorage struct {
 }
 
 type crimsonIsleData struct {
-	Abiphone            *abiphone       `json:"abiphone,omitempty"`
-	Kuudra              *map[string]int `json:"kuudra_completed_tiers,omitempty"`
-	Dojo                *map[string]int `json:"dojo,omitempty"`
-	SelectedFaction     string          `json:"selected_faction,omitempty"`
-	MagesReputation     float64         `json:"mages_reputation,omitempty"`
-	BarbarianReputation float64         `json:"barbarians_reputation,omitempty"`
+	Abiphone            abiphone       `json:"abiphone,omitempty"`
+	Kuudra              map[string]int `json:"kuudra_completed_tiers,omitempty"`
+	Dojo                map[string]int `json:"dojo,omitempty"`
+	SelectedFaction     string         `json:"selected_faction,omitempty"`
+	MagesReputation     float64        `json:"mages_reputation,omitempty"`
+	BarbarianReputation float64        `json:"barbarians_reputation,omitempty"`
 }
 
 type abiphone struct {
@@ -312,7 +312,7 @@ type forgeProcess struct {
 }
 
 type quests struct {
-	TrapperQuest *trapperQuest `json:"trapper_quest,omitempty"`
+	TrapperQuest trapperQuest `json:"trapper_quest,omitempty"`
 }
 
 type trapperQuest struct {
@@ -351,14 +351,14 @@ type playerStats struct {
 			OresMined          float64 `json:"ores_mined,omitempty"`
 		} `json:"milestone,omitempty"`
 	} `json:"pets,omitempty"`
-	Rift                  *riftPlayerData   `json:"rift,omitempty"`
-	Races                 *races            `json:"races,omitempty"`
-	Gifts                 *gifts            `json:"gifts"`
-	WinterIslandData      *winterIslandData `json:"winter"`
-	EndIsland             *endIsland        `json:"end_island"`
-	HighestCriticalDamage float64           `json:"highest_critical_damage"`
-	Mythos                *mythos           `json:"mythos"`
-	Auctions              auctions          `json:"auctions"`
+	Rift                  riftPlayerData   `json:"rift,omitempty"`
+	Races                 races            `json:"races,omitempty"`
+	Gifts                 gifts            `json:"gifts"`
+	WinterIslandData      winterIslandData `json:"winter"`
+	EndIsland             endIsland        `json:"end_island"`
+	HighestCriticalDamage float64          `json:"highest_critical_damage"`
+	Mythos                mythos           `json:"mythos"`
+	Auctions              auctions         `json:"auctions"`
 }
 
 type auctions struct {
@@ -466,7 +466,7 @@ type experimentationData struct {
 	Simon                 *ExperimentationGame `json:"simon,omitempty"`
 	Pairings              *ExperimentationGame `json:"pairings,omitempty"`
 	Numbers               *ExperimentationGame `json:"numbers,omitempty"`
-	ClaimsResets          int64                `json:"claims_resets,omitempty"`
+	ClaimsResets          *int64               `json:"claims_resets,omitempty"`
 	ClaimsResetsTimestamp int64                `json:"claims_resets_timestamp,omitempty"`
 	SerumsDrank           int                  `json:"serums_drank,omitempty"`
 	ClaimedRetroactiveRng bool                 `json:"claimed_retroactive_rng,omitempty"`

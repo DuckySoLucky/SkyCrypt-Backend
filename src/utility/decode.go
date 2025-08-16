@@ -18,6 +18,10 @@ var gzipReaderPool = sync.Pool{
 }
 
 func DecodeInventory(inventoryData *string) (*models.DecodedInventory, error) {
+	if *inventoryData == "" {
+		return &models.DecodedInventory{}, nil
+	}
+
 	decodedData, err := base64.StdEncoding.DecodeString(*inventoryData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode base64: %w", err)

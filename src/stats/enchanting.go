@@ -36,8 +36,10 @@ func getGame(gameData *models.ExperimentationGame, gameId string) []models.Encha
 }
 
 func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
-	if userProfie.Experimentation == nil {
-		return models.EnchantingOutput{}
+	if userProfie.Experimentation.ClaimsResets == nil {
+		return models.EnchantingOutput{
+			Unlocked: false,
+		}
 	}
 
 	output := map[string]models.EnchantingGameData{}
@@ -63,6 +65,7 @@ func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
 	}
 
 	return models.EnchantingOutput{
-		Data: output,
+		Unlocked: true,
+		Data:     output,
 	}
 }

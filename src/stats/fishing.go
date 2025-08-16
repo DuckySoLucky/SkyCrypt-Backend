@@ -10,7 +10,7 @@ import (
 )
 
 func getTrophyFishProgress(userProfile *models.Member) []models.TrophyFishProgress {
-	if userProfile.TrophyFish == nil {
+	if len(userProfile.TrophyFish.Rewards) == 0 {
 		return nil
 	}
 	output := []models.TrophyFishProgress{}

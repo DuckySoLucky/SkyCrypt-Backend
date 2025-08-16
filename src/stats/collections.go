@@ -66,17 +66,13 @@ func getBossCollections(userProfile *models.Member) models.CollectionCategory {
 	kuudraAmounts := []models.CollectionCategoryItemAmount{}
 	for tier := range constants.KUUDRA_COMPLETIONS_MULTIPLIER {
 		amounts := userProfile.CrimsonIsle.Kuudra
-		if amounts == nil {
-			amounts = &map[string]int{}
-		}
-
 		if tier == "none" {
 			tier = "basic"
 		}
 
 		kuudraAmounts = append(kuudraAmounts, models.CollectionCategoryItemAmount{
 			Username: utility.TitleCase(tier),
-			Amount:   (*amounts)[tier],
+			Amount:   amounts[tier],
 		})
 	}
 
@@ -130,11 +126,7 @@ func GetCollections(userProfile *models.Member, profile *models.Profile) models.
 		Categories: map[string]models.CollectionCategory{},
 	}
 
-	userCollections := *userProfile.Collections
-	if userCollections == nil {
-		userCollections = map[string]int{}
-	}
-
+	userCollections := userProfile.Collections
 	output.Categories["BOSSES"] = getBossCollections(userProfile)
 	for categoryId, categoryData := range constants.COLLECTIONS {
 		category := models.CollectionCategory{
@@ -148,12 +140,7 @@ func GetCollections(userProfile *models.Member, profile *models.Profile) models.
 
 			totalAmount, amounts := 0, []models.CollectionCategoryItemAmount{}
 			for memberId, memberData := range profile.Members {
-				if memberData.Collections == nil {
-					memberData.Collections = &map[string]int{}
-				}
-
-				memberCollections := *memberData.Collections
-				memberAmount := memberCollections[itemData.Id]
+				memberAmount := memberData.Collections[itemData.Id]
 				totalAmount += memberAmount
 				if memberAmount > 0 {
 					amounts = append(amounts, models.CollectionCategoryItemAmount{

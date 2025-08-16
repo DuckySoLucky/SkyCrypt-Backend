@@ -63,8 +63,8 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 		museum := profileMuseum[uuid]
 		if museum == nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": fmt.Sprintf("No museum data found for profile %s", profileId),
+			return c.JSON(fiber.Map{
+				"items": []models.StrippedItem{},
 			})
 		}
 

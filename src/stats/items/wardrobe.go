@@ -37,5 +37,9 @@ func GetWardrobe(wardrobeInventory []models.ProcessedItem) [][]*models.StrippedI
 		}
 	}
 
+	if len(wardrobe) == 0 {
+		return [][]*models.StrippedItem{}
+	}
+
 	return wardrobe
 }

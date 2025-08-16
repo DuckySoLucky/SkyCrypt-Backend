@@ -13,7 +13,7 @@ func GetKuudraCompletions(userProfile *models.Member) int {
 	}
 
 	kills := 0
-	for kuudraId, kuudrakills := range *userProfile.CrimsonIsle.Kuudra {
+	for kuudraId, kuudrakills := range userProfile.CrimsonIsle.Kuudra {
 		if kuudraId == "total" || strings.HasPrefix(kuudraId, "highest") {
 			continue
 		}
@@ -35,7 +35,7 @@ func getKuudra(userProfile *models.Member) models.CrimsonIsleKuudra {
 			Name:    constants.KUUDRA_TIERS[kuudraId].Name,
 			Id:      kuudraId,
 			Texture: constants.KUUDRA_TIERS[kuudraId].Texture,
-			Kills:   (*userProfile.CrimsonIsle.Kuudra)[kuudraId],
+			Kills:   userProfile.CrimsonIsle.Kuudra[kuudraId],
 		}
 
 		totalKills += tier.Kills
@@ -67,8 +67,8 @@ func getDojoRank(points int) string {
 func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
 	totalPoints, challenges := 0, []models.CrimsonIsleDojoChallenge{}
 	for challengeId, challengeData := range constants.DOJO {
-		points := (*userProfile.CrimsonIsle.Dojo)[fmt.Sprintf("dojo_points_%s", challengeId)]
-		time := (*userProfile.CrimsonIsle.Dojo)[fmt.Sprintf("dojo_time_%s", challengeId)]
+		points := userProfile.CrimsonIsle.Dojo[fmt.Sprintf("dojo_points_%s", challengeId)]
+		time := userProfile.CrimsonIsle.Dojo[fmt.Sprintf("dojo_time_%s", challengeId)]
 		challenge := models.CrimsonIsleDojoChallenge{
 			Name:    challengeData.Name,
 			Id:      challengeId,

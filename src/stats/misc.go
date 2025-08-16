@@ -167,10 +167,6 @@ func getGifts(userProfile *models.Member) MiscGifts {
 }
 
 func getSeasonOfJerry(userProfile *models.Member) MiscSeasonOfJerry {
-	if userProfile.PlayerStats.WinterIslandData == nil {
-		return MiscSeasonOfJerry{}
-	}
-
 	return MiscSeasonOfJerry{
 		MostSnowballsHit:     int(userProfile.PlayerStats.WinterIslandData.MostSnowballsHit),
 		MostDamageDealt:      int(userProfile.PlayerStats.WinterIslandData.MostDamageDealt),
