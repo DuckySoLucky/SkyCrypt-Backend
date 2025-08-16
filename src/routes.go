@@ -76,7 +76,7 @@ func SetupRoutes(app *fiber.App) {
 	// Assets folder
 	app.Static("/assets", "assets")
 
-	if os.Getenv("DEV") == "false" {
+	if os.Getenv("DEV") != "true" {
 		fmt.Println("[ENVIROMENT] Running in production mode")
 		app.Use(etag.New())
 		app.Use("/api", cache.New(cache.Config{

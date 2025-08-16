@@ -1,14 +1,21 @@
 package utility
 
 import (
+	"bytes"
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
+	"os"
 	"regexp"
+	"runtime"
 	"skycrypt/src/constants"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -16,6 +23,17 @@ import (
 )
 
 var colorCodeRegex = regexp.MustCompile("§[0-9a-fk-or]")
+
+type errorCache struct {
+	lastSent time.Time
+	count    int
+}
+
+var (
+	errorCacheMutex sync.RWMutex
+	errorCacheMap   = make(map[string]*errorCache)
+	cacheDuration   = 15 * time.Minute
+)
 
 func GetRawLore(text string) string {
 	return colorCodeRegex.ReplaceAllString(text, "")
@@ -353,4 +371,149 @@ func SortSlice[T any](slice []T, less func(i, j int) bool) {
 			}
 		}
 	}
+}
+
+func SendWebhook(endpoint string, err interface{}, stack []byte) {
+	webhookURL := os.Getenv("DISCORD_WEBHOOK")
+	if webhookURL == "" {
+		fmt.Println("DISCORD_WEBHOOK environment variable not set")
+		return
+	}
+
+	errorStr := fmt.Sprintf("%v", err)
+	errorHash := generateErrorHash(endpoint, errorStr)
+
+	if !shouldSendError(errorHash) {
+		fmt.Printf("Error webhook rate limited for hash: %s\n", errorHash[:8])
+		return
+	}
+
+	pc, file, line, ok := runtime.Caller(1)
+	var callerInfo string
+	if ok {
+		fn := runtime.FuncForPC(pc)
+		callerInfo = fmt.Sprintf("%s:%d in %s", file, line, fn.Name())
+	} else {
+		callerInfo = "Unknown caller"
+	}
+
+	stackStr := string(stack)
+	maxStackLength := 800
+	if len(stackStr) > maxStackLength {
+		stackStr = stackStr[:maxStackLength] + "\n... (truncated)"
+	}
+
+	cleanFilePath := callerInfo
+	if strings.Contains(callerInfo, "/") {
+		parts := strings.Split(callerInfo, "/")
+		if len(parts) >= 2 {
+			// Show last 2 directories + file for context
+			cleanFilePath = strings.Join(parts[len(parts)-2:], "/")
+		}
+	}
+
+	if len(errorStr) > 100 {
+		errorStr = errorStr[:100] + "..."
+	}
+
+	errorCount := getErrorCount(errorHash)
+	var countText string
+	if errorCount > 1 {
+		countText = fmt.Sprintf(" (occurred %d times)", errorCount)
+	}
+
+	embed := map[string]interface{}{
+		"color": 0xFF3B30,
+		"fields": []map[string]interface{}{
+			{
+				"name":   "Error Details" + countText,
+				"value":  fmt.Sprintf("```\n%s\n```", errorStr),
+				"inline": false,
+			},
+			{
+				"name":   "Endpoint",
+				"value":  fmt.Sprintf("`%s`", endpoint),
+				"inline": true,
+			},
+			{
+				"name":   "Occurred",
+				"value":  fmt.Sprintf("<t:%d:R>", time.Now().Unix()),
+				"inline": true,
+			},
+			{
+				"name":   "Location",
+				"value":  fmt.Sprintf("`%s`", cleanFilePath),
+				"inline": false,
+			},
+			{
+				"name":   "Stack Trace",
+				"value":  fmt.Sprintf("```go\n%s\n```", stackStr),
+				"inline": false,
+			},
+		},
+	}
+
+	payload := map[string]interface{}{
+		"username": "SkyCrypt Monitor",
+		"embeds":   []map[string]interface{}{embed},
+	}
+
+	jsonData, jsonErr := json.Marshal(payload)
+	if jsonErr != nil {
+		fmt.Printf("Failed to marshal webhook payload: %v\n", jsonErr)
+		return
+	}
+
+	resp, httpErr := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
+	if httpErr != nil {
+		fmt.Printf("Failed to send webhook: %v\n", httpErr)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		fmt.Printf("Webhook returned non-success status: %d\n", resp.StatusCode)
+		return
+	}
+}
+
+func generateErrorHash(endpoint, errorStr string) string {
+	data := fmt.Sprintf("%s:%s", endpoint, errorStr)
+	hash := md5.Sum([]byte(data))
+	return hex.EncodeToString(hash[:])
+}
+
+func shouldSendError(errorHash string) bool {
+	errorCacheMutex.Lock()
+	defer errorCacheMutex.Unlock()
+
+	now := time.Now()
+	cache, exists := errorCacheMap[errorHash]
+
+	if !exists {
+		errorCacheMap[errorHash] = &errorCache{
+			lastSent: now,
+			count:    1,
+		}
+		return true
+	}
+
+	cache.count++
+
+	if now.Sub(cache.lastSent) >= cacheDuration {
+		cache.lastSent = now
+		return true
+	}
+
+	return false
+}
+
+func getErrorCount(errorHash string) int {
+	errorCacheMutex.RLock()
+	defer errorCacheMutex.RUnlock()
+
+	if cache, exists := errorCacheMap[errorHash]; exists {
+		return cache.count
+	}
+	return 1
 }

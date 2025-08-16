@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"skycrypt/src"
+	"skycrypt/src/utility"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -30,6 +31,9 @@ func main() {
 		StackTraceHandler: func(c *fiber.Ctx, err interface{}) {
 			stack := debug.Stack()
 			fmt.Printf("\033[31m\n========== FATAL PANIC ==========\nPANIC: %v\n\nSTACK TRACE:\n%s\n==================================\033[0m\n", err, stack)
+
+			utility.SendWebhook(c.OriginalURL(), err, stack)
+
 			// TODO: Figure out why this doesn't work
 			// Return JSON error to the client
 			_ = c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
