@@ -1,11 +1,12 @@
 package redis
 
 import (
-	"context"
-	"fmt"
-	"time"
+        "context"
+        "fmt"
+        "sync"
+        "time"
 
-	"github.com/go-redis/redis/v8"
+        "github.com/go-redis/redis/v8"
 )
 
 var ctx = context.Background()
@@ -13,105 +14,161 @@ var redisClient *redis.Client
 var redisAddr string
 var redisPassword string
 var redisDB int
+var clientMutex sync.RWMutex
 
 type RedisClient struct {
-	client *redis.Client
+        client *redis.Client
 }
 
 func InitRedis(addr string, password string, db int) error {
-	redisAddr = addr
-	redisPassword = password
-	redisDB = db
+        clientMutex.Lock()
+        defer clientMutex.Unlock()
 
-	// Don't use sync.Once with prefork mode - each process needs its own connection
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
-	})
+        redisAddr = addr
+        redisPassword = password
+        redisDB = db
 
-	_, err := redisClient.Ping(ctx).Result()
-	if err != nil {
-		return fmt.Errorf("could not connect to Redis: %v", err)
-	}
+        // Don't use sync.Once with prefork mode - each process needs its own connection
+        redisClient = redis.NewClient(&redis.Options{
+                Addr:            addr,
+                Password:        password,
+                DB:              db,
+                PoolSize:        10,
+                MinIdleConns:    5,
+                MaxRetries:      3,
+                RetryDelay:      time.Millisecond * 100,
+                PoolTimeout:     time.Second * 4,
+                IdleTimeout:     time.Minute * 5,
+                ConnMaxLifetime: time.Hour,
+                DialTimeout:     time.Second * 5,
+                ReadTimeout:     time.Second * 3,
+                WriteTimeout:    time.Second * 3,
+                PoolFIFO:        false,
+        })
 
-	// fmt.Print("Redis connected successfully\n")
-	return nil
+        ctxTimeout, cancel := context.WithTimeout(ctx, time.Second*5)
+        defer cancel()
+
+        _, err := redisClient.Ping(ctxTimeout).Result()
+        if err != nil {
+                redisClient.Close()
+                redisClient = nil
+                return fmt.Errorf("could not connect to Redis: %v", err)
+        }
+
+        fmt.Print("Redis connected successfully\n")
+        return nil
 }
 
 func (r *RedisClient) Set(key string, value interface{}, expirationSeconds int) error {
-	expiration := time.Duration(expirationSeconds) * time.Second
-	err := r.client.Set(ctx, key, value, expiration).Err()
-	if err != nil {
-		return fmt.Errorf("could not set value in Redis: %v", err)
-	}
-	return nil
+        expiration := time.Duration(expirationSeconds) * time.Second
+        err := r.client.Set(ctx, key, value, expiration).Err()
+        if err != nil {
+                return fmt.Errorf("could not set value in Redis: %v", err)
+        }
+        return nil
 }
 
 func Get(key string) (string, error) {
-	if redisClient == nil {
-		if redisAddr != "" {
-			err := InitRedis(redisAddr, redisPassword, redisDB)
-			if err != nil {
-				return "", fmt.Errorf("redis client not initialized and re-initialization failed: %v", err)
-			}
-		} else {
-			return "", fmt.Errorf("redis client not initialized. Call InitRedis() first")
-		}
-	}
+        clientMutex.RLock()
+        client := redisClient
+        clientMutex.RUnlock()
 
-	val, err := redisClient.Get(ctx, key).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return "", nil
-		}
-		return "", fmt.Errorf("could not get value from Redis: %v", err)
-	}
-	return val, nil
+        if client == nil {
+                clientMutex.Lock()
+                if redisClient == nil {
+                        if redisAddr != "" {
+                                err := InitRedis(redisAddr, redisPassword, redisDB)
+                                if err != nil {
+                                        clientMutex.Unlock()
+                                        return "", fmt.Errorf("redis client not initialized and re-initialization failed: %v", err)
+                                }
+                        } else {
+                                clientMutex.Unlock()
+                                return "", fmt.Errorf("redis client not initialized. Call InitRedis() first")
+                        }
+                }
+                client = redisClient
+                clientMutex.Unlock()
+        }
+
+        val, err := client.Get(ctx, key).Result()
+        if err != nil {
+                if err == redis.Nil {
+                        return "", nil
+                }
+                return "", fmt.Errorf("could not get value from Redis: %v", err)
+        }
+        return val, nil
 }
 
 func NewRedisClient(addr string, password string, db int) *RedisClient {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
-	})
+        rdb := redis.NewClient(&redis.Options{
+                Addr:            addr,
+                Password:        password,
+                DB:              db,
+                PoolSize:        10,
+                MinIdleConns:    5,
+                MaxRetries:      3,
+                RetryDelay:      time.Millisecond * 100,
+                PoolTimeout:     time.Second * 4,
+                IdleTimeout:     time.Minute * 5,
+                ConnMaxLifetime: time.Hour,
+                DialTimeout:     time.Second * 5,
+                ReadTimeout:     time.Second * 3,
+                WriteTimeout:    time.Second * 3,
+                PoolFIFO:        false,
+        })
 
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		panic(fmt.Errorf("could not connect to Redis: %v", err))
-	}
+        ctxTimeout, cancel := context.WithTimeout(ctx, time.Second*5)
+        defer cancel()
 
-	return &RedisClient{client: rdb}
+        _, err := rdb.Ping(ctxTimeout).Result()
+        if err != nil {
+                panic(fmt.Errorf("could not connect to Redis: %v", err))
+        }
+
+        return &RedisClient{client: rdb}
 }
 
 func Set(key string, value interface{}, expirationSeconds int) error {
-	if redisClient == nil {
-		if redisAddr != "" {
-			err := InitRedis(redisAddr, redisPassword, redisDB)
-			if err != nil {
-				return fmt.Errorf("redis client not initialized and re-initialization failed: %v", err)
-			}
-		} else {
-			return fmt.Errorf("redis client not initialized. Call InitRedis() first")
-		}
-	}
+        clientMutex.RLock()
+        client := redisClient
+        clientMutex.RUnlock()
 
-	expiration := time.Duration(expirationSeconds) * time.Second
-	err := redisClient.Set(ctx, key, value, expiration).Err()
-	if err != nil {
-		return fmt.Errorf("could not set value in Redis: %v", err)
-	}
-	return nil
+        if client == nil {
+                clientMutex.Lock()
+                if redisClient == nil {
+                        if redisAddr != "" {
+                                err := InitRedis(redisAddr, redisPassword, redisDB)
+                                if err != nil {
+                                        clientMutex.Unlock()
+                                        return fmt.Errorf("redis client not initialized and re-initialization failed: %v", err)
+                                }
+                        } else {
+                                clientMutex.Unlock()
+                                return fmt.Errorf("redis client not initialized. Call InitRedis() first")
+                        }
+                }
+                client = redisClient
+                clientMutex.Unlock()
+        }
+
+        expiration := time.Duration(expirationSeconds) * time.Second
+        err := client.Set(ctx, key, value, expiration).Err()
+        if err != nil {
+                return fmt.Errorf("could not set value in Redis: %v", err)
+        }
+        return nil
 }
 
 func (r *RedisClient) Get(key string) (string, error) {
-	val, err := r.client.Get(ctx, key).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return "", nil
-		}
-		return "", fmt.Errorf("could not get value from Redis: %v", err)
-	}
-	return val, nil
+        val, err := r.client.Get(ctx, key).Result()
+        if err != nil {
+                if err == redis.Nil {
+                        return "", nil
+                }
+                return "", fmt.Errorf("could not get value from Redis: %v", err)
+        }
+        return val, nil
 }
