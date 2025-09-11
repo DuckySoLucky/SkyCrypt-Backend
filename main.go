@@ -13,7 +13,7 @@ import (
 
 func main() {
 	app := fiber.New(fiber.Config{
-		Prefork:                   true,  // Fork processes for max CPU utilization
+		Prefork:                   false,  // Fork processes for max CPU utilization
 		ServerHeader:              "",    // Remove server header for slight perf gain
 		DisableKeepalive:          false, // Keep connections alive
 		DisableDefaultDate:        true,  // Disable date header
