@@ -8,12 +8,9 @@ import (
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/routes"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/joho/godotenv"
 )
 
@@ -78,11 +75,14 @@ func SetupRoutes(app *fiber.App) {
 
 	if os.Getenv("DEV") != "true" {
 		fmt.Println("[ENVIROMENT] Running in production mode")
-		app.Use(etag.New())
-		app.Use("/api", cache.New(cache.Config{
-			Expiration:   5 * time.Minute,
-			CacheControl: true,
-		}))
+
+		/*
+			app.Use(etag.New())
+			app.Use("/api", cache.New(cache.Config{
+				Expiration:   5 * time.Minute,
+				CacheControl: true,
+			})
+		*/
 	}
 
 	api := app.Group("/api")

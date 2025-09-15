@@ -2,11 +2,13 @@ package stats
 
 import (
 	"fmt"
+	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	"skycrypt/src/constants"
 	"skycrypt/src/lib"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"slices"
+	"strings"
 )
 
 func ProcessItems(items *[]models.Item, source string) []models.ProcessedItem {
@@ -129,6 +131,10 @@ func ProcessItem(item *models.Item, source string) models.ProcessedItem {
 		}
 
 		processedItem.Texture = lib.ApplyTexture(TextureItem)
+		if strings.HasPrefix(processedItem.Texture, "http://localhost:8080/assets/resourcepacks/FurfSky/") {
+			processedItem.TexturePack = "FURFSKY_REBORN"
+		}
+
 		if processedItem.Texture == "" {
 			fmt.Printf("[CUSTOM_RESOURCES] Found no textures for item: %s\n", item.Tag.ExtraAttributes.ID)
 		}
@@ -136,6 +142,28 @@ func ProcessItem(item *models.Item, source string) models.ProcessedItem {
 
 	if item.ContainsItems != nil {
 		processedItem.ContainsItems = ProcessItems(&item.ContainsItems, source)
+	}
+
+	if item.Tag.ExtraAttributes.ID != "" {
+		NEUItem, err := notenoughupdates.GetItem(item.Tag.ExtraAttributes.ID)
+		if err == nil && len(NEUItem.Wiki) > 0 {
+			processedItem.Wiki = &models.WikipediaLinks{}
+			if len(NEUItem.Wiki) == 1 {
+				if strings.HasPrefix(NEUItem.Wiki[0], "https://wiki.hypixel.net/") {
+					processedItem.Wiki.Official = NEUItem.Wiki[0]
+				} else {
+					processedItem.Wiki.Fandom = NEUItem.Wiki[0]
+				}
+			} else {
+				if strings.HasPrefix(NEUItem.Wiki[0], "https://wiki.hypixel.net/") {
+					processedItem.Wiki.Official = NEUItem.Wiki[0]
+					processedItem.Wiki.Fandom = NEUItem.Wiki[1]
+				} else {
+					processedItem.Wiki.Fandom = NEUItem.Wiki[0]
+					processedItem.Wiki.Official = NEUItem.Wiki[1]
+				}
+			}
+		}
 	}
 
 	// TODO: add cake bag & legacy backpack support

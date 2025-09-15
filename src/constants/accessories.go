@@ -271,7 +271,7 @@ func GetAllAccessories() []Accessory {
 					Name:       item.Name,
 				}
 				output = append(output, specialAccessoryItem)
-				fmt.Printf("[ACCESSORIES] Added special accessory %s with rarity %s\n", specialAccessoryItem.SkyBlockID, specialAccessoryItem.Rarity)
+				// fmt.Printf("[ACCESSORIES] Added special accessory %s with rarity %s\n", specialAccessoryItem.SkyBlockID, specialAccessoryItem.Rarity)
 			}
 		}
 	}
