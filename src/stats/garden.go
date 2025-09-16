@@ -9,6 +9,8 @@ import (
 	"skycrypt/src/utility"
 	"slices"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 type Garden struct {
@@ -53,7 +55,7 @@ type PlotLayout struct {
 	Layout   []models.ProcessedItem `json:"layout"`
 }
 
-func getVisitors(gardenData *models.GardenRaw) Visitors {
+func getVisitors(gardenData *skycrypttypes.Garden) Visitors {
 	VISITOR_RARITIES := notenoughupdates.NEUConstants.Garden.Visitors
 	MAX_VISITORS := notenoughupdates.NEUConstants.Garden.MaxVisitors
 
@@ -87,7 +89,7 @@ func getVisitors(gardenData *models.GardenRaw) Visitors {
 	}
 }
 
-func getCropMilestones(gardenData *models.GardenRaw) []CropMilestone {
+func getCropMilestones(gardenData *skycrypttypes.Garden) []CropMilestone {
 	milestones := make([]CropMilestone, 0, len(gardenData.ResourcesCollected))
 	for cropId, cropName := range constants.CROPS {
 		milestones = append(milestones, CropMilestone{
@@ -102,7 +104,7 @@ func getCropMilestones(gardenData *models.GardenRaw) []CropMilestone {
 	return milestones
 }
 
-func getCropUpgrades(gardenData *models.GardenRaw) []CropUpgrade {
+func getCropUpgrades(gardenData *skycrypttypes.Garden) []CropUpgrade {
 	upgrades := make([]CropUpgrade, 0, len(gardenData.CropUpgradeLevels))
 	for cropId, cropName := range constants.CROPS {
 		experience := stats.GetSkillExperience("crop_upgrade", int(gardenData.CropUpgradeLevels[cropId]))
@@ -119,7 +121,7 @@ func getCropUpgrades(gardenData *models.GardenRaw) []CropUpgrade {
 	return upgrades
 }
 
-func getComposter(gardenData *models.GardenRaw) map[string]int {
+func getComposter(gardenData *skycrypttypes.Garden) map[string]int {
 	output := make(map[string]int, len(gardenData.ComposterData.Upgrades))
 	for _, upgrade := range notenoughupdates.NEUConstants.Garden.ComposterUpgrades {
 		output[upgrade] = int(gardenData.ComposterData.Upgrades[upgrade])
@@ -128,7 +130,7 @@ func getComposter(gardenData *models.GardenRaw) map[string]int {
 	return output
 }
 
-func getPlotLayout(gardenData *models.GardenRaw) PlotLayout {
+func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
 	PLOT_LAYOUT := notenoughupdates.NEUConstants.Garden.SortedPlots
 	PLOT_NAMES := notenoughupdates.NEUConstants.Garden.Plots
 
@@ -193,7 +195,7 @@ func getPlotLayout(gardenData *models.GardenRaw) PlotLayout {
 	return output
 }
 
-func GetGarden(gardenData *models.GardenRaw) *Garden {
+func GetGarden(gardenData *skycrypttypes.Garden) *Garden {
 	return &Garden{
 		Level:          stats.GetLevelByXp(int(gardenData.Experience), &stats.ExtraSkillData{Type: "garden"}),
 		Visitors:       getVisitors(gardenData),

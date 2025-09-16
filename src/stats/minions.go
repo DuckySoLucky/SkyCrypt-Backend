@@ -6,9 +6,11 @@ import (
 	"skycrypt/src/utility"
 	"slices"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getMinionSlots(profile *models.Profile, tiers int) *models.MinionSlotsOutput {
+func getMinionSlots(profile *skycrypttypes.Profile, tiers int) *models.MinionSlotsOutput {
 	keys := make([]int, 0, len(constants.MINION_SLOTS))
 	for k := range constants.MINION_SLOTS {
 		keys = append(keys, k)
@@ -40,7 +42,7 @@ func getMinionSlots(profile *models.Profile, tiers int) *models.MinionSlotsOutpu
 	}
 }
 
-func getCraftedMinions(profile *models.Profile) map[string][]int {
+func getCraftedMinions(profile *skycrypttypes.Profile) map[string][]int {
 	craftedMinions := make(map[string][]int)
 	for _, member := range profile.Members {
 		for _, minion := range member.PlayerData.Minions {
@@ -68,7 +70,7 @@ func getCraftedMinions(profile *models.Profile) map[string][]int {
 	return craftedMinions
 }
 
-func GetMinions(profile *models.Profile) models.MinionsOutput {
+func GetMinions(profile *skycrypttypes.Profile) models.MinionsOutput {
 	craftedMinions := getCraftedMinions(profile)
 
 	output := models.MinionsOutput{

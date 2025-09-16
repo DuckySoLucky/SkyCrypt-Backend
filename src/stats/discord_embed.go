@@ -5,6 +5,8 @@ import (
 	"fmt"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 func getSkillsForEmbed(skills *models.Skills) models.EmbedDataSkills {
@@ -47,8 +49,8 @@ func getSlayersForEmbed(slayers *models.SlayersOutput) models.EmbedDataSlayers {
 	return output
 }
 
-func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *models.Member, profile *models.Profile, networth map[string]float64) {
-	skills := GetSkills(userProfile, profile, &models.Player{})
+func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile, networth map[string]float64) {
+	skills := GetSkills(userProfile, profile, &skycrypttypes.Player{})
 	dungeons := GetDungeons(userProfile)
 	slayers := GetSlayers(userProfile)
 

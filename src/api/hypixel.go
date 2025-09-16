@@ -9,14 +9,15 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	jsoniter "github.com/json-iterator/go"
 )
 
 var HYPIXEL_API_KEY = os.Getenv("HYPIXEL_API_KEY")
 
-func GetPlayer(uuid string) (*models.Player, error) {
+func GetPlayer(uuid string) (*skycrypttypes.Player, error) {
 	var rawReponse models.HypixelPlayerResponse
-	var response models.Player
+	var response skycrypttypes.Player
 
 	if !utility.IsUUID(uuid) {
 		respUUID, err := GetUUID(uuid)
@@ -103,16 +104,16 @@ func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
 	return &response, nil
 }
 
-func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
+func GetProfile(uuid string, profileId ...string) (*skycrypttypes.Profile, error) {
 	profiles, err := GetProfiles(uuid)
 	if err != nil {
-		return &models.Profile{}, err
+		return &skycrypttypes.Profile{}, err
 	}
 
 	// If no profileId provided, return the first profile or selected profile
 	if len(profileId) == 0 || (len(profileId) == 1 && profileId[0] == "") {
 		if len(profiles.Profiles) == 0 {
-			return &models.Profile{}, fmt.Errorf("no profiles found for UUID %s", uuid)
+			return &skycrypttypes.Profile{}, fmt.Errorf("no profiles found for UUID %s", uuid)
 		}
 
 		for _, profile := range profiles.Profiles {
@@ -132,10 +133,10 @@ func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
 		}
 	}
 
-	return &models.Profile{}, fmt.Errorf("profile with ID %s not found for UUID %s", targetProfileId, uuid)
+	return &skycrypttypes.Profile{}, fmt.Errorf("profile with ID %s not found for UUID %s", targetProfileId, uuid)
 }
 
-func GetMuseum(profileId string) (map[string]*models.Museum, error) {
+func GetMuseum(profileId string) (map[string]*skycrypttypes.Museum, error) {
 	var rawReponse models.HypixelMuseumResponse
 
 	cache, err := redis.Get(fmt.Sprintf(`museum:%s`, profileId))
@@ -168,7 +169,7 @@ func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 	return rawReponse.Members, nil
 }
 
-func GetGarden(profileId string) (*models.GardenRaw, error) {
+func GetGarden(profileId string) (*skycrypttypes.Garden, error) {
 	var rawReponse models.HypixelGardenResponse
 
 	cache, err := redis.Get(fmt.Sprintf(`garden:%s`, profileId))

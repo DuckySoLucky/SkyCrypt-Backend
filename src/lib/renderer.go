@@ -24,6 +24,8 @@ import (
 	"skycrypt/src/utility"
 	"strconv"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var textureDir = "assets/static"
@@ -737,7 +739,7 @@ func RenderItem(itemID string) ([]byte, error) {
 	TextureItem := models.TextureItem{
 		Damage: &itemData.Damage,
 		ID:     &itemData.ItemId,
-		Tag: models.TextureItemExtraAttributes{
+		Tag: skycrypttypes.TextureItemExtraAttributes{
 			ExtraAttributes: map[string]interface{}{
 				"id": itemData.SkyblockID,
 			},

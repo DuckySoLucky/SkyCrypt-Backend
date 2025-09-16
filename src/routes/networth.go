@@ -6,7 +6,7 @@ import (
 	"skycrypt/src/stats"
 	"time"
 
-	skyhelpernetworthgo "github.com/DuckySoLucky/SkyHelper-Networth-Go"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -50,7 +50,14 @@ func NetworthHandler(c *fiber.Ctx) error {
 	museum := profileMuseum[mowojang.UUID]
 	userProfile := &userProfileValue
 
-	calculator, err := skyhelpernetworthgo.NewProfileNetworthCalculator(userProfile, museum, *profile.Banking.Balance)
+	var bankBalance float64
+	if profile.Banking != nil && profile.Banking.Balance != nil {
+		bankBalance = *profile.Banking.Balance
+	} else {
+		bankBalance = 0.0
+	}
+
+	calculator, err := skyhelpernetworthgo.NewProfileNetworthCalculator(userProfile, museum, bankBalance)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to create networth calculator: %v", err),

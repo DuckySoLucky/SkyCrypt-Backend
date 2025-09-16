@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getBossCollections(userProfile *models.Member) models.CollectionCategory {
+func getBossCollections(userProfile *skycrypttypes.Member) models.CollectionCategory {
 	bossCollections := []models.CollectionCategoryItem{}
 
 	dungeons := GetFloorCompletions(userProfile)
@@ -111,7 +113,7 @@ func getBossCollections(userProfile *models.Member) models.CollectionCategory {
 	}
 }
 
-func GetCollections(userProfile *models.Member, profile *models.Profile) models.CollectionsOutput {
+func GetCollections(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) models.CollectionsOutput {
 	usernames := map[string]string{}
 	for memberId := range profile.Members {
 		username, err := api.GetUsername(memberId)

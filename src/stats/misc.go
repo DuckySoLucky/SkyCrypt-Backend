@@ -3,9 +3,10 @@ package stats
 import (
 	"fmt"
 	"skycrypt/src/constants"
-	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 type MiscOutput struct {
@@ -101,7 +102,7 @@ type MiscGifts struct {
 	Received int `json:"received"`
 }
 
-func getEssence(userProfile *models.Member) []MiscEssence {
+func getEssence(userProfile *skycrypttypes.Member) []MiscEssence {
 	essence := make([]MiscEssence, 0, len(constants.ESSENCE))
 	for essenceId, essenceData := range constants.ESSENCE {
 		essence = append(essence, MiscEssence{
@@ -114,7 +115,7 @@ func getEssence(userProfile *models.Member) []MiscEssence {
 	return essence
 }
 
-func getKills(userProfile *models.Member) MiscKills {
+func getKills(userProfile *skycrypttypes.Member) MiscKills {
 	totalKills, totalDeaths := 0, 0
 	kills, deaths := []MiscKill{}, []MiscKill{}
 	for id, amount := range userProfile.PlayerStats.Kills {
@@ -159,14 +160,14 @@ func getKills(userProfile *models.Member) MiscKills {
 	}
 }
 
-func getGifts(userProfile *models.Member) MiscGifts {
+func getGifts(userProfile *skycrypttypes.Member) MiscGifts {
 	return MiscGifts{
 		Given:    int(userProfile.PlayerStats.Gifts.Given),
 		Received: int(userProfile.PlayerStats.Gifts.Received),
 	}
 }
 
-func getSeasonOfJerry(userProfile *models.Member) MiscSeasonOfJerry {
+func getSeasonOfJerry(userProfile *skycrypttypes.Member) MiscSeasonOfJerry {
 	return MiscSeasonOfJerry{
 		MostSnowballsHit:     int(userProfile.PlayerStats.WinterIslandData.MostSnowballsHit),
 		MostDamageDealt:      int(userProfile.PlayerStats.WinterIslandData.MostDamageDealt),
@@ -175,7 +176,7 @@ func getSeasonOfJerry(userProfile *models.Member) MiscSeasonOfJerry {
 	}
 }
 
-func getDragons(userProfile *models.Member) MiscDragons {
+func getDragons(userProfile *skycrypttypes.Member) MiscDragons {
 	dragonKills, dragonKillsTotal, dragonDeaths, dragonDeathsTotal := map[string]float64{}, 0.0, map[string]float64{}, 0.0
 	for mobId, amount := range userProfile.PlayerStats.Kills {
 		if strings.HasPrefix(mobId, "master_wither_king") {
@@ -214,14 +215,14 @@ func getDragons(userProfile *models.Member) MiscDragons {
 	}
 }
 
-func getEndstoneProtector(userProfile *models.Member) MiscEndstoneProtector {
+func getEndstoneProtector(userProfile *skycrypttypes.Member) MiscEndstoneProtector {
 	return MiscEndstoneProtector{
 		Kills:  int(userProfile.PlayerStats.Kills["corrupted_protector"]),
 		Deaths: int(userProfile.PlayerStats.Deaths["corrupted_protector"]),
 	}
 }
 
-func getDamage(userProfile *models.Member) MiscDamage {
+func getDamage(userProfile *skycrypttypes.Member) MiscDamage {
 	return MiscDamage{
 		HighestCriticalDamage: userProfile.PlayerStats.HighestCriticalDamage,
 	}
@@ -261,14 +262,14 @@ func getPetMilestone(typeName string, amount float64) MiscPetMilestone {
 	}
 }
 
-func getPetMilestones(userProfile *models.Member) map[string]MiscPetMilestone {
+func getPetMilestones(userProfile *skycrypttypes.Member) map[string]MiscPetMilestone {
 	return map[string]MiscPetMilestone{
 		"sea_creatures_killed": getPetMilestone("sea_creatures_killed", userProfile.PlayerStats.Pets.Milestone.SeaCreaturesKilled),
 		"ores_mined":           getPetMilestone("ores_mined", userProfile.PlayerStats.Pets.Milestone.OresMined),
 	}
 }
 
-func getMythologicalEvent(userProfile *models.Member) MiscMythologicalEvent {
+func getMythologicalEvent(userProfile *skycrypttypes.Member) MiscMythologicalEvent {
 	return MiscMythologicalEvent{
 		Kills:                 userProfile.PlayerStats.Mythos.Kills,
 		BurrowsDugNext:        userProfile.PlayerStats.Mythos.BurrowsDugNext,
@@ -278,7 +279,7 @@ func getMythologicalEvent(userProfile *models.Member) MiscMythologicalEvent {
 	}
 }
 
-func getProfileUpgrades(profile *models.Profile) MiscProfileUpgrades {
+func getProfileUpgrades(profile *skycrypttypes.Profile) MiscProfileUpgrades {
 	output := MiscProfileUpgrades{}
 	for upgrade := range constants.PROFILE_UPGRADES {
 		output[upgrade] = 0
@@ -295,7 +296,7 @@ func getProfileUpgrades(profile *models.Profile) MiscProfileUpgrades {
 	return output
 }
 
-func getAuctions(userProfile *models.Member) MiscAuctions {
+func getAuctions(userProfile *skycrypttypes.Member) MiscAuctions {
 	auctions := userProfile.PlayerStats.Auctions
 
 	totalSold, totalSoldAmount, totalBought, totalBoughtAmount := map[string]float64{}, 0.0, map[string]float64{}, 0.0
@@ -327,7 +328,7 @@ func getAuctions(userProfile *models.Member) MiscAuctions {
 	}
 }
 
-func getUncategorized(userProfile *models.Member) map[string]any {
+func getUncategorized(userProfile *skycrypttypes.Member) map[string]any {
 	personalBank := constants.BANK_COOLDOWN[userProfile.Profile.PersonalBankUpgrade]
 	if personalBank == "" {
 		personalBank = "Unknown"
@@ -345,7 +346,7 @@ func getUncategorized(userProfile *models.Member) map[string]any {
 	}
 }
 
-func getClaimedItems(player *models.Player) map[string]int64 {
+func getClaimedItems(player *skycrypttypes.Player) map[string]int64 {
 	return map[string]int64{
 		"potato_talisman":         player.ClaimedPotatoTalisman,
 		"potato_basket":           player.ClaimedPotatoBasket,
@@ -357,7 +358,7 @@ func getClaimedItems(player *models.Player) map[string]int64 {
 	}
 }
 
-func GetMisc(userProfile *models.Member, profile *models.Profile, player *models.Player) *MiscOutput {
+func GetMisc(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile, player *skycrypttypes.Player) *MiscOutput {
 	return &MiscOutput{
 		Essence:           getEssence(userProfile),
 		Kills:             getKills(userProfile),

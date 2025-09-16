@@ -6,9 +6,11 @@ import (
 	stats "skycrypt/src/stats/leveling"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetSkills(userProfile *models.Member, profile *models.Profile, player *models.Player) *models.Skills {
+func GetSkills(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile, player *skycrypttypes.Player) *models.Skills {
 	output := &models.Skills{Skills: make(map[string]models.Skill)}
 
 	skillLevelCaps := stats.GetSkillLevelCaps(userProfile, player)

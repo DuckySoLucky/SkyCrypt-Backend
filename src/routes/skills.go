@@ -10,6 +10,7 @@ import (
 
 	"time"
 
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	"github.com/gofiber/fiber/v2"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -37,7 +38,7 @@ func SkillsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
-	var items map[string][]models.Item
+	var items map[string][]skycrypttypes.Item
 	cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
 	if err == nil && cache != "" {
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary

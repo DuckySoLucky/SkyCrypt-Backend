@@ -7,6 +7,8 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var skillTables = map[string]map[int]int{
@@ -171,7 +173,7 @@ func GetLevelByXp(xp int, extra *ExtraSkillData) models.Skill {
 	}
 }
 
-func GetSkillLevelCaps(userProfile *models.Member, player *models.Player) map[string]int {
+func GetSkillLevelCaps(userProfile *skycrypttypes.Member, player *skycrypttypes.Player) map[string]int {
 	caps := map[string]int{
 		"farming":      50,
 		"taming":       50,
@@ -194,7 +196,7 @@ func GetSkillLevelCaps(userProfile *models.Member, player *models.Player) map[st
 }
 
 // GetSocialSkillExperience calculates the total social skill experience for a given profile
-func GetSocialSkillExperience(profile *models.Profile) float64 {
+func GetSocialSkillExperience(profile *skycrypttypes.Profile) float64 {
 	total := 0.00
 	for _, member := range profile.Members {
 		total += member.PlayerData.Experience.SkillSocial

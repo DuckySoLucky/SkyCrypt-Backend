@@ -7,9 +7,11 @@ import (
 	statsItems "skycrypt/src/stats/items"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getTrophyFishProgress(userProfile *models.Member) []models.TrophyFishProgress {
+func getTrophyFishProgress(userProfile *skycrypttypes.Member) []models.TrophyFishProgress {
 	if len(userProfile.TrophyFish.Rewards) == 0 {
 		return nil
 	}
@@ -30,7 +32,7 @@ func getTrophyFishProgress(userProfile *models.Member) []models.TrophyFishProgre
 	return output
 }
 
-func getTrophyFish(userProfile *models.Member) models.TrophyFishOutput {
+func getTrophyFish(userProfile *skycrypttypes.Member) models.TrophyFishOutput {
 	output := []models.TrophyFish{}
 	for id, data := range constants.TROPHY_FISH {
 		tf := models.TrophyFish{
@@ -88,7 +90,7 @@ func getTrophyFish(userProfile *models.Member) models.TrophyFishOutput {
 	}
 }
 
-func GetFishing(userProfile *models.Member, items []models.ProcessedItem) models.FishingOuput {
+func GetFishing(userProfile *skycrypttypes.Member, items []models.ProcessedItem) models.FishingOuput {
 	output := models.FishingOuput{
 		ItemsFished:        int(userProfile.PlayerStats.ItemsFished.Total),
 		Treasure:           int(userProfile.PlayerStats.ItemsFished.Treasure),

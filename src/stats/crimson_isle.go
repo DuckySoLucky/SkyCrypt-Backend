@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetKuudraCompletions(userProfile *models.Member) int {
+func GetKuudraCompletions(userProfile *skycrypttypes.Member) int {
 	if userProfile.CrimsonIsle.Kuudra == nil {
 		return 0
 	}
@@ -24,7 +26,7 @@ func GetKuudraCompletions(userProfile *models.Member) int {
 	return kills
 }
 
-func getKuudra(userProfile *models.Member) models.CrimsonIsleKuudra {
+func getKuudra(userProfile *skycrypttypes.Member) models.CrimsonIsleKuudra {
 	tiers, totalKills := []models.CrimsonIsleKuudraTier{}, 0
 	for kuudraId := range constants.KUUDRA_TIERS {
 		if kuudraId == "total" || strings.HasPrefix(kuudraId, "highest") {
@@ -64,7 +66,7 @@ func getDojoRank(points int) string {
 	return "F"
 }
 
-func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
+func getDojo(userProfile *skycrypttypes.Member) models.CrimsonIsleDojo {
 	totalPoints, challenges := 0, []models.CrimsonIsleDojoChallenge{}
 	for challengeId, challengeData := range constants.DOJO {
 		points := userProfile.CrimsonIsle.Dojo[fmt.Sprintf("dojo_points_%s", challengeId)]
@@ -88,7 +90,7 @@ func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
 	}
 }
 
-func GetCrimsonIsle(userProfile *models.Member) *models.CrimsonIsleOutput {
+func GetCrimsonIsle(userProfile *skycrypttypes.Member) *models.CrimsonIsleOutput {
 	selectedFaction := userProfile.CrimsonIsle.SelectedFaction
 	if selectedFaction == "" {
 		selectedFaction = "None"

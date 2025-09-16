@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/models"
 	statsitems "skycrypt/src/stats/items"
 	"slices"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getMotes(userProfile *models.Member) models.RiftMotesOutput {
+func getMotes(userProfile *skycrypttypes.Member) models.RiftMotesOutput {
 	return models.RiftMotesOutput{
 		Purse:    int(userProfile.Currencies.MotesPurse),
 		Lifetime: int(userProfile.PlayerStats.Rift.LifetimeMotesCollected),
@@ -15,7 +17,7 @@ func getMotes(userProfile *models.Member) models.RiftMotesOutput {
 	}
 }
 
-func getEnigma(userProfile *models.Member) models.RiftEnigmaOutput {
+func getEnigma(userProfile *skycrypttypes.Member) models.RiftEnigmaOutput {
 
 	return models.RiftEnigmaOutput{
 		Souls:      len(userProfile.Rift.Enigma.FoundSouls),
@@ -23,14 +25,14 @@ func getEnigma(userProfile *models.Member) models.RiftEnigmaOutput {
 	}
 }
 
-func getCastle(userProfile *models.Member) models.RiftCastleOutput {
+func getCastle(userProfile *skycrypttypes.Member) models.RiftCastleOutput {
 	return models.RiftCastleOutput{
 		GrubberStacks: userProfile.Rift.Castle.GrubberStacks,
 		MaxBurgers:    constants.RIFT_MAX_GRUBBER_STACKS,
 	}
 }
 
-func getPorhtals(userProfile *models.Member) models.RiftPortalsOutput {
+func getPorhtals(userProfile *skycrypttypes.Member) models.RiftPortalsOutput {
 	porhtals, found := make([]models.RiftPorhtal, 0, len(userProfile.Rift.WitherCage.KilledEyes)), 0
 	for _, portal := range constants.RIFT_EYES {
 		isFound := slices.Contains(userProfile.Rift.WitherCage.KilledEyes, portal.Id)
@@ -52,7 +54,7 @@ func getPorhtals(userProfile *models.Member) models.RiftPortalsOutput {
 	}
 }
 
-func getTimecharms(userProfile *models.Member) models.RiftTimecharmsOutput {
+func getTimecharms(userProfile *skycrypttypes.Member) models.RiftTimecharmsOutput {
 	timecharms := make([]models.RiftTimecharms, 0, len(constants.RIFT_TIMECHARMS))
 	found := 0
 
@@ -81,7 +83,7 @@ func getTimecharms(userProfile *models.Member) models.RiftTimecharmsOutput {
 	}
 }
 
-func GetRift(userProfile *models.Member, items map[string][]models.ProcessedItem) *models.RiftOutput {
+func GetRift(userProfile *skycrypttypes.Member, items map[string][]models.ProcessedItem) *models.RiftOutput {
 	return &models.RiftOutput{
 		Visits:     int(userProfile.PlayerStats.Rift.Visits),
 		Motes:      getMotes(userProfile),

@@ -3,9 +3,11 @@ package stats
 import (
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getGame(gameData *models.ExperimentationGame, gameId string) []models.EnchantingGame {
+func getGame(gameData *skycrypttypes.ExperimentationGame, gameId string) []models.EnchantingGame {
 	var output []models.EnchantingGame
 	for index, tier := range constants.EXPERIMENTS.Tiers {
 		attempts := gameData.Attempts[index]
@@ -35,7 +37,7 @@ func getGame(gameData *models.ExperimentationGame, gameId string) []models.Encha
 	return output
 }
 
-func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
+func GetEnchanting(userProfie *skycrypttypes.Member) models.EnchantingOutput {
 	if userProfie.Experimentation.ClaimsResets == nil {
 		return models.EnchantingOutput{
 			Unlocked: false,
@@ -45,7 +47,7 @@ func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
 	output := map[string]models.EnchantingGameData{}
 	games := []struct {
 		key      string
-		gameData *models.ExperimentationGame
+		gameData *skycrypttypes.ExperimentationGame
 	}{
 		{"simon", userProfie.Experimentation.Simon},
 		{"numbers", userProfie.Experimentation.Numbers},

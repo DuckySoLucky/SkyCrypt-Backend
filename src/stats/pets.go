@@ -11,6 +11,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 func getMaxPetIds() map[string]int {
@@ -38,7 +40,7 @@ func getMaxPetIds() map[string]int {
 	return maxPetIds
 }
 
-func getPetLevel(pet models.Pet) models.PetLevel {
+func getPetLevel(pet skycrypttypes.Pet) models.PetLevel {
 	petData := notenoughupdates.NEUConstants.Pets
 
 	rarityOffset := petData.CustomPetLeveling[pet.Type].RarityOffset[pet.Rarity]
@@ -161,7 +163,7 @@ func getPetData(level int, petType string, rarity string) map[string]float64 {
 	return output
 }
 
-func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.ProcessedPet {
+func getProfilePets(userProfile *skycrypttypes.Member, pets *[]skycrypttypes.Pet) []models.ProcessedPet {
 	output := []models.ProcessedPet{}
 	for _, pet := range *pets {
 		if pet.Rarity == "" {
@@ -314,13 +316,13 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 	return output
 }
 
-func getMissingPets(userProfile *models.Member, pets []models.ProcessedPet, gameMode string) []models.ProcessedPet {
+func getMissingPets(userProfile *skycrypttypes.Member, pets []models.ProcessedPet, gameMode string) []models.ProcessedPet {
 	ownedPetTypes := make(map[string]struct{})
 	for _, pet := range pets {
 		ownedPetTypes[pet.Type] = struct{}{}
 	}
 
-	missingPets := []models.Pet{}
+	missingPets := []skycrypttypes.Pet{}
 	maxPetIds := getMaxPetIds()
 	for pet := range notenoughupdates.NEUConstants.PetNums {
 		if _, ok := ownedPetTypes[pet]; ok || (pet == "BINGO" && gameMode != "bingo") {
@@ -332,7 +334,7 @@ func getMissingPets(userProfile *models.Member, pets []models.ProcessedPet, game
 			continue
 		}
 
-		missingPets = append(missingPets, models.Pet{
+		missingPets = append(missingPets, skycrypttypes.Pet{
 			Type:       pet,
 			Active:     false,
 			Experience: 0,
@@ -410,9 +412,9 @@ func GetPetScore(pets []models.ProcessedPet) models.PetScore {
 	return output
 }
 
-func GetPets(userProfile *models.Member, profile *models.Profile) (models.OutputPets, error) {
+func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) (models.OutputPets, error) {
 
-	allPets := []models.Pet{}
+	allPets := []skycrypttypes.Pet{}
 	allPets = append(allPets, userProfile.Pets.Pets...)
 	if userProfile.Rift.DeadCats.Montezuma.Rarity != "" {
 		userProfile.Rift.DeadCats.Montezuma.Active = false

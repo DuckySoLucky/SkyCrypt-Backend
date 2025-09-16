@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getSlayerKills(slayerData models.SlayerBoss) map[string]int {
+func getSlayerKills(slayerData skycrypttypes.SlayerBoss) map[string]int {
 	tiers := []int{
 		slayerData.BossKillsTier0,
 		slayerData.BossKillsTier1,
@@ -65,10 +67,10 @@ func getSlayerLevel(experience int, slayerId string) models.SlayerLevel {
 	}
 }
 
-func GetSlayers(userProfile *models.Member) models.SlayersOutput {
+func GetSlayers(userProfile *skycrypttypes.Member) models.SlayersOutput {
 	output := models.SlayersOutput{
-		Data: make(map[string]models.SlayerData),
-		Stats:  make(map[string]float64),
+		Data:  make(map[string]models.SlayerData),
+		Stats: make(map[string]float64),
 	}
 
 	totalExperience := 0

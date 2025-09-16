@@ -15,7 +15,6 @@ import (
 )
 
 func SetupApplication() error {
-	// Load environment variables first (only log if this is the main process)
 	err := godotenv.Load()
 	if err != nil && os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		log.Println("No .env file found, using environment variables")
@@ -44,20 +43,21 @@ func SetupApplication() error {
 		return fmt.Errorf("error loading SkyBlock items: %v", err)
 	}
 
-	if err := notenoughupdates.InitializeNEURepository(); err != nil {
-		return fmt.Errorf("error initializing repository: %v", err)
-	}
+	/*
+		if err := notenoughupdates.InitializeNEURepository(); err != nil {
+			return fmt.Errorf("error initializing repository: %v", err)
+		}
 
-	if err := notenoughupdates.UpdateNEURepository(); err != nil {
-		return fmt.Errorf("error updating repository: %v", err)
-	}
+		if err := notenoughupdates.UpdateNEURepository(); err != nil {
+			return fmt.Errorf("error updating repository: %v", err)
+		}
+	*/
 
 	err = notenoughupdates.ParseNEURepository()
 	if err != nil {
 		return fmt.Errorf("error parsing NEU repository: %v", err)
 	}
 
-	// Only log success message from main process to avoid spam
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
 	}

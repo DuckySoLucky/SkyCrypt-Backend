@@ -5,6 +5,8 @@ import (
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/items"
 	"slices"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 func hasAccessory(accessories *[]models.InsertAccessory, id string, rarity string, ignoreRarity bool) bool {
@@ -79,7 +81,7 @@ func GetMagicalPower(rarity string, id string) int {
 	return constants.MAGICAL_POWER[rarity]
 }
 
-func getMagicalPowerData(accessories *[]models.InsertAccessory, userProfile *models.Member) models.GetMagicalPowerOutput {
+func getMagicalPowerData(accessories *[]models.InsertAccessory, userProfile *skycrypttypes.Member) models.GetMagicalPowerOutput {
 	output := models.GetMagicalPowerOutput{
 		Rarities: models.GetMagicalPowerRarities{},
 	}
@@ -211,7 +213,7 @@ func getMissing(accessories *[]models.InsertAccessory, accessoryIds []models.Acc
 	}
 }
 
-func GetMissingAccessories(accessories models.AccessoriesOutput, userProfile *models.Member) models.GetMissingAccessoresOutput {
+func GetMissingAccessories(accessories models.AccessoriesOutput, userProfile *skycrypttypes.Member) models.GetMissingAccessoresOutput {
 	if len(accessories.AccessoryIds) == 0 && accessories.Accessories == nil {
 		return models.GetMissingAccessoresOutput{}
 	}

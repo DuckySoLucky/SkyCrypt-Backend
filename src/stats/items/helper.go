@@ -7,6 +7,8 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var rarityPattern = func() *regexp.Regexp {
@@ -29,7 +31,7 @@ type itemDataType struct {
 	Rarity     string
 }
 
-func ParseItemTypeFromLore(lore []string, item models.Item) itemDataType {
+func ParseItemTypeFromLore(lore []string, item skycrypttypes.Item) itemDataType {
 	loreCopy := make([]string, len(lore))
 	copy(loreCopy, lore)
 
@@ -66,7 +68,7 @@ func ParseItemTypeFromLore(lore []string, item models.Item) itemDataType {
 	}
 }
 
-func getCategories(itemType string, item models.Item) []string {
+func getCategories(itemType string, item skycrypttypes.Item) []string {
 	categories := []string{}
 
 	enchantments := item.Tag.ExtraAttributes.Enchantments
@@ -272,9 +274,9 @@ func AddLevelableEnchantmentsToLore(amount int, constant constants.EnchantmentLa
 }
 
 func GetId(item models.ProcessedItem) string {
-	if item.Tag == nil || item.Tag.ExtraAttributes.ID == "" {
+	if item.Tag == nil || item.Tag.ExtraAttributes.Id == "" {
 		return ""
 	}
 
-	return item.Tag.ExtraAttributes.ID
+	return item.Tag.ExtraAttributes.Id
 }
