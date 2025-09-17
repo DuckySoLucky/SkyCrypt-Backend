@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install git for dependency management and ca-certificates for HTTPS requests
 RUN apk add --no-cache git ca-certificates
@@ -7,14 +7,18 @@ RUN apk add --no-cache git ca-certificates
 # Set working directory
 WORKDIR /app
 
+# Copy local dependencies first
+# COPY SkyCrypt-Types/ ../SkyCrypt-Types/
+# COPY SkyHelper-Networth-Go/ ../SkyHelper-Networth-Go/
+
 # Copy go mod files
-COPY go.mod go.sum ./
+COPY SkyCrypt-Backend/go.mod SkyCrypt-Backend/go.sum ./
 
 # Download dependencies
 RUN go mod download
 
 # Copy source code
-COPY . .
+COPY SkyCrypt-Backend/ ./
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -buildvcs=false -o main .

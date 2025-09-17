@@ -4,6 +4,8 @@ github.com/DuckySoLucky/SkyCrypt-Types v0.1.3 h1:cCuLooqGJ7eN+Te4XP80M8on8fm8NEy
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.3/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.4 h1:DKT6w8JRmrqLTUswfP+e+894Tz6e1P0VTWsU2FTEELM=
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.4/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
+github.com/DuckySoLucky/SkyCrypt-Types v0.1.5 h1:OFt/+C8LrVOs4gORzWeZxRxzmHrdPqxNwjcm9TShEmU=
+github.com/DuckySoLucky/SkyCrypt-Types v0.1.5/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
