@@ -43,15 +43,13 @@ func SetupApplication() error {
 		return fmt.Errorf("error loading SkyBlock items: %v", err)
 	}
 
-	/*
-		if err := notenoughupdates.InitializeNEURepository(); err != nil {
-			return fmt.Errorf("error initializing repository: %v", err)
-		}
+	if err := notenoughupdates.InitializeNEURepository(); err != nil {
+		return fmt.Errorf("error initializing repository: %v", err)
+	}
 
-		if err := notenoughupdates.UpdateNEURepository(); err != nil {
-			return fmt.Errorf("error updating repository: %v", err)
-		}
-	*/
+	if err := notenoughupdates.UpdateNEURepository(); err != nil {
+		return fmt.Errorf("error updating repository: %v", err)
+	}
 
 	err = notenoughupdates.ParseNEURepository()
 	if err != nil {
