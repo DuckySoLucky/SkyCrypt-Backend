@@ -348,7 +348,7 @@ func ApplyTexture(item models.TextureItem) string {
 		}
 
 		if os.Getenv("DEV") != "true" {
-			return fmt.Sprintf("/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/leather_%s_%s.png", armorType, armorColor)
+			return fmt.Sprintf("/api/leather/%s/%s", armorType, armorColor)
 		}
 
 		return fmt.Sprintf("http://localhost:8080/api/leather/%s/%s", armorType, armorColor)
