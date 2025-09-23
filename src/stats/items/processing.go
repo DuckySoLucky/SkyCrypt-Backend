@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 
 	"skycrypt/src/constants"
@@ -148,7 +149,11 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 			potionType = "normal"
 		}
 
-		processedItem.Texture = "http://localhost:8080/api/potion/" + potionType + "/" + color
+		if os.Getenv("DEV") != "true" {
+			processedItem.Texture = fmt.Sprintf("/api/potion/%s/%s", potionType, color)
+		}
+
+		processedItem.Texture = fmt.Sprintf("http://localhost:8080/api/potion/%s/%s", potionType, color)
 	}
 
 	if processedItem.Texture == "" {
@@ -160,7 +165,7 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 		}
 
 		processedItem.Texture = lib.ApplyTexture(TextureItem)
-		if strings.HasPrefix(processedItem.Texture, "http://localhost:8080/assets/resourcepacks/FurfSky/") {
+		if strings.Contains(processedItem.Texture, "/assets/resourcepacks/FurfSky/") {
 			processedItem.TexturePack = "FURFSKY_REBORN"
 		}
 
