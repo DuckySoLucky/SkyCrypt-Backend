@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"strings"
@@ -38,6 +39,10 @@ func getKuudra(userProfile *skycrypttypes.Member) models.CrimsonIsleKuudra {
 			Id:      kuudraId,
 			Texture: constants.KUUDRA_TIERS[kuudraId].Texture,
 			Kills:   userProfile.CrimsonIsle.Kuudra[kuudraId],
+		}
+
+		if os.Getenv("DEV") == "true" {
+			tier.Texture = strings.Replace(tier.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
 		}
 
 		totalKills += tier.Kills
@@ -78,6 +83,10 @@ func getDojo(userProfile *skycrypttypes.Member) models.CrimsonIsleDojo {
 			Points:  points,
 			Time:    time,
 			Rank:    getDojoRank(points),
+		}
+
+		if os.Getenv("DEV") == "true" {
+			challenge.Texture = strings.Replace(challenge.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 		}
 
 		totalPoints += points

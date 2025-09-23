@@ -1,10 +1,12 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/api"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
+	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
@@ -48,6 +50,11 @@ func getBossCollections(userProfile *skycrypttypes.Member) models.CollectionCate
 				},
 			},
 		}
+
+		if os.Getenv("DEV") == "true" {
+			item.Texture = strings.Replace(item.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
 		floorId, _ := utility.ParseInt(floor)
 		floorItems = append(floorItems, models.BossCollectionsFloorData{
 			FloorId: floorId,
@@ -78,18 +85,24 @@ func getBossCollections(userProfile *skycrypttypes.Member) models.CollectionCate
 		})
 	}
 
+	kuudraBoss := models.CollectionCategoryItem{
+		Name:        KUUDRA_CONSTANTS.Name,
+		Id:          "kuudra",
+		Texture:     KUUDRA_CONSTANTS.Texture,
+		Amount:      kuudraCompletions,
+		TotalAmount: kuudraCompletions,
+		Tier:        kuudraTier,
+		MaxTier:     len(KUUDRA_CONSTANTS.Collections),
+		Amounts:     kuudraAmounts,
+	}
+
+	if os.Getenv("DEV") == "true" {
+		kuudraBoss.Texture = strings.Replace(kuudraBoss.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+	}
+
 	floorItems = append(floorItems, models.BossCollectionsFloorData{
 		FloorId: 8,
-		Item: models.CollectionCategoryItem{
-			Name:        KUUDRA_CONSTANTS.Name,
-			Id:          "kuudra",
-			Texture:     KUUDRA_CONSTANTS.Texture,
-			Amount:      kuudraCompletions,
-			TotalAmount: kuudraCompletions,
-			Tier:        kuudraTier,
-			MaxTier:     len(KUUDRA_CONSTANTS.Collections),
-			Amounts:     kuudraAmounts,
-		},
+		Item:    kuudraBoss,
 	})
 
 	utility.SortSlice(floorItems, func(i, j int) bool {

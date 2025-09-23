@@ -1,10 +1,12 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	statsitems "skycrypt/src/stats/items"
 	"slices"
+	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
@@ -40,11 +42,17 @@ func getPorhtals(userProfile *skycrypttypes.Member) models.RiftPortalsOutput {
 			found++
 		}
 
-		porhtals = append(porhtals, models.RiftPorhtal{
+		porhtalData := models.RiftPorhtal{
 			Name:     portal.Name,
 			Texture:  portal.Texture,
 			Unlocked: isFound,
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			porhtalData.Texture = strings.Replace(porhtalData.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
+		porhtals = append(porhtals, porhtalData)
 
 	}
 
@@ -69,12 +77,18 @@ func getTimecharms(userProfile *skycrypttypes.Member) models.RiftTimecharmsOutpu
 			}
 		}
 
-		timecharms = append(timecharms, models.RiftTimecharms{
+		timecharmData := models.RiftTimecharms{
 			Name:       charm.Name,
 			Texture:    charm.Texture,
 			Unlocked:   isFound,
 			UnlockedAt: timestamp,
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			timecharmData.Texture = strings.Replace(timecharmData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
+		timecharms = append(timecharms, timecharmData)
 	}
 
 	return models.RiftTimecharmsOutput{

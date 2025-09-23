@@ -1,10 +1,12 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/leveling"
 	"skycrypt/src/utility"
+	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
@@ -144,12 +146,18 @@ func formatCatacombsFloor(data *skycrypttypes.DungeonData, dungeonType string) [
 			MostDamage:           getMostDamage(data, f.ID),
 		}
 
-		output = append(output, models.FormattedDungeonFloor{
+		floorData := models.FormattedDungeonFloor{
 			Name:    f.Name,
 			Texture: f.Texture,
 			Stats:   stats,
 			BestRun: getBestRun(data.BestRuns[f.ID]),
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			floorData.Texture = strings.Replace(floorData.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
+		output = append(output, floorData)
 	}
 
 	return output

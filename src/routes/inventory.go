@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
@@ -18,16 +19,16 @@ import (
 )
 
 var ICONS map[string]string = map[string]string{
-	"backpack":        "http://localhost:8080/api/item/chest",
-	"enderchest":      "http://localhost:8080/api/item/ender_chest",
-	"personal_vault":  "http://localhost:8080/api/head/f7aadff9ddc546fdcec6ed5919cc39dfa8d0c07ff4bc613a19f2e6d7f2593",
-	"talisman_bag":    "http://localhost:8080/api/head/961a918c0c49ba8d053e522cb91abc74689367b4d8aa06bfc1ba9154730985ff",
-	"potion_bag":      "http://localhost:8080/api/head/9f8b82427b260d0a61e6483fc3b2c35a585851e08a9a9df372548b4168cc817c",
-	"fishing_bag":     "http://localhost:8080/api/head/eb8e297df6b8dffcf135dba84ec792d420ad8ecb458d144288572a84603b1631",
-	"quiver":          "http://localhost:8080/api/head/4cb3acdc11ca747bf710e59f4c8e9b3d949fdd364c6869831ca878f0763d1787",
-	"museum":          "http://localhost:8080/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
-	"rift_inventory":  "http://localhost:8080/api/head/445240fcf1a9796327dda5593985343af9121a7156bc76e3d6b341b02e6a6e52",
-	"rift_enderchest": "http://localhost:8080/api/head/a6cc486c2be1cb9dfcb2e53dd9a3e9a883bfadb27cb956f1896d602b4067",
+	"backpack":        "/api/item/chest",
+	"enderchest":      "/api/item/ender_chest",
+	"personal_vault":  "/api/head/f7aadff9ddc546fdcec6ed5919cc39dfa8d0c07ff4bc613a19f2e6d7f2593",
+	"talisman_bag":    "/api/head/961a918c0c49ba8d053e522cb91abc74689367b4d8aa06bfc1ba9154730985ff",
+	"potion_bag":      "/api/head/9f8b82427b260d0a61e6483fc3b2c35a585851e08a9a9df372548b4168cc817c",
+	"fishing_bag":     "/api/head/eb8e297df6b8dffcf135dba84ec792d420ad8ecb458d144288572a84603b1631",
+	"quiver":          "/api/head/4cb3acdc11ca747bf710e59f4c8e9b3d949fdd364c6869831ca878f0763d1787",
+	"museum":          "/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
+	"rift_inventory":  "/api/head/445240fcf1a9796327dda5593985343af9121a7156bc76e3d6b341b02e6a6e52",
+	"rift_enderchest": "/api/head/a6cc486c2be1cb9dfcb2e53dd9a3e9a883bfadb27cb956f1896d602b4067",
 }
 
 type SearchItem struct {
@@ -42,6 +43,10 @@ type SourceTab struct {
 
 func getIcon(source string, uuid string) string {
 	if icon, exists := ICONS[source]; exists {
+		if os.Getenv("DEV") == "true" {
+			return fmt.Sprintf("http://localhost:8080%s", icon)
+		}
+
 		return icon
 	}
 

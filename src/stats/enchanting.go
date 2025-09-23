@@ -1,8 +1,10 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
@@ -25,13 +27,19 @@ func getGame(gameData *skycrypttypes.ExperimentationGame, gameId string) []model
 		}
 
 		tier = constants.EXPERIMENTS.Tiers[index]
-		output = append(output, models.EnchantingGame{
+		experimentData := models.EnchantingGame{
 			Name:      tier.Name,
 			Texture:   tier.Texture,
 			Attempts:  attempts,
 			Claims:    claims,
 			BestScore: bestScore,
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			experimentData.Texture = strings.Replace(experimentData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
+		output = append(output, experimentData)
 	}
 
 	return output

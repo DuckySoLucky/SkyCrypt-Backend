@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/leveling"
@@ -38,6 +39,10 @@ func GetSkills(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile
 				Type:    skill,
 				Texture: constants.SKILL_ICONS[skill],
 				Cap:     &capValue,
+			}
+
+			if os.Getenv("DEV") == "true" {
+				extra.Texture = strings.Replace(extra.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 			}
 
 			output.Skills[skill] = stats.GetLevelByXp(int(experience), extra)

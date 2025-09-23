@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	statsItems "skycrypt/src/stats/items"
@@ -69,6 +70,10 @@ func getTrophyFish(userProfile *skycrypttypes.Member) models.TrophyFishOutput {
 		}
 
 		tf.Texture = data.Textures[highestTier]
+		if os.Getenv("DEV") == "true" {
+			tf.Texture = strings.Replace(tf.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
 		tf.Maxed = highestTier == constants.TROPHY_FISH_TIERS[len(constants.TROPHY_FISH_TIERS)-1]
 		output = append(output, tf)
 	}

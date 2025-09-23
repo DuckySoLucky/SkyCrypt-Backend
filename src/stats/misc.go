@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/utility"
 	"strings"
@@ -105,11 +106,17 @@ type MiscGifts struct {
 func getEssence(userProfile *skycrypttypes.Member) []MiscEssence {
 	essence := make([]MiscEssence, 0, len(constants.ESSENCE))
 	for essenceId, essenceData := range constants.ESSENCE {
-		essence = append(essence, MiscEssence{
+		essenceData := MiscEssence{
 			Name:    essenceData.Name,
 			Texture: essenceData.Texture,
 			Amount:  userProfile.Currencies.Essence[strings.ToUpper(essenceId)].Current,
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			essenceData.Texture = strings.Replace(essenceData.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
+		essence = append(essence, essenceData)
 	}
 
 	return essence

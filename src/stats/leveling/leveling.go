@@ -2,6 +2,7 @@ package stats
 
 import (
 	"math"
+	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
@@ -157,6 +158,10 @@ func GetLevelByXp(xp int, extra *ExtraSkillData) models.Skill {
 		}
 	}
 
+	if os.Getenv("DEV") == "true" {
+		texture = strings.Replace(texture, "/api/", "http://localhost:8080/api/", 1)
+	}
+
 	return models.Skill{
 		XP:                          xp,
 		Level:                       level,
@@ -309,6 +314,10 @@ func GetXpByLevel(level int, extra *ExtraSkillData) models.Skill {
 		if textureIcon, exists := constants.SKILL_ICONS[extra.Texture]; exists {
 			texture = textureIcon
 		}
+	}
+
+	if os.Getenv("DEV") == "true" {
+		texture = strings.Replace(texture, "/api/", "http://localhost:8080/api/", 1)
 	}
 
 	return models.Skill{

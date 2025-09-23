@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
@@ -87,6 +88,10 @@ func GetMinions(profile *skycrypttypes.Profile) models.MinionsOutput {
 			MaxedTiers:   0,
 		}
 
+		if os.Getenv("DEV") == "true" {
+			category.Texture = strings.Replace(category.Texture, "/api/", "http://localhost:8080/api/", 1)
+		}
+
 		totalTiers := 0
 		for minionId, minionData := range categoryData {
 			name := minionData.Name
@@ -104,12 +109,18 @@ func GetMinions(profile *skycrypttypes.Profile) models.MinionsOutput {
 				craftedTiers = []int{}
 			}
 
-			category.Minions = append(category.Minions, models.Minion{
+			minionData := models.Minion{
 				Name:    name,
 				Texture: minionData.Texture,
 				MaxTier: maxTier,
 				Tiers:   craftedTiers,
-			})
+			}
+
+			if os.Getenv("DEV") == "true" {
+				minionData.Texture = strings.Replace(minionData.Texture, "/api/", "http://localhost:8080/api/", 1)
+			}
+
+			category.Minions = append(category.Minions, minionData)
 
 			totalTiers += maxTier
 			category.MaxedTiers += len(craftedMinions[minionId])

@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	statsItems "skycrypt/src/stats/items"
@@ -210,6 +211,10 @@ func getGlaciteTunnels(userProfile *skycrypttypes.Member) models.GlaciteTunnels 
 			Amount:  userProfile.GlaciteTunnels.CorpsesLooted[corpseId],
 			Name:    utility.TitleCase(corpseId),
 			Texture: corpseTexture,
+		}
+
+		if os.Getenv("DEV") == "true" {
+			corpseData.Texture = strings.Replace(corpseData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 		}
 
 		output.Corpses.Corpses = append(output.Corpses.Corpses, corpseData)
