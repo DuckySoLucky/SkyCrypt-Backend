@@ -29,7 +29,7 @@ func GetTexturePath(texturePath string, textureString string) string {
 	}
 
 	if os.Getenv("DEV") != "true" {
-		return formattedPath
+		return fmt.Sprintf("/assets/%s", formattedPath)
 	}
 
 	return "http://localhost:8080/assets/" + formattedPath
