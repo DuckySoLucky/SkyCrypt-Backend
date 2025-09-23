@@ -12,13 +12,13 @@ WORKDIR /app
 # COPY SkyHelper-Networth-Go/ ../SkyHelper-Networth-Go/
 
 # Copy go mod files
-COPY SkyCrypt-Backend/go.mod SkyCrypt-Backend/go.sum ./
+COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod download
 
 # Copy source code
-COPY SkyCrypt-Backend/ ./
+COPY . .
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -buildvcs=false -o main .
