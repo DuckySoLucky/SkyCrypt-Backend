@@ -54,6 +54,11 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 	dungeons := GetDungeons(userProfile)
 	slayers := GetSlayers(userProfile)
 
+	bank := 0.0
+	if profile.Banking != nil {
+		bank = *profile.Banking.Balance
+	}
+
 	output := models.EmbedData{
 		DisplayName:     mowojang.Name,
 		Username:        mowojang.Name,
@@ -66,7 +71,7 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 		Skills:          getSkillsForEmbed(skills),
 		Networth:        networth,
 		Purse:           userProfile.Currencies.CoinPurse,
-		Bank:            *profile.Banking.Balance,
+		Bank:            bank,
 		Dungeons:        getDungeonsForEmbed(&dungeons),
 		Slayers:         getSlayersForEmbed(&slayers),
 	}
