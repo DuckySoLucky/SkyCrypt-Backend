@@ -230,9 +230,13 @@ func getGlaciteTunnels(userProfile *skycrypttypes.Member) models.GlaciteTunnels 
 			found++
 		}
 
-		texture := fmt.Sprintf("http://localhost:8080/api/item/%s_FOSSIL", fossil)
+		texture := fmt.Sprintf("/api/item/%s_FOSSIL", fossil)
 		if fossil == "HELIX" {
-			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", fossil)
+			texture = fmt.Sprintf("/api/item/%s", fossil)
+		}
+
+		if os.Getenv("DEV") == "true" {
+			texture = strings.Replace(texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 		}
 
 		fossilData := models.Fossil{
