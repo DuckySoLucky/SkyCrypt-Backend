@@ -132,6 +132,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/misc/:uuid/:profileId", routes.MiscHandler)
 
 	api.Get("/embed/:uuid/:profileId", routes.EmbedHandler)
+	api.Get("/embed/:uuid", routes.EmbedHandler)
 
 	// RENDERING ENDPOINTS
 	api.Get("/head/:textureId", routes.HeadHandlers)

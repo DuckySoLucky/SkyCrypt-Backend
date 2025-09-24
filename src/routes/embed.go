@@ -3,9 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"skycrypt/src/api"
 	"skycrypt/src/constants"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
+	"skycrypt/src/stats"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,8 +17,33 @@ func EmbedHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
 	uuid := c.Params("uuid")
+	mowojang, err := api.ResolvePlayer(uuid)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to resolve player: %v", err),
+		})
+	}
+
 	profileId := c.Params("profileId")
-	embed, err := redis.Get(fmt.Sprintf("embed:%s:%s", uuid, profileId))
+	if len(profileId) > 0 && profileId[0] == '/' {
+		profileId = profileId[1:]
+	}
+
+	profiles, err := api.GetProfiles(mowojang.UUID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to get profile: %v", err),
+		})
+	}
+
+	profile, err := stats.GetProfile(profiles, profileId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to get profile: %v", err),
+		})
+	}
+
+	embed, err := redis.Get(fmt.Sprintf("embed:%s:%s", mowojang.UUID, profile.ProfileID))
 	if err != nil {
 		c.Status(400)
 		return c.JSON(constants.InvalidUserError)
