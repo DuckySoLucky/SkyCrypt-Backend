@@ -758,7 +758,7 @@ func RenderItem(itemID string) ([]byte, error) {
 	}
 
 	// If output is a localhost asset, read from disk (performance optimization)
-	if (strings.HasPrefix(output, "http://localhost") || strings.HasPrefix(output, "https://localhost")) && !strings.Contains(output, "/api/") {
+	if strings.Contains(output, "/assets/") && !strings.Contains(output, "/api/") {
 		assetsIdx := strings.Index(output, "/assets/")
 		if assetsIdx != -1 {
 			localPath := output[assetsIdx+1:] // skip the leading slash
