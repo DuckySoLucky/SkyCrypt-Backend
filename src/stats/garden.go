@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
@@ -13,54 +14,12 @@ import (
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-type Garden struct {
-	Level          models.Skill    `json:"level"`
-	Visitors       Visitors        `json:"visitors"`
-	CropMilestones []CropMilestone `json:"cropMilestones"`
-	CropUpgrades   []CropUpgrade   `json:"cropUpgrades"`
-	Composter      map[string]int  `json:"composter"`
-	Plot           PlotLayout      `json:"plot"`
-}
-
-type Visitors struct {
-	Visited        int                          `json:"visited"`
-	Completed      int                          `json:"completed"`
-	UniqueVisitors int                          `json:"uniqueVisitors"`
-	Visitors       map[string]VisitorRarityData `json:"visitors"`
-}
-
-type VisitorRarityData struct {
-	Visited   int `json:"visited"`
-	Completed int `json:"completed"`
-	Unique    int `json:"unique"`
-	MaxUnique int `json:"maxUnique"`
-}
-
-type CropMilestone struct {
-	Name    string       `json:"name"`
-	Texture string       `json:"texture"`
-	Level   models.Skill `json:"level"`
-}
-
-type CropUpgrade struct {
-	Name    string       `json:"name"`
-	Texture string       `json:"texture"`
-	Level   models.Skill `json:"level"`
-}
-
-type PlotLayout struct {
-	Unlocked int                    `json:"unlocked"`
-	Total    int                    `json:"total"`
-	BarnSkin string                 `json:"barnSkin"`
-	Layout   []models.ProcessedItem `json:"layout"`
-}
-
-func getVisitors(gardenData *skycrypttypes.Garden) Visitors {
+func getVisitors(gardenData *skycrypttypes.Garden) models.Visitors {
 	VISITOR_RARITIES := notenoughupdates.NEUConstants.Garden.Visitors
 	MAX_VISITORS := notenoughupdates.NEUConstants.Garden.MaxVisitors
 
 	visited, completed, unique := 0, 0, map[string]bool{}
-	visitors := make(map[string]VisitorRarityData, len(gardenData.CommissionData.Visits))
+	visitors := make(map[string]models.VisitorRarityData, len(gardenData.CommissionData.Visits))
 	for visitorId, amount := range gardenData.CommissionData.Visits {
 		completed += gardenData.CommissionData.Completed[visitorId]
 		unique[visitorId] = true
@@ -68,7 +27,7 @@ func getVisitors(gardenData *skycrypttypes.Garden) Visitors {
 
 		visitorData := visitors[VISITOR_RARITIES[visitorId]]
 		if visitorData.MaxUnique == 0 {
-			visitorData = VisitorRarityData{
+			visitorData = models.VisitorRarityData{
 				MaxUnique: MAX_VISITORS[VISITOR_RARITIES[visitorId]],
 			}
 		}
@@ -81,7 +40,7 @@ func getVisitors(gardenData *skycrypttypes.Garden) Visitors {
 
 	}
 
-	return Visitors{
+	return models.Visitors{
 		Visited:        visited,
 		Completed:      completed,
 		UniqueVisitors: len(unique),
@@ -89,12 +48,17 @@ func getVisitors(gardenData *skycrypttypes.Garden) Visitors {
 	}
 }
 
-func getCropMilestones(gardenData *skycrypttypes.Garden) []CropMilestone {
-	milestones := make([]CropMilestone, 0, len(gardenData.ResourcesCollected))
+func getCropMilestones(gardenData *skycrypttypes.Garden) []models.CropMilestone {
+	milestones := make([]models.CropMilestone, 0, len(gardenData.ResourcesCollected))
 	for cropId, cropName := range constants.CROPS {
-		milestones = append(milestones, CropMilestone{
+		texture := fmt.Sprintf("/api/item/%s", cropId)
+		if os.Getenv("DEV") == "true" {
+			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", cropId)
+		}
+
+		milestones = append(milestones, models.CropMilestone{
 			Name:    cropName,
-			Texture: fmt.Sprintf("http://localhost:8080/api/item/%s", cropId),
+			Texture: texture,
 			Level: stats.GetLevelByXp(int(gardenData.ResourcesCollected[cropId]), &stats.ExtraSkillData{
 				Type: fmt.Sprintf("crop_milestone_%s", constants.CROP_TO_ID[cropId]),
 			}),
@@ -104,14 +68,18 @@ func getCropMilestones(gardenData *skycrypttypes.Garden) []CropMilestone {
 	return milestones
 }
 
-func getCropUpgrades(gardenData *skycrypttypes.Garden) []CropUpgrade {
-	upgrades := make([]CropUpgrade, 0, len(gardenData.CropUpgradeLevels))
+func getCropUpgrades(gardenData *skycrypttypes.Garden) []models.CropUpgrade {
+	upgrades := make([]models.CropUpgrade, 0, len(gardenData.CropUpgradeLevels))
 	for cropId, cropName := range constants.CROPS {
 		experience := stats.GetSkillExperience("crop_upgrade", int(gardenData.CropUpgradeLevels[cropId]))
+		texture := fmt.Sprintf("/api/item/%s", cropId)
+		if os.Getenv("DEV") == "true" {
+			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", cropId)
+		}
 
-		upgrades = append(upgrades, CropUpgrade{
+		upgrades = append(upgrades, models.CropUpgrade{
 			Name:    cropName,
-			Texture: fmt.Sprintf("http://localhost:8080/api/item/%s", cropId),
+			Texture: texture,
 			Level: stats.GetLevelByXp(experience, &stats.ExtraSkillData{
 				Type: "crop_upgrade",
 			}),
@@ -130,11 +98,11 @@ func getComposter(gardenData *skycrypttypes.Garden) map[string]int {
 	return output
 }
 
-func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
+func getPlotLayout(gardenData *skycrypttypes.Garden) models.PlotLayout {
 	PLOT_LAYOUT := notenoughupdates.NEUConstants.Garden.SortedPlots
 	PLOT_NAMES := notenoughupdates.NEUConstants.Garden.Plots
 
-	output := PlotLayout{
+	output := models.PlotLayout{
 		Unlocked: len(gardenData.UnlockedPlotsIds),
 		Total:    len(PLOT_LAYOUT),
 		BarnSkin: "",
@@ -148,9 +116,9 @@ func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
 			checkPlots = append(checkPlots, PLOT_LAYOUT[index-5])
 		} else if index+1 >= 0 && index+1 < len(PLOT_LAYOUT) { // RIGHT
 			checkPlots = append(checkPlots, PLOT_LAYOUT[index+1])
-		} else if index+5 >= 0 && index+5 < len(PLOT_LAYOUT) { // below
+		} else if index+5 >= 0 && index+5 < len(PLOT_LAYOUT) { // BELOW
 			checkPlots = append(checkPlots, PLOT_LAYOUT[index+5])
-		} else if index-1 >= 0 && index-1 < len(PLOT_LAYOUT) { // left
+		} else if index-1 >= 0 && index-1 < len(PLOT_LAYOUT) { // LEFT
 			checkPlots = append(checkPlots, PLOT_LAYOUT[index-1])
 		}
 
@@ -172,9 +140,14 @@ func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
 				output.BarnSkin = utility.GetRawLore(item.Name)
 			}
 
+			texture := fmt.Sprintf("http://localhost:8080/api/item/%s", strings.ReplaceAll(item.ItemId, "-", ":"))
+			if os.Getenv("DEV") != "true" {
+				texture = fmt.Sprintf("/api/item/%s", strings.ReplaceAll(item.ItemId, "-", ":"))
+			}
+
 			output.Layout = append(output.Layout, models.ProcessedItem{
 				DisplayName: item.Name,
-				Texture:     fmt.Sprintf("http://localhost:8080/api/item/%s", strings.ReplaceAll(item.ItemId, "-", ":")),
+				Texture:     texture,
 			})
 		}
 
@@ -185,9 +158,14 @@ func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
 			textureId = "WOOD_BUTTON"
 		}
 
+		texture := fmt.Sprintf("/api/item/%s", textureId)
+		if os.Getenv("DEV") == "true" {
+			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", textureId)
+		}
+
 		output.Layout = append(output.Layout, models.ProcessedItem{
 			DisplayName: PLOT_NAMES[plot],
-			Texture:     fmt.Sprintf("http://localhost:8080/api/item/%s", textureId),
+			Texture:     texture,
 		})
 
 	}
@@ -195,8 +173,8 @@ func getPlotLayout(gardenData *skycrypttypes.Garden) PlotLayout {
 	return output
 }
 
-func GetGarden(gardenData *skycrypttypes.Garden) *Garden {
-	return &Garden{
+func GetGarden(gardenData *skycrypttypes.Garden) *models.Garden {
+	return &models.Garden{
 		Level:          stats.GetLevelByXp(int(gardenData.Experience), &stats.ExtraSkillData{Type: "garden"}),
 		Visitors:       getVisitors(gardenData),
 		CropMilestones: getCropMilestones(gardenData),

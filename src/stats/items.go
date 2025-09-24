@@ -130,6 +130,10 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 }
 
 func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]skycrypttypes.Item, error) {
+	if useProfile.Inventory == nil {
+		useProfile.Inventory = &skycrypttypes.Inventory{}
+	}
+
 	encodedInventories := map[string]*string{
 		"inventory":      &useProfile.Inventory.Inventory.Data,
 		"enderchest":     &useProfile.Inventory.Enderchest.Data,

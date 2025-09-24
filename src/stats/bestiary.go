@@ -12,6 +12,10 @@ import (
 
 func GetBestiaryFamily(userProfile *skycrypttypes.Member, mobName string) *models.BestiaryMobOutput {
 	bestiaryConstants := notenoughupdates.NEUConstants.Bestiary.Islands
+	if userProfile.Bestiary == nil {
+		return &models.BestiaryMobOutput{}
+	}
+
 	bestiary := userProfile.Bestiary.Kills
 
 	for _, category := range bestiaryConstants {
@@ -30,6 +34,9 @@ func GetBestiaryFamily(userProfile *skycrypttypes.Member, mobName string) *model
 
 func getCategoryMobs(userProfile *skycrypttypes.Member, mobs []neu.BestiaryMob) []models.BestiaryMobOutput {
 	mobOutputs := make([]models.BestiaryMobOutput, 0)
+	if userProfile.Bestiary == nil {
+		userProfile.Bestiary = &skycrypttypes.Bestiary{Kills: make(map[string]int)}
+	}
 
 	bestiaryKills := userProfile.Bestiary.Kills
 	brackets := notenoughupdates.NEUConstants.Bestiary.Brackets
