@@ -8,6 +8,7 @@ import (
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/routes"
+	"skycrypt/src/utility"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -58,6 +59,8 @@ func SetupApplication() error {
 
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
+
+		utility.SendWebhook("SKYCRYPT_STARTED", "EPIC_ERROR", []byte("SkyCrypt has started successfully!"))
 	}
 
 	return nil
@@ -139,4 +142,5 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Get("/leather/:type/:color", routes.LeatherHandlers)
 
+	api.Get("/items", routes.ItemsHandlers)
 }
