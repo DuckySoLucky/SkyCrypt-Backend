@@ -161,7 +161,7 @@ func getItems(userProfile *skycrypttypes.Member, profileId string) map[string][]
 
 func processItems(rawItems map[string][]skycrypttypes.Item) map[string][]models.ProcessedItem {
 	var processedItems = make(map[string][]models.ProcessedItem)
-	inventoryKeys := []string{"armor", "equipment", "wardrobe", "inventory", "enderchest", "backpack"}
+	inventoryKeys := []string{"armor", "equipment"}
 	for _, inventoryId := range inventoryKeys {
 		inventoryData := rawItems[inventoryId]
 		if len(inventoryData) == 0 {
