@@ -3,6 +3,7 @@ package routes
 import (
 	"skycrypt/src/constants"
 	"skycrypt/src/lib"
+	"skycrypt/src/utility"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,7 +19,13 @@ func ItemHandlers(c *fiber.Ctx) error {
 	textureBytes, err := lib.RenderItem(textureId)
 	if err != nil {
 		c.Status(500)
-		return c.JSON(constants.InvalidItemProvidedError)
+		// return c.JSON(constants.InvalidItemProvidedError)
+		utility.SendWebhook("error", err.Error(), []byte(nil))
+		return c.JSON(fiber.Map{
+			"error": err.Error(),
+			"err":   err,
+		})
+
 	}
 
 	c.Type("png")
