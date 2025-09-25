@@ -724,6 +724,14 @@ func main() {
 }
 */
 
+type RedirectError struct {
+	URL string
+}
+
+func (e RedirectError) Error() string {
+	return "redirect:" + e.URL
+}
+
 func RenderItem(itemID string) ([]byte, error) {
 	damage := 0
 	if strings.Contains(itemID, ":") {
@@ -757,6 +765,11 @@ func RenderItem(itemID string) ([]byte, error) {
 		return nil, fmt.Errorf("couldn't find the texture")
 	}
 
+	// If output is a redirect path (starts with /api/), return redirect error
+	if strings.HasPrefix(output, "/api/") {
+		return nil, RedirectError{URL: output}
+	}
+
 	// If output is a localhost asset, read from disk (performance optimization)
 	if strings.Contains(output, "/assets/") && !strings.Contains(output, "/api/") {
 		assetsIdx := strings.Index(output, "/assets/")
@@ -776,6 +789,7 @@ func RenderItem(itemID string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid localhost asset path: %s", output)
 	}
 
+	// Otherwise, fetch from the URL (this shouldn't ever happen but just as a fallback)
 	response, err := http.Get(output)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching item texture: %v", err)
