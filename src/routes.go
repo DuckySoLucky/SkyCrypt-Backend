@@ -102,6 +102,8 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/stats/:uuid/:profileId", routes.StatsHandler)
 	api.Get("/stats/:uuid", routes.StatsHandler)
 
+	api.Get("/playerStats/:uuid/:profileId", routes.PlayerStatsHandler)
+
 	api.Get("/networth/:uuid/:profileId", routes.NetworthHandler)
 
 	api.Get("/gear/:uuid/:profileId", routes.GearHandler)

@@ -427,8 +427,7 @@ func GetPetScore(pets []models.ProcessedPet) models.PetScore {
 	return output
 }
 
-func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) (models.OutputPets, error) {
-
+func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) models.OutputPets {
 	allPets := []skycrypttypes.Pet{}
 	allPets = append(allPets, userProfile.Pets.Pets...)
 	if userProfile.Rift.DeadCats.Montezuma.Rarity != "" {
@@ -463,5 +462,5 @@ func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) 
 
 	output.MissingPets = stats.StripPets(getMissingPets(userProfile, pets, profile.GameMode))
 
-	return output, nil
+	return output
 }

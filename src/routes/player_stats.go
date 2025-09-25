@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func PetsHandler(c *fiber.Ctx) error {
+func PlayerStatsHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
 	uuid := c.Params("uuid")
@@ -25,9 +25,9 @@ func PetsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
-	fmt.Printf("Returning /api/pets/%s in %s\n", profileId, time.Since(timeNow))
+	fmt.Printf("Returning /api/playerStats/%s in %s\n", profileId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"pets": stats.GetPets(userProfile, profile),
+		"stats": stats.GetPlayerStats(userProfile, profile, profileId),
 	})
 }
