@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"skycrypt/src/constants"
 	"skycrypt/src/lib"
 	"skycrypt/src/utility"
 
@@ -13,7 +12,10 @@ func ItemHandlers(c *fiber.Ctx) error {
 	textureId := c.Params("itemId")
 	if textureId == "" {
 		c.Status(400)
-		return c.JSON(constants.InvalidItemProvidedError)
+		// return c.JSON(constants.InvalidItemProvidedError)
+		return c.JSON(fiber.Map{
+			"error": "deez nuts",
+		})
 	}
 
 	textureBytes, err := lib.RenderItem(textureId)
