@@ -14,6 +14,18 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+// RiftHandler godoc
+// @Summary Get rift stats of a specified player
+// @Description Returns rift data for the given user and profile ID
+// @Tags rift
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID"
+// @Param profileId path string true "Profile ID"
+// @Success 200 {object} models.RiftOutput
+// @Failure 400 {object} models.ProcessingError
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/rift/{uuid}/{profileId} [get]
 func RiftHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
@@ -22,7 +34,7 @@ func RiftHandler(c *fiber.Ctx) error {
 
 	profile, err := api.GetProfile(uuid, profileId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}

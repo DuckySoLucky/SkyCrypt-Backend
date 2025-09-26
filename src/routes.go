@@ -13,6 +13,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/joho/godotenv"
+	scalar "github.com/yokeTH/gofiber-scalar"
 )
 
 func SetupApplication() error {
@@ -73,6 +74,12 @@ func SetupRoutes(app *fiber.App) {
 
 	// Assets folder
 	app.Static("/assets", "assets")
+
+	// Documentation
+	app.Get("/scalar/*", scalar.New(scalar.Config{
+		Path:       "/scalar",
+		RawSpecUrl: "/swagger/doc.json",
+	}))
 
 	if os.Getenv("DEV") != "true" {
 		fmt.Println("[ENVIROMENT] Running in production mode")

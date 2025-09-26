@@ -9,6 +9,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// CollectionsHandler godoc
+// @Summary Get collections stats of a specified player
+// @Description Returns collections for the given user and profile ID
+// @Tags collections
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID"
+// @Param profileId path string true "Profile ID"
+// @Success 200 {object} models.CollectionsOutput
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/collections/{uuid}/{profileId} [get]
 func CollectionsHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
@@ -17,7 +28,7 @@ func CollectionsHandler(c *fiber.Ctx) error {
 
 	profile, err := api.GetProfile(uuid, profileId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}

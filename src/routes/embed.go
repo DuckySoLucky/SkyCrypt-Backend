@@ -13,13 +13,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// EmbedHandler godoc
+// @Summary Get embed data for a specified player
+// @Description Returns embed data for the given user (UUID or username) and optional profile ID
+// @Tags embed
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID or username"
+// @Param profileId path string false "Profile ID (optional)"
+// @Success 200 {object} models.EmbedData
+// @Failure 400 {object} models.ProcessingError
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/embed/{uuid}/{profileId} [get]
 func EmbedHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
 	uuid := c.Params("uuid")
 	mowojang, err := api.ResolvePlayer(uuid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to resolve player: %v", err),
 		})
 	}
@@ -31,7 +43,7 @@ func EmbedHandler(c *fiber.Ctx) error {
 
 	profiles, err := api.GetProfiles(mowojang.UUID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
