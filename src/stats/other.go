@@ -89,16 +89,21 @@ func GetFairySouls(userProfile *skycrypttypes.Member, gamemode string) *models.F
 		gamemode = "normal"
 	}
 
+	total := constants.FAIRY_SOULS[gamemode]
+	if total == 0 {
+		total = constants.FAIRY_SOULS["normal"]
+	}
+
 	if userProfile.FairySouls == nil {
 		return &models.FairySouls{
 			Found: 0,
-			Total: constants.FAIRY_SOULS[gamemode],
+			Total: total,
 		}
 	}
 
 	return &models.FairySouls{
 		Found: userProfile.FairySouls.TotalCollected,
-		Total: constants.FAIRY_SOULS[gamemode],
+		Total: total,
 	}
 
 }

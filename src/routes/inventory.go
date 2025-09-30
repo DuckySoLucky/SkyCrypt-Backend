@@ -180,9 +180,16 @@ func InventoryHandler(c *fiber.Ctx) error {
 	itemSlice := stats.GetInventory(userProfile, inventoryId)
 	output := statsItems.ProcessItems(&itemSlice, inventoryId)
 
+	strippedItems := statsItems.StripItems(&output)
+	if strings.HasSuffix(inventoryId, "inventory") {
+		if len(strippedItems) > 9 {
+			strippedItems = append(strippedItems[9:], strippedItems[:9]...)
+		}
+	}
+
 	fmt.Printf("Returning /api/inventory/%s/%s in %s\n", uuid, inventoryId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"items": statsItems.StripItems(&output),
+		"items": strippedItems,
 	})
 }

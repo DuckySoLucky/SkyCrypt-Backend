@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
+	"slices"
 
 	"skycrypt/src/constants"
 	"skycrypt/src/lib"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
-	"slices"
 	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
@@ -49,26 +49,27 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 		processedItem.Lore = append(processedItem.Lore, "§8(Recombobulated)")
 	}
 
-	if item.Tag.Display.Color != 0 {
-		color := fmt.Sprintf("#%06X", item.Tag.Display.Color)
-		if item.Tag.ExtraAttributes.DyeItem != "" {
-			defaultHexColor := constants.ITEMS[item.Tag.ExtraAttributes.Id].Color
-			if defaultHexColor != "" {
-				fmt.Printf("[CUSTOM_RESOURCES] Using default color for item %s: %s\n", item.Tag.ExtraAttributes.Id, defaultHexColor)
-				color = defaultHexColor
-			}
-		}
-
-		if !slices.Contains(constants.BLACKLISTED_HEX_ARMOR_PIECES, item.Tag.ExtraAttributes.Id) {
-			processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Color: %s", color))
-		}
-	}
-
 	if item.Tag.ExtraAttributes != nil {
 		processedItem.Recombobulated = item.Tag.ExtraAttributes.Recombobulated == 1
 		if item.Tag.SkullOwner == nil {
 			// Do not apply shiny effecet to skulls
 			processedItem.Shiny = len(item.Tag.ExtraAttributes.Enchantments) > 0
+		}
+
+		// Hex color
+		if item.Tag.Display.Color != 0 {
+			color := fmt.Sprintf("#%06X", item.Tag.Display.Color)
+			if item.Tag.ExtraAttributes.DyeItem != "" {
+				defaultHexColor := constants.ITEMS[item.Tag.ExtraAttributes.Id].Color
+				if defaultHexColor != "" {
+					fmt.Printf("[CUSTOM_RESOURCES] Using default color for item %s: %s\n", item.Tag.ExtraAttributes.Id, defaultHexColor)
+					color = defaultHexColor
+				}
+			}
+
+			if !slices.Contains(constants.BLACKLISTED_HEX_ARMOR_PIECES, item.Tag.ExtraAttributes.Id) {
+				processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Color: %s", color))
+			}
 		}
 
 		// Timestamps

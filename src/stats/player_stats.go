@@ -66,32 +66,34 @@ func GetPlayerStats(userProfile *skycrypttypes.Member, profile *skycrypttypes.Pr
 	}
 
 	pets := GetPets(userProfile, &skycrypttypes.Profile{})
-	activePet := pets.Pets[0]
-	if !activePet.Active {
-		for i := range pets.Pets {
-			if !pets.Pets[i].Active {
+	if len(pets.Pets) > 0 {
+		activePet := pets.Pets[0]
+		if !activePet.Active {
+			for i := range pets.Pets {
+				if !pets.Pets[i].Active {
+					continue
+				}
+
+				activePet = pets.Pets[i]
+				break
+			}
+		}
+
+		for statName, statValue := range activePet.Stats {
+			if _, exists := stats[statName]; !exists {
 				continue
 			}
 
-			activePet = pets.Pets[i]
-			break
-		}
-	}
-
-	for statName, statValue := range activePet.Stats {
-		if _, exists := stats[statName]; !exists {
-			continue
+			stats[statName]["active_pet"] += int(statValue)
 		}
 
-		stats[statName]["active_pet"] += int(statValue)
-	}
+		for statName, statValue := range pets.PetScore.Stats {
+			if _, exists := stats[statName]; !exists {
+				continue
+			}
 
-	for statName, statValue := range pets.PetScore.Stats {
-		if _, exists := stats[statName]; !exists {
-			continue
+			stats[statName]["pet_score"] += int(statValue)
 		}
-
-		stats[statName]["pet_score"] += int(statValue)
 	}
 
 	skills := GetSkills(userProfile, &skycrypttypes.Profile{}, &skycrypttypes.Player{})
