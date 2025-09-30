@@ -1,7 +1,6 @@
 package stats
 
 import (
-	"fmt"
 	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
@@ -48,7 +47,6 @@ func getGame(gameData *skycrypttypes.ExperimentationGame, gameId string) []model
 
 func GetEnchanting(userProfie *skycrypttypes.Member) models.EnchantingOutput {
 	if userProfie.Experimentation.Simon == nil {
-		fmt.Printf("no experimentation data found for user")
 		return models.EnchantingOutput{
 			Unlocked: false,
 		}
