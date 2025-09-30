@@ -152,9 +152,9 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 
 		if os.Getenv("DEV") != "true" {
 			processedItem.Texture = fmt.Sprintf("/api/potion/%s/%s", potionType, color)
+		} else {
+			processedItem.Texture = fmt.Sprintf("http://localhost:8080/api/potion/%s/%s", potionType, color)
 		}
-
-		processedItem.Texture = fmt.Sprintf("http://localhost:8080/api/potion/%s/%s", potionType, color)
 	}
 
 	if processedItem.Texture == "" {
