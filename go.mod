@@ -3,7 +3,7 @@ module skycrypt
 go 1.25.1
 
 require (
-	github.com/DuckySoLucky/SkyCrypt-Types v0.1.6
+	github.com/DuckySoLucky/SkyCrypt-Types v0.1.8
 	github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.1.10
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/gofiber/fiber/v2 v2.52.9

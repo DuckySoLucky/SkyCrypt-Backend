@@ -75,7 +75,7 @@ func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		err = json.Unmarshal([]byte(cache), &response)
 		if err == nil {
-			return &response, nil
+			// return &response, nil
 		}
 	}
 
