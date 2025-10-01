@@ -13,6 +13,7 @@ func GetStats(mowojang *models.MowojangReponse, profiles *models.HypixelProfiles
 		UUID:            mowojang.UUID,
 		ProfileID:       profile.ProfileID,
 		ProfileCuteName: profile.CuteName,
+		GameMode:        profile.GameMode,
 		Selected:        profile.Selected,
 		Profiles:        FormatProfiles(profiles),
 		Members:         members,

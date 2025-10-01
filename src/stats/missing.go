@@ -192,7 +192,7 @@ func getMissing(accessories *[]models.InsertAccessory, accessoryIds []models.Acc
 		object := models.ProcessedItem{
 			Texture:     accessory.Texture,
 			DisplayName: accessory.Name,
-			Rarity:      accessory.Rarity,
+			Rarity:      missingAccessory.Rarity,
 			Id:          missingAccessory.Id,
 		}
 

@@ -339,8 +339,6 @@ func GetMuseum(museum *skycrypttypes.Museum) []models.ProcessedItem {
 				itemSlot.ProcessedItem.Texture = strings.Replace(itemSlot.ProcessedItem.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 			}
 
-			fmt.Printf("Item: %+v\n", itemSlot.ProcessedItem.Texture)
-
 			output[itemSlot.Position] = itemSlot.ProcessedItem
 			continue
 		}

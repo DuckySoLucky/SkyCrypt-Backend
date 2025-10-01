@@ -29,6 +29,10 @@ func getMinionSlots(profile *skycrypttypes.Profile, tiers int) *models.MinionSlo
 		}
 	}
 
+	if profile.CommunityUpgrades == nil {
+		profile.CommunityUpgrades = &skycrypttypes.CommunityUpgrades{}
+	}
+
 	bonusSlots := 0
 	for _, upgrade := range profile.CommunityUpgrades.UpgradeStates {
 		if upgrade.Upgrade == "minion_slots" {

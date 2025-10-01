@@ -10,6 +10,10 @@ import (
 )
 
 func getGame(gameData *skycrypttypes.ExperimentationGame, gameId string) []models.EnchantingGame {
+	if gameData == nil {
+		gameData = &skycrypttypes.ExperimentationGame{}
+	}
+
 	var output []models.EnchantingGame
 	for index, tier := range constants.EXPERIMENTS.Tiers {
 		attempts := gameData.Attempts[index]
@@ -63,6 +67,10 @@ func GetEnchanting(userProfie *skycrypttypes.Member) models.EnchantingOutput {
 	}
 
 	for _, g := range games {
+		if g.gameData == nil {
+			continue
+		}
+
 		output[g.key] = models.EnchantingGameData{
 			Name: constants.EXPERIMENTS.Games[g.key].Name,
 			Stats: models.EnchantingGameStats{
