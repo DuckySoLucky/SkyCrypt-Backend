@@ -13,6 +13,8 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 	Transport: &http.Transport{
@@ -23,7 +25,7 @@ var httpClient = &http.Client{
 }
 
 func GetUUID(username string) (string, error) {
-	var post models.MowojangReponse
+	post := &models.MowojangReponse{}
 
 	cache, err := redis.Get(fmt.Sprintf("uuid:%s", strings.ToLower(username)))
 	if err == nil && cache != "" {
@@ -35,14 +37,17 @@ func GetUUID(username string) (string, error) {
 		return post.UUID, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return post.UUID, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return post.UUID, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &post)
+	err = json.Unmarshal(body, post)
 	if err != nil {
 		return post.UUID, fmt.Errorf("error parsing JSON: %v", err)
 	}
@@ -54,7 +59,7 @@ func GetUUID(username string) (string, error) {
 }
 
 func GetUsername(uuid string) (string, error) {
-	var post models.MowojangReponse
+	post := &models.MowojangReponse{}
 
 	cache, err := redis.Get(fmt.Sprintf("username:%s", uuid))
 	if err == nil && cache != "" {
@@ -66,14 +71,17 @@ func GetUsername(uuid string) (string, error) {
 		return post.Name, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return post.Name, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return post.Name, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &post)
+	err = json.Unmarshal(body, post)
 	if err != nil {
 		return post.Name, fmt.Errorf("error parsing JSON: %v", err)
 	}
@@ -85,42 +93,44 @@ func GetUsername(uuid string) (string, error) {
 }
 
 func ResolvePlayer(uuid string) (*models.MowojangReponse, error) {
-	var post models.MowojangReponse
+	post := &models.MowojangReponse{}
 	if !utility.IsUUID(uuid) {
 		tempUUID, err := GetUUID(uuid)
 		if err != nil {
-			return &post, fmt.Errorf("error resolving UUID for username '%s': %v", uuid, err)
+			return post, fmt.Errorf("error resolving UUID for username '%s': %v", uuid, err)
 		}
 		uuid = tempUUID
 	}
 
 	cache, err := redis.Get(fmt.Sprintf("mowojang:%s", uuid))
 	if err == nil && cache != "" {
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &post)
+		err = json.Unmarshal([]byte(cache), post)
 		if err == nil {
-			return &post, nil
+			return post, nil
 		}
 	}
 
 	resp, err := httpClient.Get(fmt.Sprintf("https://mowojang.matdoes.dev/%s", uuid))
 	if err != nil {
-		return &post, fmt.Errorf("error making request: %v", err)
+		return post, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return post, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &post, fmt.Errorf("error reading response: %v", err)
+		return post, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &post)
+	err = json.Unmarshal(body, post)
 	if err != nil {
-		return &post, fmt.Errorf("error parsing JSON: %v", err)
+		return post, fmt.Errorf("error parsing JSON: %v", err)
 	}
 
 	redis.Set(fmt.Sprintf("mowojang:%s", uuid), string(body), 24*60*60) // Cache for 24 hours
 
-	return &post, nil
+	return post, nil
 }

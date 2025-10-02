@@ -15,6 +15,8 @@ import (
 
 var HYPIXEL_API_KEY = os.Getenv("HYPIXEL_API_KEY")
 
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 	Transport: &http.Transport{
@@ -25,13 +27,13 @@ var httpClient = &http.Client{
 }
 
 func GetPlayer(uuid string) (*models.Player, error) {
-	var rawReponse models.HypixelPlayerResponse
-	var response models.Player
+	rawReponse := &models.HypixelPlayerResponse{}
+	response := &models.Player{}
 
 	if !utility.IsUUID(uuid) {
 		respUUID, err := GetUUID(uuid)
 		if err != nil {
-			return &response, err
+			return response, err
 		}
 
 		uuid = respUUID
@@ -39,41 +41,43 @@ func GetPlayer(uuid string) (*models.Player, error) {
 
 	cache, err := redis.Get(fmt.Sprintf(`player:%s`, uuid))
 	if err == nil && cache != "" {
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &rawReponse)
+		err = json.Unmarshal([]byte(cache), rawReponse)
 		if err == nil {
-			return &rawReponse.Player, nil
+			return rawReponse.Player, nil
 		}
 	}
 
 	resp, err := httpClient.Get(fmt.Sprintf("https://api.hypixel.net/v2/player?key=%s&uuid=%s", HYPIXEL_API_KEY, uuid))
 
 	if err != nil {
-		return &response, fmt.Errorf("error making request: %v", err)
+		return response, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return response, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &response, fmt.Errorf("error reading response: %v", err)
+		return response, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &rawReponse)
+	err = json.Unmarshal(body, rawReponse)
 	if err != nil {
-		return &rawReponse.Player, fmt.Errorf("error parsing JSON: %v", err)
+		return rawReponse.Player, fmt.Errorf("error parsing JSON: %v", err)
 	}
 
 	redis.Set(fmt.Sprintf(`player:%s`, uuid), string(body), 24*60*60)
-	return &rawReponse.Player, nil
+	return rawReponse.Player, nil
 }
 
 func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
-	var response models.HypixelProfilesResponse
+	response := &models.HypixelProfilesResponse{}
 	if !utility.IsUUID(uuid) {
 		respUUID, err := GetUUID(uuid)
 		if err != nil {
-			return &response, err
+			return response, err
 		}
 
 		uuid = respUUID
@@ -81,36 +85,38 @@ func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
 
 	cache, err := redis.Get(fmt.Sprintf(`profiles:%s`, uuid))
 	if err == nil && cache != "" {
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &response)
+		err = json.Unmarshal([]byte(cache), response)
 		if err == nil {
-			return &response, nil
+			return response, nil
 		}
 	}
 
 	resp, err := httpClient.Get(fmt.Sprintf("https://api.hypixel.net/v2/skyblock/profiles?key=%s&uuid=%s", HYPIXEL_API_KEY, uuid))
 	if err != nil {
-		return &response, fmt.Errorf("error making request: %v", err)
+		return response, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return response, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &response, fmt.Errorf("error reading response: %v", err)
+		return response, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &response)
+	err = json.Unmarshal(body, response)
 	if err != nil {
-		return &response, fmt.Errorf("error parsing JSON: %v", err)
+		return response, fmt.Errorf("error parsing JSON: %v", err)
 	}
 
 	if response.Cause != "" && !response.Success {
-		return &response, fmt.Errorf("error fetching profiles: %s", response.Cause)
+		return response, fmt.Errorf("error fetching profiles: %s", response.Cause)
 	}
 
 	redis.Set(fmt.Sprintf(`profiles:%s`, uuid), string(body), 5*60) // Cache for 5 minutes
-	return &response, nil
+	return response, nil
 }
 
 func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
@@ -146,12 +152,12 @@ func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
 }
 
 func GetMuseum(profileId string) (map[string]*models.Museum, error) {
-	var rawReponse models.HypixelMuseumResponse
+	rawReponse := &models.HypixelMuseumResponse{}
 
 	cache, err := redis.Get(fmt.Sprintf(`museum:%s`, profileId))
 	if err == nil && cache != "" {
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &rawReponse)
+		err = json.Unmarshal([]byte(cache), rawReponse)
 		if err == nil {
 			return rawReponse.Members, nil
 		}
@@ -162,14 +168,17 @@ func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 		return nil, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &rawReponse)
+	err = json.Unmarshal(body, rawReponse)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing JSON: %v", err)
 	}
@@ -179,14 +188,14 @@ func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 }
 
 func GetGarden(profileId string) (*models.GardenRaw, error) {
-	var rawReponse models.HypixelGardenResponse
+	rawReponse := &models.HypixelGardenResponse{}
 
 	cache, err := redis.Get(fmt.Sprintf(`garden:%s`, profileId))
 	if err == nil && cache != "" {
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &rawReponse)
+		err = json.Unmarshal([]byte(cache), rawReponse)
 		if err == nil {
-			return &rawReponse.Garden, nil
+			return rawReponse.Garden, nil
 		}
 	}
 
@@ -195,18 +204,21 @@ func GetGarden(profileId string) (*models.GardenRaw, error) {
 		return nil, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err = json.Unmarshal(body, &rawReponse)
+	err = json.Unmarshal(body, rawReponse)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing JSON: %v", err)
 	}
 
 	redis.Set(fmt.Sprintf(`garden:%s`, profileId), string(body), 60*30) // Cache for 30 minutes
-	return &rawReponse.Garden, nil
+	return rawReponse.Garden, nil
 }
