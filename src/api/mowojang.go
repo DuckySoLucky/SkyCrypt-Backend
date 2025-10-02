@@ -3,15 +3,24 @@ package api
 import (
 	"fmt"
 	"io"
+	"net/http"
+	"strings"
+	"time"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 
-	"net/http"
-	"strings"
-
 	jsoniter "github.com/json-iterator/go"
 )
+
+var httpClient = &http.Client{
+	Timeout: 10 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
 
 func GetUUID(username string) (string, error) {
 	var post models.MowojangReponse
