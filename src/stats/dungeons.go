@@ -1,13 +1,17 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/leveling"
 	"skycrypt/src/utility"
+	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getSecrets(data *models.Dungeons) models.SecretsOutput {
+func getSecrets(data *skycrypttypes.Dungeons) models.SecretsOutput {
 	secretsFound := max(data.Secrets, 1)
 	totalRuns := 0.0
 	for _, dungeonType := range data.DungeonTypes {
@@ -35,7 +39,7 @@ func getSecrets(data *models.Dungeons) models.SecretsOutput {
 	}
 }
 
-func getDungeonStats(userProfile *models.Member) models.DungeonStatsOutput {
+func getDungeonStats(userProfile *skycrypttypes.Member) models.DungeonStatsOutput {
 	return models.DungeonStatsOutput{
 		Secrets:                  getSecrets(&userProfile.Dungeons),
 		HighestFloorBeatenNormal: userProfile.Dungeons.DungeonTypes["catacombs"].HighestTierCompleted,
@@ -44,7 +48,7 @@ func getDungeonStats(userProfile *models.Member) models.DungeonStatsOutput {
 	}
 }
 
-func getScoreGrade(data models.BestRun) string {
+func getScoreGrade(data skycrypttypes.BestRun) string {
 	totalScore := data.ScoreExploration + data.ScoreSpeed + data.ScoreSkill + data.ScoreBonus
 	switch {
 	case totalScore <= 99:
@@ -62,13 +66,13 @@ func getScoreGrade(data models.BestRun) string {
 	}
 }
 
-func getBestRun(bestRunData *[]models.BestRun) *models.BestRunOutput {
+func getBestRun(bestRunData *[]skycrypttypes.BestRun) *models.BestRunOutput {
 	if bestRunData == nil || len(*bestRunData) == 0 {
 		return nil
 	}
 
 	var bestScore int
-	var bestRun *models.BestRun
+	var bestRun *skycrypttypes.BestRun
 	for _, run := range *bestRunData {
 		score := run.ScoreExploration + run.ScoreSpeed + run.ScoreSkill + run.ScoreBonus
 		if bestRun == nil || score > bestScore {
@@ -99,7 +103,7 @@ func getBestRun(bestRunData *[]models.BestRun) *models.BestRunOutput {
 	return &result
 }
 
-func getMostDamage(data *models.DungeonData, floorID string) models.MostDamageOutput {
+func getMostDamage(data *skycrypttypes.DungeonData, floorID string) models.MostDamageOutput {
 	damageFields := map[string]map[string]float64{
 		"berserk": data.MostDamageBerserk,
 		"mage":    data.MostDamageMage,
@@ -122,7 +126,7 @@ func getMostDamage(data *models.DungeonData, floorID string) models.MostDamageOu
 	}
 }
 
-func formatCatacombsFloor(data *models.DungeonData, dungeonType string) []models.FormattedDungeonFloor {
+func formatCatacombsFloor(data *skycrypttypes.DungeonData, dungeonType string) []models.FormattedDungeonFloor {
 	output := make([]models.FormattedDungeonFloor, 0, len(constants.DUNGEONS.Floors[dungeonType]))
 
 	floorData := constants.DUNGEONS.Floors[dungeonType]
@@ -142,18 +146,24 @@ func formatCatacombsFloor(data *models.DungeonData, dungeonType string) []models
 			MostDamage:           getMostDamage(data, f.ID),
 		}
 
-		output = append(output, models.FormattedDungeonFloor{
+		floorData := models.FormattedDungeonFloor{
 			Name:    f.Name,
 			Texture: f.Texture,
 			Stats:   stats,
 			BestRun: getBestRun(data.BestRuns[f.ID]),
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			floorData.Texture = strings.Replace(floorData.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
+		output = append(output, floorData)
 	}
 
 	return output
 }
 
-func getClassData(userProfile *models.Member) models.ClassData {
+func getClassData(userProfile *skycrypttypes.Member) models.ClassData {
 	selectedClass := userProfile.Dungeons.SelectedDungeonClass
 	if selectedClass == "" {
 		selectedClass = "none"
@@ -181,7 +191,7 @@ func getClassData(userProfile *models.Member) models.ClassData {
 	return output
 }
 
-func GetFloorCompletions(userProfile *models.Member) *models.FloorCompletionsOutput {
+func GetFloorCompletions(userProfile *skycrypttypes.Member) *models.FloorCompletionsOutput {
 	normalCompletions := userProfile.Dungeons.DungeonTypes["catacombs"].TierCompletions
 	masterCompletions := userProfile.Dungeons.DungeonTypes["master_catacombs"].TierCompletions
 	if normalCompletions == nil && masterCompletions == nil {
@@ -218,7 +228,7 @@ func GetFloorCompletions(userProfile *models.Member) *models.FloorCompletionsOut
 	}
 }
 
-func GetDungeons(userProfile *models.Member) models.DungeonsOutput {
+func GetDungeons(userProfile *skycrypttypes.Member) models.DungeonsOutput {
 	catacombs := userProfile.Dungeons.DungeonTypes["catacombs"]
 	masterCatacombs := userProfile.Dungeons.DungeonTypes["master_catacombs"]
 

@@ -14,13 +14,22 @@ func GetEquipment(equipment []models.ProcessedItem) models.EquipmentResult {
 		}
 	}
 
-	reversedEquipment := make([]models.ProcessedItem, len(equipment))
-	copy(reversedEquipment, equipment)
+	validItems := utility.Filter(equipment, func(item models.ProcessedItem) bool {
+		return !isInvalidItem(item)
+	})
+	if len(validItems) == 0 {
+		return models.EquipmentResult{
+			Equipment: []models.StrippedItem{},
+			Stats:     map[string]float64{},
+		}
+	}
+
+	reversedEquipment := make([]models.ProcessedItem, len(validItems))
+	copy(reversedEquipment, validItems)
 	slices.Reverse(reversedEquipment)
 
 	return models.EquipmentResult{
 		Equipment: StripItems(&reversedEquipment),
-		Stats:     GetStatsFromItems(equipment),
+		Stats:     GetStatsFromItems(validItems),
 	}
-
 }

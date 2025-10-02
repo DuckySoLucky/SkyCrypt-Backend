@@ -2,6 +2,7 @@ package constants
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/models"
 	"slices"
 	"time"
@@ -248,9 +249,15 @@ func GetAllAccessories() []Accessory {
 
 		texturePath := ""
 		if item.Texture != "" {
-			texturePath = fmt.Sprintf("http://localhost:8080/api/head/%s", item.Texture)
+			texturePath = fmt.Sprintf("api/head/%s", item.Texture)
+			if os.Getenv("DEV") == "true" {
+				texturePath = fmt.Sprintf("http://localhost:8080/api/head/%s", item.Texture)
+			}
 		} else {
-			texturePath = fmt.Sprintf("http://localhost:8080/api/item/%s:%d", item.Material, item.Damage)
+			texturePath = fmt.Sprintf("/api/item/%s:%d", item.Material, item.Damage)
+			if os.Getenv("DEV") == "true" {
+				texturePath = fmt.Sprintf("http://localhost:8080/api/item/%s:%d", item.Material, item.Damage)
+			}
 		}
 
 		accessory := Accessory{
@@ -271,7 +278,7 @@ func GetAllAccessories() []Accessory {
 					Name:       item.Name,
 				}
 				output = append(output, specialAccessoryItem)
-				fmt.Printf("[ACCESSORIES] Added special accessory %s with rarity %s\n", specialAccessoryItem.SkyBlockID, specialAccessoryItem.Rarity)
+				// fmt.Printf("[ACCESSORIES] Added special accessory %s with rarity %s\n", specialAccessoryItem.SkyBlockID, specialAccessoryItem.Rarity)
 			}
 		}
 	}

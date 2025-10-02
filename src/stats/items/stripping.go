@@ -44,6 +44,14 @@ func StripItem(item *models.ProcessedItem, search ...bool) *models.StrippedItem 
 		output.Count = item.Count
 	}
 
+	if item.Wiki != nil {
+		output.Wiki = item.Wiki
+	}
+
+	if item.TexturePack != "" {
+		output.TexturePack = item.TexturePack
+	}
+
 	return output
 }
 

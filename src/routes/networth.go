@@ -1,11 +1,29 @@
 package routes
 
 import (
+	"fmt"
+	"skycrypt/src/api"
+	"skycrypt/src/stats"
+	"time"
+
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
 )
 
+// NetworthHandler godoc
+// @Summary Get networth of a specified player
+// @Description Returns networth for the given user and profile ID
+// @Tags networth
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID"
+// @Param profileId path string true "Profile ID"
+// @Success 200 {object} map[string]any
+// @Failure 400 {object} models.ProcessingError
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/networth/{uuid}/{profileId} [get]
 func NetworthHandler(c *fiber.Ctx) error {
-	/*timeNow := time.Now()
+	timeNow := time.Now()
 
 	uuid := c.Params("uuid")
 	profileId := c.Params("profileId")
@@ -15,28 +33,28 @@ func NetworthHandler(c *fiber.Ctx) error {
 
 	mowojang, err := api.ResolvePlayer(uuid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to resolve player: %v", err),
 		})
 	}
 
 	profiles, err := api.GetProfiles(mowojang.UUID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
 
 	profile, err := stats.GetProfile(profiles, profileId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
 
 	profileMuseum, err := api.GetMuseum(profile.ProfileID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get museum: %v", err),
 		})
 	}
@@ -44,7 +62,14 @@ func NetworthHandler(c *fiber.Ctx) error {
 	museum := profileMuseum[mowojang.UUID]
 	userProfile := &userProfileValue
 
-	calculator, err := skyhelpernetworthgo.NewProfileNetworthCalculator(userProfile, museum, *profile.Banking.Balance)
+	var bankBalance float64
+	if profile.Banking != nil && profile.Banking.Balance != nil {
+		bankBalance = *profile.Banking.Balance
+	} else {
+		bankBalance = 0.0
+	}
+
+	calculator, err := skyhelpernetworthgo.NewProfileNetworthCalculator(userProfile, museum, bankBalance)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to create networth calculator: %v", err),
@@ -67,8 +92,6 @@ func NetworthHandler(c *fiber.Ctx) error {
 			"normal":      networth,
 			"nonCosmetic": nonCosmeticNetworth,
 		},
-	})*/
-	return c.JSON(fiber.Map{
-		"networth": nil,
 	})
+
 }

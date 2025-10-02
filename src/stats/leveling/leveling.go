@@ -2,11 +2,14 @@ package stats
 
 import (
 	"math"
+	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var skillTables = map[string]map[int]int{
@@ -155,6 +158,10 @@ func GetLevelByXp(xp int, extra *ExtraSkillData) models.Skill {
 		}
 	}
 
+	if os.Getenv("DEV") == "true" {
+		texture = strings.Replace(texture, "/api/", "http://localhost:8080/api/", 1)
+	}
+
 	return models.Skill{
 		XP:                          xp,
 		Level:                       level,
@@ -171,7 +178,7 @@ func GetLevelByXp(xp int, extra *ExtraSkillData) models.Skill {
 	}
 }
 
-func GetSkillLevelCaps(userProfile *models.Member, player *models.Player) map[string]int {
+func GetSkillLevelCaps(userProfile *skycrypttypes.Member, player *skycrypttypes.Player) map[string]int {
 	caps := map[string]int{
 		"farming":      50,
 		"taming":       50,
@@ -194,7 +201,7 @@ func GetSkillLevelCaps(userProfile *models.Member, player *models.Player) map[st
 }
 
 // GetSocialSkillExperience calculates the total social skill experience for a given profile
-func GetSocialSkillExperience(profile *models.Profile) float64 {
+func GetSocialSkillExperience(profile *skycrypttypes.Profile) float64 {
 	total := 0.00
 	for _, member := range profile.Members {
 		total += member.PlayerData.Experience.SkillSocial
@@ -307,6 +314,10 @@ func GetXpByLevel(level int, extra *ExtraSkillData) models.Skill {
 		if textureIcon, exists := constants.SKILL_ICONS[extra.Texture]; exists {
 			texture = textureIcon
 		}
+	}
+
+	if os.Getenv("DEV") == "true" {
+		texture = strings.Replace(texture, "/api/", "http://localhost:8080/api/", 1)
 	}
 
 	return models.Skill{

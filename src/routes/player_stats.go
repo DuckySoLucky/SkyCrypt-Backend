@@ -9,18 +9,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// SlayersHandler godoc
-// @Summary Get slayer stats of a specified player
-// @Description Returns slayer statistics for the given user and profile ID
-// @Tags slayers
+// PlayerStatsHandler godoc
+// @Summary Get player stats of a specified player
+// @Description Returns player stats for the given user and profile ID
+// @Tags playerStats
 // @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
-// @Success 200 {object} models.SlayersOutput
+// @Success 200 {object} map[string]models.StatsInfo
 // @Failure 400 {object} models.ProcessingError
-// @Router /api/slayer/{uuid}/{profileId} [get]
-func SlayersHandler(c *fiber.Ctx) error {
+// @Router /api/playerStats/{uuid}/{profileId} [get]
+func PlayerStatsHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
 	uuid := c.Params("uuid")
@@ -36,9 +36,9 @@ func SlayersHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
-	fmt.Printf("Returning /api/slayer/%s in %s\n", profileId, time.Since(timeNow))
+	fmt.Printf("Returning /api/playerStats/%s in %s\n", profileId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"slayer": stats.GetSlayers(userProfile),
+		"stats": stats.GetPlayerStats(userProfile, profile, profileId),
 	})
 }

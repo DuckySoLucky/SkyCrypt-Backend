@@ -9,9 +9,11 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetAccessories(useProfile *models.Member, items map[string][]models.Item) models.GetMissingAccessoresOutput {
+func GetAccessories(useProfile *skycrypttypes.Member, items map[string][]skycrypttypes.Item) models.GetMissingAccessoresOutput {
 	if items == nil {
 		return models.GetMissingAccessoresOutput{}
 	}
@@ -156,7 +158,7 @@ func GetAccessories(useProfile *models.Member, items map[string][]models.Item) m
 		riftPrismItem, _ := notenoughupdates.GetItem("RIFT_PRISM")
 
 		itemId := 397
-		processedItem := stats.ProcessItem(&models.Item{
+		processedItem := stats.ProcessItem(&skycrypttypes.Item{
 			Tag:    &riftPrismItem.NBT,
 			ID:     &itemId,
 			Damage: &riftPrismItem.Damage,

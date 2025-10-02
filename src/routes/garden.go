@@ -10,6 +10,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GardenHandler godoc
+// @Summary Get garden stats of a specified profile
+// @Description Returns garden data for the given profile ID
+// @Tags garden
+// @Accept  json
+// @Produce  json
+// @Param profileId path string true "Profile ID"
+// @Success 200 {object} models.Garden
+// @Failure 400 {object} models.ProcessingError
+// @Router /api/garden/{profileId} [get]
 func GardenHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 

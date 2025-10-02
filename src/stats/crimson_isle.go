@@ -2,12 +2,15 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetKuudraCompletions(userProfile *models.Member) int {
+func GetKuudraCompletions(userProfile *skycrypttypes.Member) int {
 	if userProfile.CrimsonIsle.Kuudra == nil {
 		return 0
 	}
@@ -24,7 +27,7 @@ func GetKuudraCompletions(userProfile *models.Member) int {
 	return kills
 }
 
-func getKuudra(userProfile *models.Member) models.CrimsonIsleKuudra {
+func getKuudra(userProfile *skycrypttypes.Member) models.CrimsonIsleKuudra {
 	tiers, totalKills := []models.CrimsonIsleKuudraTier{}, 0
 	for kuudraId := range constants.KUUDRA_TIERS {
 		if kuudraId == "total" || strings.HasPrefix(kuudraId, "highest") {
@@ -36,6 +39,10 @@ func getKuudra(userProfile *models.Member) models.CrimsonIsleKuudra {
 			Id:      kuudraId,
 			Texture: constants.KUUDRA_TIERS[kuudraId].Texture,
 			Kills:   userProfile.CrimsonIsle.Kuudra[kuudraId],
+		}
+
+		if os.Getenv("DEV") == "true" {
+			tier.Texture = strings.Replace(tier.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
 		}
 
 		totalKills += tier.Kills
@@ -64,7 +71,7 @@ func getDojoRank(points int) string {
 	return "F"
 }
 
-func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
+func getDojo(userProfile *skycrypttypes.Member) models.CrimsonIsleDojo {
 	totalPoints, challenges := 0, []models.CrimsonIsleDojoChallenge{}
 	for challengeId, challengeData := range constants.DOJO {
 		points := userProfile.CrimsonIsle.Dojo[fmt.Sprintf("dojo_points_%s", challengeId)]
@@ -78,6 +85,10 @@ func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
 			Rank:    getDojoRank(points),
 		}
 
+		if os.Getenv("DEV") == "true" {
+			challenge.Texture = strings.Replace(challenge.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
 		totalPoints += points
 		challenges = append(challenges, challenge)
 	}
@@ -88,7 +99,7 @@ func getDojo(userProfile *models.Member) models.CrimsonIsleDojo {
 	}
 }
 
-func GetCrimsonIsle(userProfile *models.Member) *models.CrimsonIsleOutput {
+func GetCrimsonIsle(userProfile *skycrypttypes.Member) *models.CrimsonIsleOutput {
 	selectedFaction := userProfile.CrimsonIsle.SelectedFaction
 	if selectedFaction == "" {
 		selectedFaction = "None"

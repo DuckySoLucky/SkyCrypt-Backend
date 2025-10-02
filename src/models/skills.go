@@ -21,3 +21,10 @@ type Skill struct {
 	Maxed                       bool    `json:"maxed"`
 	Texture                     string  `json:"texture"`
 }
+
+type SkillsOutput struct {
+	Mining     MiningOutput     `json:"mining"`
+	Farming    FarmingOutput    `json:"farming"`
+	Fishing    FishingOuput     `json:"fishing"`
+	Enchanting EnchantingOutput `json:"enchanting"`
+}

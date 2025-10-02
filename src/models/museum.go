@@ -1,28 +1,11 @@
 package models
 
-type EncodedItem struct {
-	Type int    `json:"type"`
-	Data string `json:"data"`
-}
+import skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 
 type HypixelMuseumResponse struct {
-	Success bool               `json:"success"`
-	Cause   string             `json:"cause,omitempty"`
-	Members map[string]*Museum `json:"members"`
-}
-
-type Museum struct {
-	Value     int64                     `json:"value"`
-	Appraisal bool                      `json:"appraisal,omitempty"`
-	Items     map[string]*RawMuseumItem `json:"items,omitempty"`
-	Special   []RawMuseumItem           `json:"special,omitempty"`
-}
-
-type RawMuseumItem struct {
-	DonatedTime  int64       `json:"donated_time"`
-	FeaturedSlot *string     `json:"featured_slot"`
-	Borrowing    bool        `json:"borrowing"`
-	Items        EncodedItem `json:"items"`
+	Success bool                                     `json:"success"`
+	Cause   string                                   `json:"cause,omitempty"`
+	Members map[string]*skycrypttypes.Museum `json:"members"`
 }
 
 type MuseumInventoryItem struct {

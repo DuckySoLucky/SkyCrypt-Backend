@@ -35,6 +35,17 @@ var (
 	cacheDuration   = 15 * time.Minute
 )
 
+var (
+	skinHashCacheMutex sync.RWMutex
+	skinHashCache      = make(map[string]string)
+	base64Encodings    = []*base64.Encoding{
+		base64.RawStdEncoding, // Standard base64 without padding
+		base64.StdEncoding,    // Standard base64 with padding
+		base64.RawURLEncoding, // URL-safe base64 without padding
+		base64.URLEncoding,    // URL-safe base64 with padding
+	}
+)
+
 func GetRawLore(text string) string {
 	return colorCodeRegex.ReplaceAllString(text, "")
 }
@@ -203,12 +214,35 @@ func GetSkinHash(base64String string) string {
 		return ""
 	}
 
-	data, err := base64.RawStdEncoding.DecodeString(base64String)
-	if err != nil {
-		data, err = base64.StdEncoding.DecodeString(base64String)
-		if err != nil {
-			return ""
+	skinHashCacheMutex.RLock()
+	if cached, exists := skinHashCache[base64String]; exists {
+		skinHashCacheMutex.RUnlock()
+		return cached
+	}
+	skinHashCacheMutex.RUnlock()
+
+	result := computeSkinHash(base64String)
+
+	skinHashCacheMutex.Lock()
+	skinHashCache[base64String] = result
+	skinHashCacheMutex.Unlock()
+
+	return result
+}
+
+func computeSkinHash(base64String string) string {
+	var data []byte
+
+	for _, encoding := range base64Encodings {
+		var err error
+		data, err = encoding.DecodeString(base64String)
+		if err == nil {
+			break
 		}
+	}
+
+	if data == nil {
+		return ""
 	}
 
 	var jsonData struct {

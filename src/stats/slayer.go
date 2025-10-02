@@ -2,11 +2,15 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getSlayerKills(slayerData models.SlayerBoss) map[string]int {
+func getSlayerKills(slayerData skycrypttypes.SlayerBoss) map[string]int {
 	tiers := []int{
 		slayerData.BossKillsTier0,
 		slayerData.BossKillsTier1,
@@ -65,17 +69,22 @@ func getSlayerLevel(experience int, slayerId string) models.SlayerLevel {
 	}
 }
 
-func GetSlayers(userProfile *models.Member) models.SlayersOutput {
+func GetSlayers(userProfile *skycrypttypes.Member) models.SlayersOutput {
 	output := models.SlayersOutput{
-		Data: make(map[string]models.SlayerData),
-		Stats:  make(map[string]float64),
+		Data:  make(map[string]models.SlayerData),
+		Stats: make(map[string]float64),
 	}
 
 	totalExperience := 0
 	for slayerId, slayerData := range userProfile.Slayer.SlayerBosses {
+		texture := constants.SLAYER_INFO[slayerId].Head
+		if os.Getenv("DEV") == "true" {
+			texture = strings.Replace(texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
 		output.Data[slayerId] = models.SlayerData{
 			Name:    constants.SLAYER_INFO[slayerId].Name,
-			Texture: constants.SLAYER_INFO[slayerId].Head,
+			Texture: texture,
 			Kills:   getSlayerKills(slayerData),
 			Level:   getSlayerLevel(int(slayerData.Experience), slayerId),
 		}

@@ -24,6 +24,8 @@ import (
 	"skycrypt/src/utility"
 	"strconv"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var textureDir = "assets/static"
@@ -722,6 +724,14 @@ func main() {
 }
 */
 
+type RedirectError struct {
+	URL string
+}
+
+func (e RedirectError) Error() string {
+	return "redirect:" + e.URL
+}
+
 func RenderItem(itemID string) ([]byte, error) {
 	damage := 0
 	if strings.Contains(itemID, ":") {
@@ -737,7 +747,7 @@ func RenderItem(itemID string) ([]byte, error) {
 	TextureItem := models.TextureItem{
 		Damage: &itemData.Damage,
 		ID:     &itemData.ItemId,
-		Tag: models.TextureItemExtraAttributes{
+		Tag: skycrypttypes.TextureItemExtraAttributes{
 			ExtraAttributes: map[string]interface{}{
 				"id": itemData.SkyblockID,
 			},
@@ -755,8 +765,13 @@ func RenderItem(itemID string) ([]byte, error) {
 		return nil, fmt.Errorf("couldn't find the texture")
 	}
 
+	// If output is a redirect path (starts with /api/), return redirect error
+	if strings.HasPrefix(output, "/api/") {
+		return nil, RedirectError{URL: output}
+	}
+
 	// If output is a localhost asset, read from disk (performance optimization)
-	if (strings.HasPrefix(output, "http://localhost") || strings.HasPrefix(output, "https://localhost")) && !strings.Contains(output, "/api/") {
+	if strings.Contains(output, "/assets/") && !strings.Contains(output, "/api/") {
 		assetsIdx := strings.Index(output, "/assets/")
 		if assetsIdx != -1 {
 			localPath := output[assetsIdx+1:] // skip the leading slash
@@ -774,6 +789,7 @@ func RenderItem(itemID string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid localhost asset path: %s", output)
 	}
 
+	// Otherwise, fetch from the URL (this shouldn't ever happen but just as a fallback)
 	response, err := http.Get(output)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching item texture: %v", err)

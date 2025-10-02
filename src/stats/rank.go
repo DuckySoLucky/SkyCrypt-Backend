@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetRank(player *models.Player) *models.RankOutput {
+func GetRank(player *skycrypttypes.Player) *models.RankOutput {
 	output := models.RankOutput{
 		RankText:  "",
 		RankColor: "",

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
@@ -12,21 +13,22 @@ import (
 
 	"time"
 
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	"github.com/gofiber/fiber/v2"
 	jsoniter "github.com/json-iterator/go"
 )
 
 var ICONS map[string]string = map[string]string{
-	"backpack":        "http://localhost:8080/api/item/chest",
-	"enderchest":      "http://localhost:8080/api/item/ender_chest",
-	"personal_vault":  "http://localhost:8080/api/head/f7aadff9ddc546fdcec6ed5919cc39dfa8d0c07ff4bc613a19f2e6d7f2593",
-	"talisman_bag":    "http://localhost:8080/api/head/961a918c0c49ba8d053e522cb91abc74689367b4d8aa06bfc1ba9154730985ff",
-	"potion_bag":      "http://localhost:8080/api/head/9f8b82427b260d0a61e6483fc3b2c35a585851e08a9a9df372548b4168cc817c",
-	"fishing_bag":     "http://localhost:8080/api/head/eb8e297df6b8dffcf135dba84ec792d420ad8ecb458d144288572a84603b1631",
-	"quiver":          "http://localhost:8080/api/head/4cb3acdc11ca747bf710e59f4c8e9b3d949fdd364c6869831ca878f0763d1787",
-	"museum":          "http://localhost:8080/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
-	"rift_inventory":  "http://localhost:8080/api/head/445240fcf1a9796327dda5593985343af9121a7156bc76e3d6b341b02e6a6e52",
-	"rift_enderchest": "http://localhost:8080/api/head/a6cc486c2be1cb9dfcb2e53dd9a3e9a883bfadb27cb956f1896d602b4067",
+	"backpack":        "/api/item/chest",
+	"enderchest":      "/api/item/ender_chest",
+	"personal_vault":  "/api/head/f7aadff9ddc546fdcec6ed5919cc39dfa8d0c07ff4bc613a19f2e6d7f2593",
+	"talisman_bag":    "/api/head/961a918c0c49ba8d053e522cb91abc74689367b4d8aa06bfc1ba9154730985ff",
+	"potion_bag":      "/api/head/9f8b82427b260d0a61e6483fc3b2c35a585851e08a9a9df372548b4168cc817c",
+	"fishing_bag":     "/api/head/eb8e297df6b8dffcf135dba84ec792d420ad8ecb458d144288572a84603b1631",
+	"quiver":          "/api/head/4cb3acdc11ca747bf710e59f4c8e9b3d949fdd364c6869831ca878f0763d1787",
+	"museum":          "/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
+	"rift_inventory":  "/api/head/445240fcf1a9796327dda5593985343af9121a7156bc76e3d6b341b02e6a6e52",
+	"rift_enderchest": "/api/head/a6cc486c2be1cb9dfcb2e53dd9a3e9a883bfadb27cb956f1896d602b4067",
 }
 
 type SearchItem struct {
@@ -41,12 +43,31 @@ type SourceTab struct {
 
 func getIcon(source string, uuid string) string {
 	if icon, exists := ICONS[source]; exists {
+		if os.Getenv("DEV") == "true" {
+			return fmt.Sprintf("http://localhost:8080%s", icon)
+		}
+
 		return icon
 	}
 
 	return fmt.Sprintf(`https://crafatar.com/renders/head/%s?overlay`, uuid)
 }
 
+// InventoryHandler godoc
+// @Summary Get inventory items for a specified player
+// @Description Returns inventory items for the given user, profile ID, and inventory ID. Supports museum, search, and other inventories.
+// @Tags inventory
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID"
+// @Param profileId path string true "Profile ID"
+// @Param inventoryId path string true "Inventory ID (e.g., museum, search, or other inventory types)"
+// @Param search path string false "Search string (required when inventoryId is 'search')"
+// @Success 200 {object} []models.StrippedItem
+// @Failure 400 {object} models.ProcessingError
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/inventory/{uuid}/{profileId}/{inventoryId} [get]
+// @Router /api/inventory/{uuid}/{profileId}/search/{search} [get]
 func InventoryHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
@@ -56,7 +77,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 	if inventoryId == "museum" {
 		profileMuseum, err := api.GetMuseum(profileId)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": fmt.Sprintf("Failed to get museum: %v", err),
 			})
 		}
@@ -80,7 +101,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 	profile, err := api.GetProfile(uuid, profileId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
@@ -89,7 +110,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 	userProfile := &userProfileValue
 
 	if inventoryId == "search" {
-		var items map[string][]models.Item
+		var items map[string][]skycrypttypes.Item
 		cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
 		if err == nil && cache != "" {
 			var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -159,9 +180,16 @@ func InventoryHandler(c *fiber.Ctx) error {
 	itemSlice := stats.GetInventory(userProfile, inventoryId)
 	output := statsItems.ProcessItems(&itemSlice, inventoryId)
 
+	strippedItems := statsItems.StripItems(&output)
+	if strings.HasSuffix(inventoryId, "inventory") {
+		if len(strippedItems) > 9 {
+			strippedItems = append(strippedItems[9:], strippedItems[:9]...)
+		}
+	}
+
 	fmt.Printf("Returning /api/inventory/%s/%s in %s\n", uuid, inventoryId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"items": statsItems.StripItems(&output),
+		"items": strippedItems,
 	})
 }

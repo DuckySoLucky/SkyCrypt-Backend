@@ -129,7 +129,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Museum",
 			Rarity:      "rare",
-			Texture:     "http://localhost:8080/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
+			Texture:     "/api/head/438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc",
 			Lore: []string{
 				"§7The §9Museum §7is a compendium",
 				"§7of all of your items in",
@@ -149,7 +149,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Weapons",
 			Rarity:      "uncommon",
-			Texture:     "http://localhost:8080/api/item/DIAMOND_SWORD",
+			Texture:     "/api/item/DIAMOND_SWORD",
 			Lore: []string{
 				"§7View all of the §6Weapons §7that",
 				"§7you have donated to the",
@@ -166,7 +166,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Armor Sets",
 			Rarity:      "uncommon",
-			Texture:     "http://localhost:8080/api/item/DIAMOND_CHESTPLATE",
+			Texture:     "/api/item/DIAMOND_CHESTPLATE",
 			Lore: []string{
 				"§7View all of the §9Armor Sets",
 				"§9§7that you have donated to the",
@@ -183,7 +183,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Rarities",
 			Rarity:      "uncommon",
-			Texture:     "http://localhost:8080/api/head/86addbd5dedad40999473be4a7f48f6236a79a0dce971b5dbd7372014ae394d",
+			Texture:     "/api/head/86addbd5dedad40999473be4a7f48f6236a79a0dce971b5dbd7372014ae394d",
 			Lore: []string{
 				"§7View all of the §5Rarities",
 				"§5§7that you have donated to the",
@@ -200,7 +200,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Special Items",
 			Rarity:      "uncommon",
-			Texture:     "http://localhost:8080/api/item/CAKE",
+			Texture:     "/api/item/CAKE",
 			Lore: []string{
 				"§7View all of the §dSpecial Items",
 				"§d§7that you have donated to the",
@@ -225,7 +225,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Museum Appraisal",
 			Rarity:      "legendary",
-			Texture:     "http://localhost:8080/api/item/DIAMOND",
+			Texture:     "/api/item/DIAMOND",
 			Lore: []string{
 				"§7§6Madame Goldsworth §7offers an",
 				"§7appraisal service for Museums.",
@@ -247,7 +247,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Museum Rewards",
 			Rarity:      "legendary",
-			Texture:     "http://localhost:8080/api/item/GOLD_BLOCK",
+			Texture:     "/api/item/GOLD_BLOCK",
 			Lore: []string{
 				"§7Each time you donate an item to",
 				"§7your Museum, the §bCurator",
@@ -268,7 +268,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Close",
 			Rarity:      "special",
-			Texture:     "http://localhost:8080/api/item/BARRIER",
+			Texture:     "/api/item/BARRIER",
 			Lore:        []string{},
 		},
 		Position: 49,
@@ -277,7 +277,7 @@ var MUSEUM_INVENTORY = []models.MuseumInventoryItem{
 		ProcessedItem: models.ProcessedItem{
 			DisplayName: "Museum Browser",
 			Rarity:      "uncommon",
-			Texture:     "http://localhost:8080/api/item/SIGN",
+			Texture:     "/api/item/SIGN",
 			Lore: []string{
 				"§7View the Museums of your",
 				"§7friends, top valued players, and",
@@ -294,7 +294,7 @@ var MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE = map[string]models.ProcessedItem{
 	"weapons": {
 		DisplayName: "Missing Weapon",
 		Rarity:      "special",
-		Texture:     "http://localhost:8080/api/item/INK_SACK:8",
+		Texture:     "/api/item/INK_SACK:8",
 		Lore: []string{
 			"§7Click on this item in your",
 			"§7inventory to add it to your",
@@ -304,7 +304,7 @@ var MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE = map[string]models.ProcessedItem{
 	"armor": {
 		DisplayName: "Missing Armor Set",
 		Rarity:      "special",
-		Texture:     "http://localhost:8080/api/item/INK_SACK:8",
+		Texture:     "/api/item/INK_SACK:8",
 		Lore: []string{
 			"§7Click on an armor piece in your",
 			"§7inventory that belongs to this",
@@ -315,7 +315,7 @@ var MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE = map[string]models.ProcessedItem{
 	"rarities": {
 		DisplayName: "Missing Rarity",
 		Rarity:      "special",
-		Texture:     "http://localhost:8080/api/item/INK_SACK:8",
+		Texture:     "/api/item/INK_SACK:8",
 		Lore: []string{
 			"§7Click on this item in your",
 			"§7inventory to add it to your",
@@ -326,7 +326,7 @@ var MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE = map[string]models.ProcessedItem{
 
 var MUSEUM_INVENTORY_HIGHER_TIER_DONATED_TEMPLATE = models.ProcessedItem{
 	DisplayName: "Higher Tier Donated",
-	Texture:     "http://localhost:8080/api/item/INK_SACK:10",
+	Texture:     "/api/item/INK_SACK:10",
 	Rarity:      "special",
 	Lore: []string{
 		"§7Donated as higher tier",
