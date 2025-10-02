@@ -1,11 +1,19 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getGame(gameData *models.ExperimentationGame, gameId string) []models.EnchantingGame {
+func getGame(gameData *skycrypttypes.ExperimentationGame, gameId string) []models.EnchantingGame {
+	if gameData == nil {
+		gameData = &skycrypttypes.ExperimentationGame{}
+	}
+
 	var output []models.EnchantingGame
 	for index, tier := range constants.EXPERIMENTS.Tiers {
 		attempts := gameData.Attempts[index]
@@ -23,20 +31,26 @@ func getGame(gameData *models.ExperimentationGame, gameId string) []models.Encha
 		}
 
 		tier = constants.EXPERIMENTS.Tiers[index]
-		output = append(output, models.EnchantingGame{
+		experimentData := models.EnchantingGame{
 			Name:      tier.Name,
 			Texture:   tier.Texture,
 			Attempts:  attempts,
 			Claims:    claims,
 			BestScore: bestScore,
-		})
+		}
+
+		if os.Getenv("DEV") == "true" {
+			experimentData.Texture = strings.Replace(experimentData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
+		output = append(output, experimentData)
 	}
 
 	return output
 }
 
-func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
-	if userProfie.Experimentation.ClaimsResets == nil {
+func GetEnchanting(userProfie *skycrypttypes.Member) models.EnchantingOutput {
+	if userProfie.Experimentation.Simon == nil {
 		return models.EnchantingOutput{
 			Unlocked: false,
 		}
@@ -45,7 +59,7 @@ func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
 	output := map[string]models.EnchantingGameData{}
 	games := []struct {
 		key      string
-		gameData *models.ExperimentationGame
+		gameData *skycrypttypes.ExperimentationGame
 	}{
 		{"simon", userProfie.Experimentation.Simon},
 		{"numbers", userProfie.Experimentation.Numbers},
@@ -53,6 +67,10 @@ func GetEnchanting(userProfie *models.Member) models.EnchantingOutput {
 	}
 
 	for _, g := range games {
+		if g.gameData == nil {
+			continue
+		}
+
 		output[g.key] = models.EnchantingGameData{
 			Name: constants.EXPERIMENTS.Games[g.key].Name,
 			Stats: models.EnchantingGameStats{

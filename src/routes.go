@@ -8,17 +8,15 @@ import (
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/routes"
-	"time"
+	"skycrypt/src/utility"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/joho/godotenv"
+	scalar "github.com/yokeTH/gofiber-scalar"
 )
 
 func SetupApplication() error {
-	// Load environment variables first (only log if this is the main process)
 	err := godotenv.Load()
 	if err != nil && os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		log.Println("No .env file found, using environment variables")
@@ -60,9 +58,10 @@ func SetupApplication() error {
 		return fmt.Errorf("error parsing NEU repository: %v", err)
 	}
 
-	// Only log success message from main process to avoid spam
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
+
+		utility.SendWebhook("SKYCRYPT_STARTED", "EPIC_ERROR", []byte("SkyCrypt has started successfully!"))
 	}
 
 	return nil
@@ -76,13 +75,22 @@ func SetupRoutes(app *fiber.App) {
 	// Assets folder
 	app.Static("/assets", "assets")
 
+	// Documentation
+	app.Get("/scalar/*", scalar.New(scalar.Config{
+		Path:       "/scalar",
+		RawSpecUrl: "/swagger/doc.json",
+	}))
+
 	if os.Getenv("DEV") != "true" {
 		fmt.Println("[ENVIROMENT] Running in production mode")
-		app.Use(etag.New())
-		app.Use("/api", cache.New(cache.Config{
-			Expiration:   5 * time.Minute,
-			CacheControl: true,
-		}))
+
+		/*
+			app.Use(etag.New())
+			app.Use("/api", cache.New(cache.Config{
+				Expiration:   5 * time.Minute,
+				CacheControl: true,
+			})
+		*/
 	}
 
 	api := app.Group("/api")
@@ -100,6 +108,8 @@ func SetupRoutes(app *fiber.App) {
 	// STATS ENDPOINTS
 	api.Get("/stats/:uuid/:profileId", routes.StatsHandler)
 	api.Get("/stats/:uuid", routes.StatsHandler)
+
+	api.Get("/playerStats/:uuid/:profileId", routes.PlayerStatsHandler)
 
 	api.Get("/networth/:uuid/:profileId", routes.NetworthHandler)
 
@@ -131,6 +141,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/misc/:uuid/:profileId", routes.MiscHandler)
 
 	api.Get("/embed/:uuid/:profileId", routes.EmbedHandler)
+	api.Get("/embed/:uuid", routes.EmbedHandler)
 
 	// RENDERING ENDPOINTS
 	api.Get("/head/:textureId", routes.HeadHandlers)
@@ -140,5 +151,4 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/potion/:type/:color", routes.PotionHandlers)
 
 	api.Get("/leather/:type/:color", routes.LeatherHandlers)
-
 }

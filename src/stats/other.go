@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/api"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetProfile(profiles *models.HypixelProfilesResponse, profileId ...string) (*models.Profile, error) {
+func GetProfile(profiles *models.HypixelProfilesResponse, profileId ...string) (*skycrypttypes.Profile, error) {
 	if len(profiles.Profiles) == 0 {
 		return nil, fmt.Errorf("no profiles found")
 	}
@@ -53,7 +55,7 @@ func FormatProfiles(profiles *models.HypixelProfilesResponse) []*models.Profiles
 	return profileStats
 }
 
-func FormatMembers(profiles *models.Profile) ([]*models.MemberStats, error) {
+func FormatMembers(profiles *skycrypttypes.Profile) ([]*models.MemberStats, error) {
 	memberStats := make([]*models.MemberStats, 0, len(profiles.Members))
 
 	for memberUUID, memberData := range profiles.Members {
@@ -72,7 +74,7 @@ func FormatMembers(profiles *models.Profile) ([]*models.MemberStats, error) {
 	return memberStats, nil
 }
 
-func isMemberRemoved(memberData *models.Member) bool {
+func isMemberRemoved(memberData *skycrypttypes.Member) bool {
 	if memberData.CoopInvitation != nil && !memberData.CoopInvitation.Confirmed {
 		return true
 	}
@@ -82,21 +84,26 @@ func isMemberRemoved(memberData *models.Member) bool {
 	return false
 }
 
-func GetFairySouls(userProfile *models.Member, gamemode string) *models.FairySouls {
+func GetFairySouls(userProfile *skycrypttypes.Member, gamemode string) *models.FairySouls {
 	if gamemode == "" {
 		gamemode = "normal"
+	}
+
+	total := constants.FAIRY_SOULS[gamemode]
+	if total == 0 {
+		total = constants.FAIRY_SOULS["normal"]
 	}
 
 	if userProfile.FairySouls == nil {
 		return &models.FairySouls{
 			Found: 0,
-			Total: constants.FAIRY_SOULS[gamemode],
+			Total: total,
 		}
 	}
 
 	return &models.FairySouls{
 		Found: userProfile.FairySouls.TotalCollected,
-		Total: constants.FAIRY_SOULS[gamemode],
+		Total: total,
 	}
 
 }

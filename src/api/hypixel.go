@@ -10,6 +10,7 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -26,9 +27,15 @@ var httpClient = &http.Client{
 	},
 }
 
+<<<<<<< HEAD
 func GetPlayer(uuid string) (*models.Player, error) {
 	rawReponse := &models.HypixelPlayerResponse{}
 	response := &models.Player{}
+=======
+func GetPlayer(uuid string) (*skycrypttypes.Player, error) {
+	var rawReponse models.HypixelPlayerResponse
+	var response skycrypttypes.Player
+>>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
 
 	if !utility.IsUUID(uuid) {
 		respUUID, err := GetUUID(uuid)
@@ -119,16 +126,16 @@ func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
 	return response, nil
 }
 
-func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
+func GetProfile(uuid string, profileId ...string) (*skycrypttypes.Profile, error) {
 	profiles, err := GetProfiles(uuid)
 	if err != nil {
-		return &models.Profile{}, err
+		return &skycrypttypes.Profile{}, err
 	}
 
 	// If no profileId provided, return the first profile or selected profile
 	if len(profileId) == 0 || (len(profileId) == 1 && profileId[0] == "") {
 		if len(profiles.Profiles) == 0 {
-			return &models.Profile{}, fmt.Errorf("no profiles found for UUID %s", uuid)
+			return &skycrypttypes.Profile{}, fmt.Errorf("no profiles found for UUID %s", uuid)
 		}
 
 		for _, profile := range profiles.Profiles {
@@ -148,11 +155,16 @@ func GetProfile(uuid string, profileId ...string) (*models.Profile, error) {
 		}
 	}
 
-	return &models.Profile{}, fmt.Errorf("profile with ID %s not found for UUID %s", targetProfileId, uuid)
+	return &skycrypttypes.Profile{}, fmt.Errorf("profile with ID %s not found for UUID %s", targetProfileId, uuid)
 }
 
+<<<<<<< HEAD
 func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 	rawReponse := &models.HypixelMuseumResponse{}
+=======
+func GetMuseum(profileId string) (map[string]*skycrypttypes.Museum, error) {
+	var rawReponse models.HypixelMuseumResponse
+>>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
 
 	cache, err := redis.Get(fmt.Sprintf(`museum:%s`, profileId))
 	if err == nil && cache != "" {
@@ -187,8 +199,13 @@ func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 	return rawReponse.Members, nil
 }
 
+<<<<<<< HEAD
 func GetGarden(profileId string) (*models.GardenRaw, error) {
 	rawReponse := &models.HypixelGardenResponse{}
+=======
+func GetGarden(profileId string) (*skycrypttypes.Garden, error) {
+	var rawReponse models.HypixelGardenResponse
+>>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
 
 	cache, err := redis.Get(fmt.Sprintf(`garden:%s`, profileId))
 	if err == nil && cache != "" {

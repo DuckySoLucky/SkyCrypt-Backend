@@ -1,14 +1,17 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/leveling"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetSkills(userProfile *models.Member, profile *models.Profile, player *models.Player) *models.Skills {
+func GetSkills(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile, player *skycrypttypes.Player) *models.Skills {
 	output := &models.Skills{Skills: make(map[string]models.Skill)}
 
 	skillLevelCaps := stats.GetSkillLevelCaps(userProfile, player)
@@ -36,6 +39,10 @@ func GetSkills(userProfile *models.Member, profile *models.Profile, player *mode
 				Type:    skill,
 				Texture: constants.SKILL_ICONS[skill],
 				Cap:     &capValue,
+			}
+
+			if os.Getenv("DEV") == "true" {
+				extra.Texture = strings.Replace(extra.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 			}
 
 			output.Skills[skill] = stats.GetLevelByXp(int(experience), extra)

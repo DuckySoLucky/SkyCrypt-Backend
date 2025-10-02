@@ -6,6 +6,8 @@ import (
 	"skycrypt/src"
 	"skycrypt/src/utility"
 
+	_ "skycrypt/docs"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -13,7 +15,7 @@ import (
 
 func main() {
 	app := fiber.New(fiber.Config{
-		Prefork:                   true,  // Fork processes for max CPU utilization
+		Prefork:                   true,  // Enable prefork (requires --pid=host in Docker)
 		ServerHeader:              "",    // Remove server header for slight perf gain
 		DisableKeepalive:          false, // Keep connections alive
 		DisableDefaultDate:        true,  // Disable date header

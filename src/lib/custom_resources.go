@@ -28,6 +28,10 @@ func GetTexturePath(texturePath string, textureString string) string {
 		formattedPath = fmt.Sprintf("resourcepacks/%s/assets/cittofirmgenerated/textures/item/%s.png", texturePath, textureId)
 	}
 
+	if os.Getenv("DEV") != "true" {
+		return fmt.Sprintf("/assets/%s", formattedPath)
+	}
+
 	return "http://localhost:8080/assets/" + formattedPath
 }
 
@@ -292,7 +296,11 @@ func init() {
 func ApplyTexture(item models.TextureItem) string {
 	// ? NOTE: we're ignoring enchanted books because they're quite expensive to render and not really worth the performance hit
 	if item.Tag.ExtraAttributes == nil || item.Tag.ExtraAttributes["id"] == "ENCHANTED_BOOK" {
-		return "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
+		if os.Getenv("DEV") == "true" {
+			return "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
+		}
+
+		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
 	}
 
 	customTexture := GetTexture(item)
@@ -304,11 +312,19 @@ func ApplyTexture(item models.TextureItem) string {
 
 	if item.Tag.SkullOwner != nil && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
 		skinHash := utility.GetSkinHash(item.Tag.SkullOwner.Properties.Textures[0].Value)
+		if os.Getenv("DEV") != "true" {
+			return fmt.Sprintf("/api/head/%s", skinHash)
+		}
+
 		return fmt.Sprintf("http://localhost:8080/api/head/%s", skinHash)
 	}
 
 	// Preparsed texture from /api/item endpoint
 	if item.Texture != "" {
+		if os.Getenv("DEV") != "true" {
+			return fmt.Sprintf("/api/head/%s", item.Texture)
+		}
+
 		return fmt.Sprintf("http://localhost:8080/api/head/%s", item.Texture)
 	}
 
@@ -331,6 +347,10 @@ func ApplyTexture(item models.TextureItem) string {
 
 		}
 
+		if os.Getenv("DEV") != "true" {
+			return fmt.Sprintf("/api/leather/%s/%s", armorType, armorColor)
+		}
+
 		return fmt.Sprintf("http://localhost:8080/api/leather/%s/%s", armorType, armorColor)
 	}
 
@@ -351,9 +371,17 @@ func ApplyTexture(item models.TextureItem) string {
 
 	vanillaPath := fmt.Sprintf("assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/%s.png", strings.ToLower(item.RawId))
 	if _, err := os.Stat(vanillaPath); err == nil {
+		if os.Getenv("DEV") != "true" {
+			return "/" + vanillaPath
+		}
+
 		return "http://localhost:8080/" + vanillaPath
 	}
 
 	fmt.Printf("[CUSTOM_RESOURCES] No custom texture found for item %s, returning default barrier texture\n", item.Tag.ExtraAttributes["id"])
+	if os.Getenv("DEV") != "true" {
+		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"
+	}
+
 	return "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"
 }

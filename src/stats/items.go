@@ -3,15 +3,15 @@ package stats
 import (
 	"fmt"
 	redis "skycrypt/src/db"
-	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"strings"
 	"sync"
 
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	jsoniter "github.com/json-iterator/go"
 )
 
-func GetRawInventory(useProfile *models.Member, inventoryId string) string {
+func GetRawInventory(useProfile *skycrypttypes.Member, inventoryId string) string {
 	switch inventoryId {
 	case "inventory":
 		return useProfile.Inventory.Inventory.Data
@@ -47,9 +47,9 @@ func GetRawInventory(useProfile *models.Member, inventoryId string) string {
 	return ""
 }
 
-func GetInventory(useProfile *models.Member, inventoryId string) []models.Item {
+func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycrypttypes.Item {
 	if useProfile.Inventory == nil {
-		return []models.Item{}
+		return []skycrypttypes.Item{}
 	}
 
 	if inventoryId == "backpack" {
@@ -64,7 +64,7 @@ func GetInventory(useProfile *models.Member, inventoryId string) []models.Item {
 
 		type result struct {
 			inventoryId string
-			items       []models.Item
+			items       []skycrypttypes.Item
 			err         error
 		}
 
@@ -91,7 +91,7 @@ func GetInventory(useProfile *models.Member, inventoryId string) []models.Item {
 			close(resultChan)
 		}()
 
-		decodedInventory := make(map[string][]models.Item, len(encodedInventories))
+		decodedInventory := make(map[string][]skycrypttypes.Item, len(encodedInventories))
 		for res := range resultChan {
 			if res.err != nil {
 				fmt.Printf("Error decoding inventory %s: %v\n", res.inventoryId, res.err)
@@ -101,7 +101,7 @@ func GetInventory(useProfile *models.Member, inventoryId string) []models.Item {
 			decodedInventory[res.inventoryId] = res.items
 		}
 
-		output := []models.Item{}
+		output := []skycrypttypes.Item{}
 		for inventoryId, items := range decodedInventory {
 			if strings.HasPrefix(inventoryId, "backpack_") && !strings.Contains(inventoryId, "icon") {
 
@@ -129,7 +129,11 @@ func GetInventory(useProfile *models.Member, inventoryId string) []models.Item {
 	return decodedInventory.Items
 }
 
-func GetItems(useProfile *models.Member, profileId string) (map[string][]models.Item, error) {
+func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]skycrypttypes.Item, error) {
+	if useProfile.Inventory == nil {
+		useProfile.Inventory = &skycrypttypes.Inventory{}
+	}
+
 	encodedInventories := map[string]*string{
 		"inventory":      &useProfile.Inventory.Inventory.Data,
 		"enderchest":     &useProfile.Inventory.Enderchest.Data,
@@ -162,7 +166,7 @@ func GetItems(useProfile *models.Member, profileId string) (map[string][]models.
 
 	type result struct {
 		inventoryId string
-		items       []models.Item
+		items       []skycrypttypes.Item
 		err         error
 	}
 
@@ -189,7 +193,7 @@ func GetItems(useProfile *models.Member, profileId string) (map[string][]models.
 		close(resultChan)
 	}()
 
-	decodedInventory := make(map[string][]models.Item, len(encodedInventories))
+	decodedInventory := make(map[string][]skycrypttypes.Item, len(encodedInventories))
 	for res := range resultChan {
 		if res.err != nil {
 			fmt.Printf("Error decoding inventory %s: %v\n", res.inventoryId, res.err)
@@ -199,7 +203,7 @@ func GetItems(useProfile *models.Member, profileId string) (map[string][]models.
 		decodedInventory[res.inventoryId] = res.items
 	}
 
-	output := make(map[string][]models.Item)
+	output := make(map[string][]skycrypttypes.Item)
 	for inventoryId, items := range decodedInventory {
 		if !strings.Contains(inventoryId, "backpack") {
 			output[inventoryId] = items
@@ -207,7 +211,7 @@ func GetItems(useProfile *models.Member, profileId string) (map[string][]models.
 
 		if strings.HasPrefix(inventoryId, "backpack_") && !strings.Contains(inventoryId, "icon") {
 			if output["backpack"] == nil {
-				output["backpack"] = []models.Item{}
+				output["backpack"] = []skycrypttypes.Item{}
 			}
 
 			backpackIndex := strings.Split(inventoryId, "_")[1]

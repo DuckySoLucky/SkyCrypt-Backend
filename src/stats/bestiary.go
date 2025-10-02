@@ -6,10 +6,16 @@ import (
 	neu "skycrypt/src/models/NEU"
 	"slices"
 	"strconv"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetBestiaryFamily(userProfile *models.Member, mobName string) *models.BestiaryMobOutput {
+func GetBestiaryFamily(userProfile *skycrypttypes.Member, mobName string) *models.BestiaryMobOutput {
 	bestiaryConstants := notenoughupdates.NEUConstants.Bestiary.Islands
+	if userProfile.Bestiary == nil {
+		return &models.BestiaryMobOutput{}
+	}
+
 	bestiary := userProfile.Bestiary.Kills
 
 	for _, category := range bestiaryConstants {
@@ -26,8 +32,11 @@ func GetBestiaryFamily(userProfile *models.Member, mobName string) *models.Besti
 	return nil
 }
 
-func getCategoryMobs(userProfile *models.Member, mobs []neu.BestiaryMob) []models.BestiaryMobOutput {
+func getCategoryMobs(userProfile *skycrypttypes.Member, mobs []neu.BestiaryMob) []models.BestiaryMobOutput {
 	mobOutputs := make([]models.BestiaryMobOutput, 0)
+	if userProfile.Bestiary == nil {
+		userProfile.Bestiary = &skycrypttypes.Bestiary{Kills: make(map[string]int)}
+	}
 
 	bestiaryKills := userProfile.Bestiary.Kills
 	brackets := notenoughupdates.NEUConstants.Bestiary.Brackets
@@ -77,7 +86,7 @@ func getCategoryMobs(userProfile *models.Member, mobs []neu.BestiaryMob) []model
 	return mobOutputs
 }
 
-func GetBestiary(userProfile *models.Member) *models.BestiaryOutput {
+func GetBestiary(userProfile *skycrypttypes.Member) *models.BestiaryOutput {
 	output := &models.BestiaryOutput{
 		Categories:        make(map[string]models.BestiaryCategoryOutput),
 		FamiliesCompleted: 0,
