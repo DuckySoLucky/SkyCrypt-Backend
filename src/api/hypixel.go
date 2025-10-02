@@ -27,15 +27,10 @@ var httpClient = &http.Client{
 	},
 }
 
-<<<<<<< HEAD
+
 func GetPlayer(uuid string) (*models.Player, error) {
 	rawReponse := &models.HypixelPlayerResponse{}
 	response := &models.Player{}
-=======
-func GetPlayer(uuid string) (*skycrypttypes.Player, error) {
-	var rawReponse models.HypixelPlayerResponse
-	var response skycrypttypes.Player
->>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
 
 	if !utility.IsUUID(uuid) {
 		respUUID, err := GetUUID(uuid)
@@ -158,13 +153,9 @@ func GetProfile(uuid string, profileId ...string) (*skycrypttypes.Profile, error
 	return &skycrypttypes.Profile{}, fmt.Errorf("profile with ID %s not found for UUID %s", targetProfileId, uuid)
 }
 
-<<<<<<< HEAD
 func GetMuseum(profileId string) (map[string]*models.Museum, error) {
 	rawReponse := &models.HypixelMuseumResponse{}
-=======
-func GetMuseum(profileId string) (map[string]*skycrypttypes.Museum, error) {
-	var rawReponse models.HypixelMuseumResponse
->>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
+
 
 	cache, err := redis.Get(fmt.Sprintf(`museum:%s`, profileId))
 	if err == nil && cache != "" {
@@ -199,13 +190,8 @@ func GetMuseum(profileId string) (map[string]*skycrypttypes.Museum, error) {
 	return rawReponse.Members, nil
 }
 
-<<<<<<< HEAD
 func GetGarden(profileId string) (*models.GardenRaw, error) {
 	rawReponse := &models.HypixelGardenResponse{}
-=======
-func GetGarden(profileId string) (*skycrypttypes.Garden, error) {
-	var rawReponse models.HypixelGardenResponse
->>>>>>> 51b9d29d5b4157f70b06d9ae12a7d3e9003cf644
 
 	cache, err := redis.Get(fmt.Sprintf(`garden:%s`, profileId))
 	if err == nil && cache != "" {
