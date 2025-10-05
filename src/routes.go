@@ -10,6 +10,7 @@ import (
 	"skycrypt/src/routes"
 	"skycrypt/src/utility"
 
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/joho/godotenv"
@@ -58,6 +59,16 @@ func SetupApplication() error {
 		return fmt.Errorf("error parsing NEU repository: %v", err)
 	}
 
+	_, err = skyhelpernetworthgo.GetPrices(true, 0, 0)
+	if err != nil {
+		return fmt.Errorf("error fetching SkyHelper prices: %v", err)
+	}
+
+	_, err = skyhelpernetworthgo.GetItems(true, 0, 0)
+	if err != nil {
+		return fmt.Errorf("error fetching SkyHelper items: %v", err)
+	}
+
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
 
@@ -82,7 +93,9 @@ func SetupRoutes(app *fiber.App) {
 	}))
 
 	if os.Getenv("DEV") != "true" {
-		fmt.Println("[ENVIROMENT] Running in production mode")
+		if os.Getenv("FIBER_PREFORK_CHILD") == "" {
+			fmt.Println("[ENVIROMENT] Running in production mode")
+		}
 
 		/*
 			app.Use(etag.New())

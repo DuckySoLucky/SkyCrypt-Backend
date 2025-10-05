@@ -23,7 +23,7 @@ type StatsOutput struct {
 	UUID            string                         `json:"uuid"`
 	ProfileID       string                         `json:"profile_id"`
 	ProfileCuteName string                         `json:"profile_cute_name"`
-	GameMode        string                         `json:"game_mode"`
+	GameMode        string                         `json:"game_mode,omitempty"`
 	Selected        bool                           `json:"selected"`
 	Profiles        []*ProfilesStats               `json:"profiles"`
 	Members         []*MemberStats                 `json:"members"`

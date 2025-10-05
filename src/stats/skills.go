@@ -13,6 +13,9 @@ import (
 
 func GetSkills(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile, player *skycrypttypes.Player) *models.Skills {
 	output := &models.Skills{Skills: make(map[string]models.Skill)}
+	if userProfile.PlayerData == nil {
+		userProfile.PlayerData = &skycrypttypes.PlayerData{}
+	}
 
 	skillLevelCaps := stats.GetSkillLevelCaps(userProfile, player)
 
