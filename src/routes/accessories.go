@@ -3,13 +3,12 @@ package routes
 import (
 	"fmt"
 	"skycrypt/src/api"
-	redis "skycrypt/src/db"
 	"skycrypt/src/stats"
 	"time"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // AccessoriesHandler godoc
@@ -37,31 +36,39 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	userProfileValue := profile.Members[uuid]
-	userProfile := &userProfileValue
+	userProfile := profile.Members[uuid]
+	specifiedInventories := skyhelpernetworthgo.SpecifiedInventory{
+		"talisman_bag": userProfile.Inventory.BagContents.TalismanBag,
+	}
 
-	var items map[string][]skycrypttypes.Item
-	cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
-	if err == nil && cache != "" {
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &items)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to parse items: %v", err),
-			})
+	decodedItems, err := skyhelpernetworthgo.CalculateFromSpecifiedInventories(specifiedInventories, skyhelpernetworthgo.NetworthOptions{
+		IncludeItemData:  true,
+		KeepInvalidItems: true,
+	}.ToInternal())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to calculate items: %v", err),
+		})
+	}
+
+	accessories := []*skycrypttypes.Item{}
+	if decodedItems.Types["talisman_bag"] != nil {
+		for _, item := range decodedItems.Types["talisman_bag"].Items {
+			if item.ItemData != nil {
+				item.ItemData.Price = item.Price
+			}
+
+			accessories = append(accessories, item.ItemData)
 		}
-	} else {
-		items, err = stats.GetItems(userProfile, profile.ProfileID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to get items: %v", err),
-			})
-		}
+	}
+
+	items := map[string][]*skycrypttypes.Item{
+		"talisman_bag": accessories,
 	}
 
 	fmt.Printf("Returning /api/accessories/%s in %s\n", profileId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"accessories": stats.GetAccessories(userProfile, items),
+		"accessories": stats.GetAccessories(&userProfile, items),
 	})
 }

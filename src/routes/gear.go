@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"skycrypt/src/api"
-	redis "skycrypt/src/db"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats"
 	statsItems "skycrypt/src/stats/items"
@@ -11,8 +10,8 @@ import (
 	"time"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // GearHandler godoc
@@ -33,51 +32,66 @@ func GearHandler(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	profileId := c.Params("profileId")
 
-	var items map[string][]skycrypttypes.Item
-	cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
-	if err == nil && cache != "" {
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		err = json.Unmarshal([]byte(cache), &items)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to parse items: %v", err),
-			})
-		}
-	} else {
-		profile, err := api.GetProfile(uuid, profileId)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to get profile: %v", err),
-			})
-		}
-
-		userProfileValue := profile.Members[uuid]
-		userProfile := &userProfileValue
-
-		items, err = stats.GetItems(userProfile, profile.ProfileID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to get items: %v", err),
-			})
-		}
+	profile, err := api.GetProfile(uuid, profileId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to get profile: %v", err),
+		})
 	}
 
-	var processedItems = make(map[string][]models.ProcessedItem)
-	inventoryKeys := []string{"armor", "equipment", "wardrobe", "inventory", "enderchest", "backpack"}
-	for _, inventoryId := range inventoryKeys {
-		inventoryData := items[inventoryId]
+	specifiedInventories := skyhelpernetworthgo.SpecifiedInventory{
+		"armor":      profile.Members[uuid].Inventory.Armor,
+		"equipment":  profile.Members[uuid].Inventory.Equipment,
+		"wardrobe":   profile.Members[uuid].Inventory.Wardrobe,
+		"inventory":  profile.Members[uuid].Inventory.Inventory,
+		"enderchest": profile.Members[uuid].Inventory.Enderchest,
+	}
+
+	for backpackId, backpackData := range profile.Members[uuid].Inventory.Backpack {
+		specifiedInventories[fmt.Sprintf("backpack_%s", backpackId)] = backpackData
+	}
+
+	decodedItems, err := skyhelpernetworthgo.CalculateFromSpecifiedInventories(specifiedInventories, skyhelpernetworthgo.NetworthOptions{
+		IncludeItemData:  true,
+		KeepInvalidItems: true,
+	}.ToInternal())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Failed to calculate items: %v", err),
+		})
+	}
+
+	processedItems := map[string][]models.ProcessedItem{}
+	for inventoryId := range specifiedInventories {
+		if decodedItems.Types[inventoryId] == nil {
+			continue
+		}
+
+		inventoryData := decodedItems.Types[inventoryId].Items
 		if len(inventoryData) == 0 {
 			continue
 		}
 
-		processedItems[inventoryId] = statsItems.ProcessItems(&inventoryData, inventoryId)
+		combinedItems := make([]*skycrypttypes.Item, len(inventoryData))
+		for i, item := range inventoryData {
+			combinedItems[i] = item.ItemData
+			if combinedItems[i] == nil {
+				continue
+			}
+
+			combinedItems[i].Price = item.Price
+		}
+
+		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId)
 	}
 
 	allItems := make([]models.ProcessedItem, 0)
-	for _, inventoryId := range inventoryKeys {
-		if processedItems[inventoryId] != nil {
-			allItems = append(allItems, processedItems[inventoryId]...)
+	for inventoryId := range specifiedInventories {
+		if processedItems[inventoryId] == nil {
+			continue
 		}
+
+		allItems = append(allItems, processedItems[inventoryId]...)
 	}
 
 	fmt.Printf("Returning /api/gear/%s in %s\n", profileId, time.Since(timeNow))

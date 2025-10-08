@@ -1,12 +1,15 @@
 package stats
 
 import (
+	"fmt"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/items"
+	"skycrypt/src/utility"
 	"slices"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 )
 
 func hasAccessory(accessories *[]models.InsertAccessory, id string, rarity string, ignoreRarity bool) bool {
@@ -213,13 +216,73 @@ func getMissing(accessories *[]models.InsertAccessory, accessoryIds []models.Acc
 	}
 }
 
+func addMissingDataToTheAccessory(accessories *[]models.ProcessedItem, prices map[string]float64) {
+	for i := range *accessories {
+		specialAccessory := constants.SPECIAL_ACCESSORIES[(*accessories)[i].Id]
+		if specialAccessory.CustomPrice {
+			// Custom Price (POWER_RELIC for example)
+			if (*accessories)[i].Id == "POWER_RELIC" && (*accessories)[i].Rarity == "legendary" {
+				price := 0.0
+				for _, slot := range constants.ITEMS["POWER_RELIC"].GemstoneSlots {
+					price += prices[fmt.Sprintf("PERFECT_%s_GEM", slot.SlotType)]
+				}
+
+				(*accessories)[i].Lore = append((*accessories)[i].Lore, "", fmt.Sprintf("§7Price: §6%s Coins §7(§6%s§7 per MP)", utility.AddCommas(int(price)), utility.FormatNumber(price/float64(GetMagicalPower((*accessories)[i].Rarity, (*accessories)[i].Id)))))
+				(*accessories)[i].Price = price
+				continue
+			}
+
+			// Item Upgrade (POWER_RELIC with all perfect gemstones for example)
+			if specialAccessory.Upgrade != nil {
+				upgradeItem := specialAccessory.Upgrade.Item
+				upgradeCost := specialAccessory.Upgrade.Cost
+				if upgradeItem != "" && upgradeCost != nil {
+					amount := upgradeCost[(*accessories)[i].Rarity]
+					if amount > 0 {
+						price := prices[upgradeItem] * float64(amount)
+						(*accessories)[i].Lore = append((*accessories)[i].Lore, "", fmt.Sprintf("§7Price: §6%s Coins §7(§6%s§7 per MP)", utility.AddCommas(int(price)), utility.FormatNumber(price/float64(GetMagicalPower((*accessories)[i].Rarity, (*accessories)[i].Id)))))
+						(*accessories)[i].Price = price
+						continue
+					}
+				}
+			}
+
+		}
+
+		price := prices[(*accessories)[i].Id]
+		if price > 0 {
+			(*accessories)[i].Lore = append((*accessories)[i].Lore, "", fmt.Sprintf("§7Price: §6%s Coins §7(§6%s§7 per MP)", utility.AddCommas(int(price)), utility.FormatNumber(price/float64(GetMagicalPower((*accessories)[i].Rarity, (*accessories)[i].Id)))))
+			(*accessories)[i].Price = price
+		}
+	}
+
+	slices.SortFunc(*accessories, func(a, b models.ProcessedItem) int {
+		// if price is equal to 0 move it to the end
+		if a.Price == 0 && b.Price > 0 {
+			return 1
+		} else if a.Price > b.Price {
+			return 1
+		} else if a.Price < b.Price {
+			return -1
+		}
+
+		return 0
+	})
+
+}
+
 func GetMissingAccessories(accessories models.AccessoriesOutput, userProfile *skycrypttypes.Member) models.GetMissingAccessoresOutput {
 	if len(accessories.AccessoryIds) == 0 && accessories.Accessories == nil {
 		return models.GetMissingAccessoresOutput{}
 	}
 
 	missingAccessories := getMissing(&accessories.Accessories, accessories.AccessoryIds)
-	// TODO: Implement prices
+
+	prices, err := skyhelpernetworthgo.GetPrices(true, 0, 0)
+	if err == nil {
+		addMissingDataToTheAccessory(&missingAccessories.Other, prices)
+		addMissingDataToTheAccessory(&missingAccessories.Upgrades, prices)
+	}
 
 	var activeAccessories []models.InsertAccessory
 	for _, accessory := range accessories.Accessories {

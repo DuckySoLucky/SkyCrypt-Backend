@@ -24,7 +24,7 @@ func decodeMuseumItems(museumData *skycrypttypes.Museum) models.DecodedMuseumIte
 			continue
 		}
 
-		processedItems := ProcessItems(&decodedItem.Items, "museum")
+		processedItems := ProcessItems(decodedItem.Items, "museum")
 		data := models.ProcessedMuseumItem{
 			Items:           processedItems,
 			SkyblockID:      itemId,
@@ -41,7 +41,7 @@ func decodeMuseumItems(museumData *skycrypttypes.Museum) models.DecodedMuseumIte
 			continue
 		}
 
-		processedItem := ProcessItems(&decodedItem.Items, "museum")
+		processedItem := ProcessItems(decodedItem.Items, "museum")
 		data := models.ProcessedMuseumItem{
 			Items:           processedItem,
 			Missing:         false,

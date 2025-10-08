@@ -15,10 +15,10 @@ import (
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func ProcessItems(items *[]skycrypttypes.Item, source string) []models.ProcessedItem {
+func ProcessItems(items []*skycrypttypes.Item, source string) []models.ProcessedItem {
 	var processedItems []models.ProcessedItem
-	for _, item := range *items {
-		processedItem := ProcessItem(&item, source)
+	for _, item := range items {
+		processedItem := ProcessItem(item, source)
 		processedItems = append(processedItems, processedItem)
 	}
 
@@ -26,7 +26,7 @@ func ProcessItems(items *[]skycrypttypes.Item, source string) []models.Processed
 }
 
 func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
-	if item.Tag == nil {
+	if item == nil || item.Tag == nil {
 		return models.ProcessedItem{}
 	}
 
@@ -58,17 +58,18 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 
 		// Hex color
 		if item.Tag.Display.Color != 0 {
-			color := fmt.Sprintf("#%06X", item.Tag.Display.Color)
-			if item.Tag.ExtraAttributes.DyeItem != "" {
-				defaultHexColor := constants.ITEMS[item.Tag.ExtraAttributes.Id].Color
-				if defaultHexColor != "" {
-					fmt.Printf("[CUSTOM_RESOURCES] Using default color for item %s: %s\n", item.Tag.ExtraAttributes.Id, defaultHexColor)
-					color = defaultHexColor
+			color := fmt.Sprintf("%06X", item.Tag.Display.Color)
+			if os.Getenv("ENABLE_ARMOR_HEX") != "true" {
+				if item.Tag.ExtraAttributes.DyeItem == "" {
+					defaultHexColor := constants.ITEMS[item.Tag.ExtraAttributes.Id].Color
+					if defaultHexColor != "" {
+						color = defaultHexColor
+					}
 				}
 			}
 
 			if !slices.Contains(constants.BLACKLISTED_HEX_ARMOR_PIECES, item.Tag.ExtraAttributes.Id) {
-				processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Color: %s", color))
+				processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Color: #%s", color))
 			}
 		}
 
@@ -176,21 +177,23 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 	}
 
 	if item.ContainsItems != nil {
-		processedItem.ContainsItems = ProcessItems(&item.ContainsItems, source)
-	}
-
-	/*if item.Tag.ExtraAttributes.ID != "" {
-		prices, err := skyhelpernetworthgo.GetPrices(true, 69420, 1)
-		if err == nil {
-			itemCalculator, err := skyhelpernetworthgo.CalculateItem(item, prices, nil)
-			if err == nil {
-				processedItem.Lore = append(processedItem.Lore, fmt.Sprintf("§BALLS: %s", utility.FormatNumber(itemCalculator.Price)))
-			} else {I
-
-				fmt.Printf("You fucked up %v\n", err)
+		containerValue := 0.0
+		for _, containedItem := range item.ContainsItems {
+			if containedItem != nil && containedItem.Price > 0 {
+				containerValue += containedItem.Price
 			}
 		}
-	}*/
+
+		if containerValue > 0 {
+			processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Container Value: §6%s Coins §7(§6%s§7)", utility.AddCommas(int(containerValue)), utility.FormatNumber(containerValue)))
+		}
+
+		processedItem.ContainsItems = ProcessItems(item.ContainsItems, source)
+	}
+
+	if item.Price > 0 {
+		processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Item Value: §6%s Coins §7(§6%s§7)", utility.AddCommas(int(item.Price)), utility.FormatNumber(item.Price)))
+	}
 
 	// TODO: add cake bag & legacy backpack support
 

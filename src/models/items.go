@@ -3,7 +3,7 @@ package models
 import skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 
 type DecodedInventory struct {
-	Items []skycrypttypes.Item `nbt:"i"`
+	Items []*skycrypttypes.Item `nbt:"i"`
 }
 
 type ProcessedItem struct {
@@ -21,6 +21,7 @@ type ProcessedItem struct {
 	IsInactive     *bool           `json:"isInactive,omitempty"`
 	Shiny          bool            `json:"shiny,omitempty"`
 	Wiki           *WikipediaLinks `json:"wiki,omitempty"`
+	Price          float64         `json:"price,omitempty"`
 }
 
 type WikipediaLinks struct {

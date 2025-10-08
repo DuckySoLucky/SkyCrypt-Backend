@@ -142,26 +142,26 @@ func GetPlayerStats(userProfile *skycrypttypes.Member, profile *skycrypttypes.Pr
 	return stats
 }
 
-func getItems(userProfile *skycrypttypes.Member, profileId string) map[string][]skycrypttypes.Item {
-	var items map[string][]skycrypttypes.Item
+func getItems(userProfile *skycrypttypes.Member, profileId string) map[string][]*skycrypttypes.Item {
+	var items map[string][]*skycrypttypes.Item
 	cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
 	if err == nil && cache != "" {
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		err = json.Unmarshal([]byte(cache), &items)
 		if err != nil {
-			return map[string][]skycrypttypes.Item{}
+			return map[string][]*skycrypttypes.Item{}
 		}
 	} else {
 		items, err = GetItems(userProfile, profileId)
 		if err != nil {
-			return map[string][]skycrypttypes.Item{}
+			return map[string][]*skycrypttypes.Item{}
 		}
 	}
 
 	return items
 }
 
-func processItems(rawItems map[string][]skycrypttypes.Item) map[string][]models.ProcessedItem {
+func processItems(rawItems map[string][]*skycrypttypes.Item) map[string][]models.ProcessedItem {
 	var processedItems = make(map[string][]models.ProcessedItem)
 	inventoryKeys := []string{"armor", "equipment"}
 	for _, inventoryId := range inventoryKeys {
@@ -170,7 +170,7 @@ func processItems(rawItems map[string][]skycrypttypes.Item) map[string][]models.
 			continue
 		}
 
-		processedItems[inventoryId] = statsItems.ProcessItems(&inventoryData, inventoryId)
+		processedItems[inventoryId] = statsItems.ProcessItems(inventoryData, inventoryId)
 	}
 
 	return processedItems

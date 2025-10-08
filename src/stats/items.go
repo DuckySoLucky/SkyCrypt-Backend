@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -47,9 +48,9 @@ func GetRawInventory(useProfile *skycrypttypes.Member, inventoryId string) strin
 	return ""
 }
 
-func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycrypttypes.Item {
+func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []*skycrypttypes.Item {
 	if useProfile.Inventory == nil {
-		return []skycrypttypes.Item{}
+		return []*skycrypttypes.Item{}
 	}
 
 	if inventoryId == "backpack" {
@@ -64,7 +65,7 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 
 		type result struct {
 			inventoryId string
-			items       []skycrypttypes.Item
+			items       []*skycrypttypes.Item
 			err         error
 		}
 
@@ -76,13 +77,33 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 			go func(id string, data *string) {
 				defer wg.Done()
 
-				decodedInventory, err := utility.DecodeInventory(data)
+				decodedInventory, err := skyhelpernetworthgo.CalculateFromSpecifiedInventories(
+					skyhelpernetworthgo.SpecifiedInventory{
+						"inventory": skycrypttypes.EncodedItems{Data: *data},
+					},
+					skyhelpernetworthgo.NetworthOptions{
+						IncludeItemData:  true,
+						KeepInvalidItems: true,
+					}.ToInternal(),
+				)
+				items := []*skycrypttypes.Item{}
+				if decodedInventory.Types["inventory"] != nil {
+					for _, item := range decodedInventory.Types["inventory"].Items {
+						itemData := item.ItemData
+						if itemData != nil {
+							itemData.Price = item.Price
+						}
+
+						items = append(items, itemData)
+					}
+				}
+
 				if err != nil {
 					resultChan <- result{id, nil, err}
 					return
 				}
 
-				resultChan <- result{id, decodedInventory.Items, nil}
+				resultChan <- result{id, items, nil}
 			}(inventoryId, inventoryData)
 		}
 
@@ -91,7 +112,7 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 			close(resultChan)
 		}()
 
-		decodedInventory := make(map[string][]skycrypttypes.Item, len(encodedInventories))
+		decodedInventory := make(map[string][]*skycrypttypes.Item, len(encodedInventories))
 		for res := range resultChan {
 			if res.err != nil {
 				fmt.Printf("Error decoding inventory %s: %v\n", res.inventoryId, res.err)
@@ -101,7 +122,7 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 			decodedInventory[res.inventoryId] = res.items
 		}
 
-		output := []skycrypttypes.Item{}
+		output := []*skycrypttypes.Item{}
 		for inventoryId, items := range decodedInventory {
 			if strings.HasPrefix(inventoryId, "backpack_") && !strings.Contains(inventoryId, "icon") {
 
@@ -120,16 +141,36 @@ func GetInventory(useProfile *skycrypttypes.Member, inventoryId string) []skycry
 	}
 
 	rawInventory := GetRawInventory(useProfile, inventoryId)
-	decodedInventory, err := utility.DecodeInventory(&rawInventory)
+	decodedInventory, err := skyhelpernetworthgo.CalculateFromSpecifiedInventories(
+		skyhelpernetworthgo.SpecifiedInventory{
+			"inventory": skycrypttypes.EncodedItems{Data: rawInventory},
+		},
+		skyhelpernetworthgo.NetworthOptions{
+			IncludeItemData:  true,
+			KeepInvalidItems: true,
+		}.ToInternal(),
+	)
+	items := []*skycrypttypes.Item{}
+	if decodedInventory.Types["inventory"] != nil {
+		for _, item := range decodedInventory.Types["inventory"].Items {
+			itemData := item.ItemData
+			if itemData != nil {
+				itemData.Price = item.Price
+			}
+
+			items = append(items, itemData)
+		}
+	}
+
 	if err != nil {
 		fmt.Printf("Error decoding inventory %s: %v\n", inventoryId, err)
 		return nil
 	}
 
-	return decodedInventory.Items
+	return items
 }
 
-func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]skycrypttypes.Item, error) {
+func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]*skycrypttypes.Item, error) {
 	if useProfile.Inventory == nil {
 		useProfile.Inventory = &skycrypttypes.Inventory{}
 	}
@@ -166,7 +207,7 @@ func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]
 
 	type result struct {
 		inventoryId string
-		items       []skycrypttypes.Item
+		items       []*skycrypttypes.Item
 		err         error
 	}
 
@@ -193,7 +234,7 @@ func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]
 		close(resultChan)
 	}()
 
-	decodedInventory := make(map[string][]skycrypttypes.Item, len(encodedInventories))
+	decodedInventory := make(map[string][]*skycrypttypes.Item, len(encodedInventories))
 	for res := range resultChan {
 		if res.err != nil {
 			fmt.Printf("Error decoding inventory %s: %v\n", res.inventoryId, res.err)
@@ -203,7 +244,7 @@ func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]
 		decodedInventory[res.inventoryId] = res.items
 	}
 
-	output := make(map[string][]skycrypttypes.Item)
+	output := make(map[string][]*skycrypttypes.Item)
 	for inventoryId, items := range decodedInventory {
 		if !strings.Contains(inventoryId, "backpack") {
 			output[inventoryId] = items
@@ -211,7 +252,7 @@ func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]
 
 		if strings.HasPrefix(inventoryId, "backpack_") && !strings.Contains(inventoryId, "icon") {
 			if output["backpack"] == nil {
-				output["backpack"] = []skycrypttypes.Item{}
+				output["backpack"] = []*skycrypttypes.Item{}
 			}
 
 			backpackIndex := strings.Split(inventoryId, "_")[1]
@@ -235,4 +276,45 @@ func GetItems(useProfile *skycrypttypes.Member, profileId string) (map[string][]
 	}
 
 	return output, nil
+}
+
+func GetInventories(inventoryIds []string, useProfile *skycrypttypes.Member) map[string][]*skycrypttypes.Item {
+	/*
+			encodedInventories := map[string]*string{
+			"inventory":      &useProfile.Inventory.Inventory.Data,
+			"enderchest":     &useProfile.Inventory.Enderchest.Data,
+			"armor":          &useProfile.Inventory.Armor.Data,
+			"equipment":      &useProfile.Inventory.Equipment.Data,
+			"personal_vault": &useProfile.Inventory.PersonalVault.Data,
+			"wardrobe":       &useProfile.Inventory.Wardrobe.Data,
+
+			// rift
+			"rift_inventory":  &useProfile.Rift.Inventory.Inventory.Data,
+			"rift_enderchest": &useProfile.Rift.Inventory.Enderchest.Data,
+			"rift_armor":      &useProfile.Rift.Inventory.Armor.Data,
+			"rift_equipment":  &useProfile.Rift.Inventory.Equipment.Data,
+
+			// bags
+			"potion_bag":   &useProfile.Inventory.BagContents.PotionBag.Data,
+			"talisman_bag": &useProfile.Inventory.BagContents.TalismanBag.Data,
+			"fishing_bag":  &useProfile.Inventory.BagContents.FishingBag.Data,
+			// "sacks_bag": &useProfile.Inventory.BagContents.SacksBag.Data,
+			"quiver": &useProfile.Inventory.BagContents.Quiver.Data,
+		}
+
+		for backpackId, backpackData := range useProfile.Inventory.Backpack {
+			encodedInventories[fmt.Sprintf("backpack_%s", backpackId)] = &backpackData.Data
+		}
+
+		for backpackIconId, backpackIconData := range useProfile.Inventory.BackpackIcons {
+			encodedInventories[fmt.Sprintf("backpack_icon_%s", backpackIconId)] = &backpackIconData.Data
+		}
+	*/
+
+	output := make(map[string][]*skycrypttypes.Item)
+	for _, inventoryId := range inventoryIds {
+		output[inventoryId] = GetInventory(useProfile, inventoryId)
+	}
+
+	return output
 }

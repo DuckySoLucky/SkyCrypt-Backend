@@ -50,6 +50,10 @@ func getMinionSlots(profile *skycrypttypes.Profile, tiers int) *models.MinionSlo
 func getCraftedMinions(profile *skycrypttypes.Profile) map[string][]int {
 	craftedMinions := make(map[string][]int)
 	for _, member := range profile.Members {
+		if member.PlayerData == nil {
+			return craftedMinions
+		}
+
 		for _, minion := range member.PlayerData.Minions {
 			parts := strings.Split(minion, "_")
 			tierStr := parts[len(parts)-1]

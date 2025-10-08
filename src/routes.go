@@ -9,6 +9,7 @@ import (
 	redis "skycrypt/src/db"
 	"skycrypt/src/routes"
 	"skycrypt/src/utility"
+	"time"
 
 	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +19,8 @@ import (
 )
 
 func SetupApplication() error {
+	timeNow := time.Now()
+
 	err := godotenv.Load()
 	if err != nil && os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		log.Println("No .env file found, using environment variables")
@@ -59,20 +62,20 @@ func SetupApplication() error {
 		return fmt.Errorf("error parsing NEU repository: %v", err)
 	}
 
-	_, err = skyhelpernetworthgo.GetPrices(true, 0, 0)
-	if err != nil {
-		return fmt.Errorf("error fetching SkyHelper prices: %v", err)
-	}
-
-	_, err = skyhelpernetworthgo.GetItems(true, 0, 0)
-	if err != nil {
-		return fmt.Errorf("error fetching SkyHelper items: %v", err)
-	}
-
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
+		_, err = skyhelpernetworthgo.GetPrices(true, 0, 0)
+		if err != nil {
+			return fmt.Errorf("error fetching SkyHelper prices: %v", err)
+		}
+
+		_, err = skyhelpernetworthgo.GetItems(true, 0, 0)
+		if err != nil {
+			return fmt.Errorf("error fetching SkyHelper items: %v", err)
+		}
+
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
 
-		utility.SendWebhook("SKYCRYPT_STARTED", "EPIC_ERROR", []byte("SkyCrypt has started successfully!"))
+		utility.SendWebhook("BACKEND", "SkyCrypt Backend has started successfully!", fmt.Appendf(nil, "Startup Time: %s", time.Since(timeNow).String()))
 	}
 
 	return nil

@@ -162,19 +162,16 @@ var SPECIAL_ACCESSORIES = map[string]specialAccessoryConstant{
 	"BOOK_OF_PROGRESSION": {
 		AllowsRecomb:     false,
 		Rarities:         []string{"uncommon", "rare", "epic", "legendary", "mythic"},
-		CustomPrice:      true,
 		AllowsEnrichment: true,
 	},
 	"PANDORAS_BOX": {
 		AllowsRecomb:     false,
 		Rarities:         []string{"uncommon", "rare", "epic", "legendary", "mythic"},
-		CustomPrice:      true,
 		AllowsEnrichment: true,
 	},
 	"TRAPPER_CREST": {
 		AllowsRecomb:     true,
 		Rarities:         []string{"uncommon"},
-		CustomPrice:      true,
 		AllowsEnrichment: true,
 	},
 	"PULSE_RING": {

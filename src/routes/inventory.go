@@ -110,7 +110,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 	userProfile := &userProfileValue
 
 	if inventoryId == "search" {
-		var items map[string][]skycrypttypes.Item
+		var items map[string][]*skycrypttypes.Item
 		cache, err := redis.Get(fmt.Sprintf("items:%s", profileId))
 		if err == nil && cache != "" {
 			var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -144,7 +144,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 				}
 
 				if strings.Contains(strings.ToLower(item.Tag.Display.Name), searchString) || strings.Contains(strings.Join(item.Tag.Display.Lore, " "), searchString) {
-					item := statsItems.ProcessItem(&item, inventoryId)
+					item := statsItems.ProcessItem(item, inventoryId)
 
 					formattedItems = append(formattedItems, item)
 				}
@@ -178,7 +178,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 	}
 
 	itemSlice := stats.GetInventory(userProfile, inventoryId)
-	output := statsItems.ProcessItems(&itemSlice, inventoryId)
+	output := statsItems.ProcessItems(itemSlice, inventoryId)
 
 	strippedItems := statsItems.StripItems(&output)
 	if strings.HasSuffix(inventoryId, "inventory") {

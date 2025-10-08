@@ -159,14 +159,17 @@ func FormatNumber(n any) string {
 		if value == float64(int(value)) {
 			return strconv.Itoa(int(value))
 		}
-		return strconv.FormatFloat(value, 'f', -1, 64)
+		rounded := Round(value, 2)
+		return strconv.FormatFloat(rounded, 'f', -1, 64)
 	}
 
 	result := value / divisor
-	if result == float64(int(result)) {
-		return strconv.Itoa(int(result)) + suffix
+	rounded := Round(result, 2)
+
+	if rounded == float64(int(rounded)) {
+		return strconv.Itoa(int(rounded)) + suffix
 	}
-	return strconv.FormatFloat(result, 'f', 1, 64) + suffix
+	return strconv.FormatFloat(rounded, 'f', -1, 64) + suffix
 }
 
 func AddCommas(n int) string {
@@ -550,4 +553,17 @@ func getErrorCount(errorHash string) int {
 		return cache.count
 	}
 	return 1
+}
+
+func GetHexColor(color string) string {
+	parts := strings.Split(color, ",")
+	if len(parts) == 3 {
+		var r, g, b int
+		fmt.Sscanf(parts[0], "%d", &r)
+		fmt.Sscanf(parts[1], "%d", &g)
+		fmt.Sscanf(parts[2], "%d", &b)
+		return fmt.Sprintf("%02X%02X%02X", r, g, b)
+	}
+
+	return "FFFFFF"
 }

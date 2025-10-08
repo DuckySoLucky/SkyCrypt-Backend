@@ -106,6 +106,8 @@ func processItems(items *[]models.HypixelItem) map[string]models.ProcessedHypixe
 			Origin:            item.Origin,
 			RiftTransferrable: item.RiftTransferrable,
 			MuseumData:        item.MuseumData,
+			Color:             utility.GetHexColor(item.Color),
+			GemstoneSlots:     item.GemstoneSlots,
 		}
 	}
 

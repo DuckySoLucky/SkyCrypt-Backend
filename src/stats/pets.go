@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 )
 
 func getMaxPetIds() map[string]int {
@@ -166,6 +167,9 @@ func getPetData(level int, petType string, rarity string) map[string]float64 {
 
 func getProfilePets(userProfile *skycrypttypes.Member, pets *[]skycrypttypes.Pet) []models.ProcessedPet {
 	output := []models.ProcessedPet{}
+
+	prices, _ := skyhelpernetworthgo.GetPrices(true, 0, 0)
+	networthService := skyhelpernetworthgo.NewCalculatorService()
 	for _, pet := range *pets {
 		if pet.Rarity == "" {
 			continue
@@ -314,6 +318,15 @@ func getProfilePets(userProfile *skycrypttypes.Member, pets *[]skycrypttypes.Pet
 			"§7Total XP: §e"+utility.FormatNumber(outputPet.Level.Experience)+" §6/ §e"+utility.FormatNumber(outputPet.Level.ExperienceForMaxLevel)+" §6("+fmt.Sprintf("%.2f", (float64(outputPet.Level.Experience)/float64(outputPet.Level.ExperienceForMaxLevel))*100)+"%)",
 			fmt.Sprintf("§7Candy Used: §e%d §6/ §e10", outputPet.CandyUsed),
 		)
+
+		// TODO: Gotta improve this one day, its kinda ugly
+		networthResult := networthService.NewSkyBlockPetCalculator(&pet, prices, skyhelpernetworthgo.NetworthOptions(skyhelpernetworthgo.NetworthOptions{}.ToInternal()))
+		networthService.CalculatePet(networthResult)
+		price := networthResult.Price + networthResult.BasePrice
+		if price > 0 {
+			outputPet.Lore = append(outputPet.Lore, "", fmt.Sprintf("§7Item Value: §6%s Coins §7(§6%s§7)", utility.AddCommas(int(price)), utility.FormatNumber(price)))
+
+		}
 
 		output = append(output, outputPet)
 	}
