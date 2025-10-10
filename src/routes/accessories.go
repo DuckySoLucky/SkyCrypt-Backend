@@ -37,6 +37,10 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 	}
 
 	userProfile := profile.Members[uuid]
+	if userProfile.Inventory == nil {
+		userProfile.Inventory = &skycrypttypes.Inventory{}
+	}
+
 	specifiedInventories := skyhelpernetworthgo.SpecifiedInventory{
 		"talisman_bag": userProfile.Inventory.BagContents.TalismanBag,
 	}

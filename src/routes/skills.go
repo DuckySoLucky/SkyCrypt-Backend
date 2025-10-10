@@ -48,13 +48,16 @@ func SkillsHandler(c *fiber.Ctx) error {
 
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
-
-	specifiedInventories := skyhelpernetworthgo.SpecifiedInventory{
-		"inventory":  profile.Members[uuid].Inventory.Inventory,
-		"enderchest": profile.Members[uuid].Inventory.Enderchest,
+	if userProfile.Inventory == nil {
+		userProfile.Inventory = &skycrypttypes.Inventory{}
 	}
 
-	for backpackId, backpackData := range profile.Members[uuid].Inventory.Backpack {
+	specifiedInventories := skyhelpernetworthgo.SpecifiedInventory{
+		"inventory":  userProfile.Inventory.Inventory,
+		"enderchest": userProfile.Inventory.Enderchest,
+	}
+
+	for backpackId, backpackData := range userProfile.Inventory.Backpack {
 		specifiedInventories[fmt.Sprintf("backpack_%s", backpackId)] = backpackData
 	}
 
