@@ -15,7 +15,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/joho/godotenv"
-	scalar "github.com/yokeTH/gofiber-scalar"
 )
 
 func SetupApplication() error {
@@ -89,12 +88,6 @@ func SetupRoutes(app *fiber.App) {
 	// Assets folder
 	app.Static("/assets", "assets")
 
-	// Documentation
-	app.Get("/scalar/*", scalar.New(scalar.Config{
-		Path:       "/scalar",
-		RawSpecUrl: "/swagger/doc.json",
-	}))
-
 	if os.Getenv("DEV") != "true" {
 		if os.Getenv("FIBER_PREFORK_CHILD") == "" {
 			fmt.Println("[ENVIROMENT] Running in production mode")
@@ -110,6 +103,26 @@ func SetupRoutes(app *fiber.App) {
 	}
 
 	api := app.Group("/api")
+
+	// Documentation - serve openapi files directly
+	api.Static("/openapi/doc.json", "./docs/swagger.json")
+
+	api.Get("/openapi/", func(c *fiber.Ctx) error {
+		html := `<!DOCTYPE html>
+					<html>
+					<head>
+						<title>API Documentation</title>
+						<meta charset="utf-8" />
+						<meta name="viewport" content="width=device-width, initial-scale=1" />
+					</head>
+					<body>
+						<script id="api-reference" data-url="/api/openapi/doc.json"></script>
+						<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+					</body>
+					</html>`
+		c.Set("Content-Type", "text/html")
+		return c.SendString(html)
+	})
 
 	// USERNAME AND UUID RESOLVING
 	api.Get("/uuid/:username", routes.UUIDHandler)
