@@ -441,6 +441,10 @@ func GetPetScore(pets []models.ProcessedPet) models.PetScore {
 }
 
 func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) models.OutputPets {
+	if userProfile.Pets == nil {
+		userProfile.Pets = &skycrypttypes.Pets{}
+	}
+
 	allPets := []skycrypttypes.Pet{}
 	allPets = append(allPets, userProfile.Pets.Pets...)
 	if userProfile.Rift.DeadCats.Montezuma.Rarity != "" {
