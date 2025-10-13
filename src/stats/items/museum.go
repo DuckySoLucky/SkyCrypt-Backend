@@ -11,7 +11,7 @@ import (
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func decodeMuseumItems(museumData *skycrypttypes.Museum) models.DecodedMuseumItems {
+func decodeMuseumItems(museumData *skycrypttypes.Museum, disabledPacks ...[]string) models.DecodedMuseumItems {
 	output := models.DecodedMuseumItems{
 		Items:   make(map[string]models.ProcessedMuseumItem),
 		Special: []models.ProcessedMuseumItem{},
@@ -24,7 +24,7 @@ func decodeMuseumItems(museumData *skycrypttypes.Museum) models.DecodedMuseumIte
 			continue
 		}
 
-		processedItems := ProcessItems(decodedItem.Items, "museum")
+		processedItems := ProcessItems(decodedItem.Items, "museum", disabledPacks...)
 		data := models.ProcessedMuseumItem{
 			Items:           processedItems,
 			SkyblockID:      itemId,
@@ -41,7 +41,7 @@ func decodeMuseumItems(museumData *skycrypttypes.Museum) models.DecodedMuseumIte
 			continue
 		}
 
-		processedItem := ProcessItems(decodedItem.Items, "museum")
+		processedItem := ProcessItems(decodedItem.Items, "museum", disabledPacks...)
 		data := models.ProcessedMuseumItem{
 			Items:           processedItem,
 			Missing:         false,
@@ -124,12 +124,12 @@ func getMaxMissingItems(category string, output map[string]ProcessedMuseumItem) 
 }
 */
 
-func ProcessMuseumItems(museumData *skycrypttypes.Museum) models.MuseumResult {
+func ProcessMuseumItems(museumData *skycrypttypes.Museum, disabledPacks ...[]string) models.MuseumResult {
 	if museumData.Items == nil || museumData.Special == nil {
 		return models.MuseumResult{}
 	}
 
-	decodedMuseum := decodeMuseumItems(museumData)
+	decodedMuseum := decodeMuseumItems(museumData, disabledPacks...)
 
 	output := make(map[string]models.ProcessedMuseumItem)
 	for _, itemId := range constants.MUSEUM.GetAllItems() {
@@ -327,8 +327,8 @@ func getMuseumItems(section string) []string {
 	}
 }
 
-func GetMuseum(museum *skycrypttypes.Museum) []models.ProcessedItem {
-	museumItems := ProcessMuseumItems(museum)
+func GetMuseum(museum *skycrypttypes.Museum, disabledPacks ...[]string) []models.ProcessedItem {
+	museumItems := ProcessMuseumItems(museum, disabledPacks...)
 
 	output := make([]models.ProcessedItem, 6*9)
 	for _, item := range constants.MUSEUM_INVENTORY {

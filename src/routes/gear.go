@@ -6,6 +6,7 @@ import (
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats"
 	statsItems "skycrypt/src/stats/items"
+	"strings"
 
 	"time"
 
@@ -67,6 +68,12 @@ func GearHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	disabledPacks := []string{""}
+	disabledResourcePacks := c.Query("disabledPacks", "")
+	if disabledResourcePacks != "" {
+		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	}
+
 	processedItems := map[string][]models.ProcessedItem{}
 	for inventoryId := range specifiedInventories {
 		if decodedItems.Types[inventoryId] == nil {
@@ -88,7 +95,7 @@ func GearHandler(c *fiber.Ctx) error {
 			combinedItems[i].Price = item.Price
 		}
 
-		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId)
+		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId, disabledPacks)
 	}
 
 	allItems := make([]models.ProcessedItem, 0)

@@ -180,4 +180,6 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/potion/:type/:color", routes.PotionHandlers)
 
 	api.Get("/leather/:type/:color", routes.LeatherHandlers)
+
+	api.Get("/resourcepacks", routes.ResourcePackHandler)
 }

@@ -3,6 +3,7 @@ package routes
 import (
 	"skycrypt/src/constants"
 	"skycrypt/src/lib"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,7 +26,13 @@ func ItemHandlers(c *fiber.Ctx) error {
 		return c.JSON(constants.InvalidItemProvidedError)
 	}
 
-	textureBytes, err := lib.RenderItem(textureId)
+	disabledPacks := []string{""}
+	disabledResourcePacks := c.Query("disabledPacks", "")
+	if disabledResourcePacks != "" {
+		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	}
+
+	textureBytes, err := lib.RenderItem(textureId, disabledPacks)
 	if err != nil {
 		if redirectErr, ok := err.(lib.RedirectError); ok {
 			return c.Redirect(redirectErr.URL, 302)

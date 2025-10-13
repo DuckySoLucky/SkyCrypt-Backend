@@ -170,7 +170,7 @@ func processItems(rawItems map[string][]*skycrypttypes.Item) map[string][]models
 			continue
 		}
 
-		processedItems[inventoryId] = statsItems.ProcessItems(inventoryData, inventoryId)
+		processedItems[inventoryId] = statsItems.ProcessItems(inventoryData, inventoryId, []string{})
 	}
 
 	return processedItems

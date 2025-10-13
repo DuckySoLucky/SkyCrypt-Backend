@@ -732,7 +732,7 @@ func (e RedirectError) Error() string {
 	return "redirect:" + e.URL
 }
 
-func RenderItem(itemID string) ([]byte, error) {
+func RenderItem(itemID string, disabledPacks ...[]string) ([]byte, error) {
 	damage := 0
 	if strings.Contains(itemID, ":") {
 		splitId := strings.Split(itemID, ":")
@@ -760,7 +760,7 @@ func RenderItem(itemID string) ([]byte, error) {
 		TextureItem.Damage = &damage
 	}
 
-	output := ApplyTexture(TextureItem)
+	output := ApplyTexture(TextureItem, disabledPacks...)
 	if output == "" {
 		return nil, fmt.Errorf("couldn't find the texture")
 	}

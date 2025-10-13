@@ -71,6 +71,12 @@ func getIcon(source string, uuid string) string {
 func InventoryHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
+	disabledPacks := []string{""}
+	disabledResourcePacks := c.Query("disabledPacks", "")
+	if disabledResourcePacks != "" {
+		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	}
+
 	uuid := c.Params("uuid")
 	profileId := c.Params("profileId")
 	inventoryId := c.Params("inventoryId")
@@ -91,7 +97,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 		fmt.Printf("Returning /api/inventory/%s/%s in %s\n", uuid, inventoryId, time.Since(timeNow))
 
-		museumItems := statsItems.GetMuseum(museum)
+		museumItems := statsItems.GetMuseum(museum, disabledPacks)
 
 		return c.JSON(fiber.Map{
 			"items": statsItems.StripItems(&museumItems),
@@ -144,7 +150,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 				}
 
 				if strings.Contains(strings.ToLower(item.Tag.Display.Name), searchString) || strings.Contains(strings.Join(item.Tag.Display.Lore, " "), searchString) {
-					item := statsItems.ProcessItem(item, inventoryId)
+					item := statsItems.ProcessItem(item, inventoryId, disabledPacks)
 
 					formattedItems = append(formattedItems, item)
 				}
@@ -178,7 +184,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 	}
 
 	itemSlice := stats.GetInventory(userProfile, inventoryId)
-	output := statsItems.ProcessItems(itemSlice, inventoryId)
+	output := statsItems.ProcessItems(itemSlice, inventoryId, disabledPacks)
 
 	strippedItems := statsItems.StripItems(&output)
 	if strings.HasSuffix(inventoryId, "inventory") {

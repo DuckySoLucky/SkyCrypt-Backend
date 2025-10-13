@@ -293,7 +293,7 @@ func init() {
 	}
 }
 
-func ApplyTexture(item models.TextureItem) string {
+func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) string {
 	// ? NOTE: we're ignoring enchanted books because they're quite expensive to render and not really worth the performance hit
 	if item.Tag.ExtraAttributes == nil || item.Tag.ExtraAttributes["id"] == "ENCHANTED_BOOK" {
 		if os.Getenv("DEV") == "true" {
@@ -303,10 +303,18 @@ func ApplyTexture(item models.TextureItem) string {
 		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
 	}
 
-	customTexture := GetTexture(item)
-	if customTexture != "" {
-		if !strings.Contains(customTexture, "Vanilla") && !strings.Contains(customTexture, "skull") {
-			return customTexture
+	disabledPacks := ""
+	if len(disabledPacksParam) > 0 {
+		// ? NOTE: Currently only 1 resource pack exists so this is fine for now, but in the future we may want to change thi
+		disabledPacks = disabledPacksParam[0][0]
+	}
+
+	if disabledPacks != "FURFSKY_REBORN" {
+		customTexture := GetTexture(item)
+		if customTexture != "" {
+			if !strings.Contains(customTexture, "Vanilla") && !strings.Contains(customTexture, "skull") {
+				return customTexture
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"skycrypt/src/api"
 	"skycrypt/src/stats"
+	"strings"
 	"time"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
@@ -70,9 +71,15 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 		"talisman_bag": accessories,
 	}
 
+	disabledPacks := []string{""}
+	disabledResourcePacks := c.Query("disabledPacks", "")
+	if disabledResourcePacks != "" {
+		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	}
+
 	fmt.Printf("Returning /api/accessories/%s in %s\n", profileId, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"accessories": stats.GetAccessories(&userProfile, items),
+		"accessories": stats.GetAccessories(&userProfile, items, disabledPacks),
 	})
 }

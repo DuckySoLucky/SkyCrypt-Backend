@@ -6,6 +6,7 @@ import (
 	"skycrypt/src/models"
 	"skycrypt/src/stats"
 	statsItems "skycrypt/src/stats/items"
+	"strings"
 	"time"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
@@ -30,6 +31,12 @@ func RiftHandler(c *fiber.Ctx) error {
 
 	uuid := c.Params("uuid")
 	profileId := c.Params("profileId")
+
+	disabledPacks := []string{""}
+	disabledResourcePacks := c.Query("disabledPacks", "")
+	if disabledResourcePacks != "" {
+		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	}
 
 	profile, err := api.GetProfile(uuid, profileId)
 	if err != nil {
@@ -77,7 +84,7 @@ func RiftHandler(c *fiber.Ctx) error {
 			combinedItems[i].Price = item.Price
 		}
 
-		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId)
+		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId, disabledPacks)
 	}
 
 	fmt.Printf("Returning /api/rift/%s in %s\n", profileId, time.Since(timeNow))

@@ -15,17 +15,17 @@ import (
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func ProcessItems(items []*skycrypttypes.Item, source string) []models.ProcessedItem {
+func ProcessItems(items []*skycrypttypes.Item, source string, disabledPacks ...[]string) []models.ProcessedItem {
 	var processedItems []models.ProcessedItem
 	for _, item := range items {
-		processedItem := ProcessItem(item, source)
+		processedItem := ProcessItem(item, source, disabledPacks...)
 		processedItems = append(processedItems, processedItem)
 	}
 
 	return processedItems
 }
 
-func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
+func ProcessItem(item *skycrypttypes.Item, source string, disabledPacks ...[]string) models.ProcessedItem {
 	if item == nil || item.Tag == nil {
 		return models.ProcessedItem{}
 	}
@@ -166,7 +166,7 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 			Tag:    item.Tag.ToMap(),
 		}
 
-		processedItem.Texture = lib.ApplyTexture(TextureItem)
+		processedItem.Texture = lib.ApplyTexture(TextureItem, disabledPacks...)
 		if strings.Contains(processedItem.Texture, "/assets/resourcepacks/FurfSky/") {
 			processedItem.TexturePack = "FURFSKY_REBORN"
 		}
@@ -188,7 +188,7 @@ func ProcessItem(item *skycrypttypes.Item, source string) models.ProcessedItem {
 			processedItem.Lore = append(processedItem.Lore, "", fmt.Sprintf("§7Container Value: §6%s Coins §7(§6%s§7)", utility.AddCommas(int(containerValue)), utility.FormatNumber(containerValue)))
 		}
 
-		processedItem.ContainsItems = ProcessItems(item.ContainsItems, source)
+		processedItem.ContainsItems = ProcessItems(item.ContainsItems, source, disabledPacks...)
 	}
 
 	if item.Price > 0 {
