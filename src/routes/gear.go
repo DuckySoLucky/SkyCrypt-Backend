@@ -6,6 +6,7 @@ import (
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats"
 	statsItems "skycrypt/src/stats/items"
+	"skycrypt/src/utility"
 	"strings"
 
 	"time"
@@ -73,6 +74,9 @@ func GearHandler(c *fiber.Ctx) error {
 	if disabledResourcePacks != "" {
 		disabledPacks = strings.Split(disabledResourcePacks, ",")
 	}
+
+	disabledPacksCookies := c.Cookies("disabledPacks", "FAILED")
+	utility.SendWebhook("/api/gear", "FOUND REQUESTED", fmt.Appendf(nil, "Cookies: %s", disabledPacksCookies))
 
 	processedItems := map[string][]models.ProcessedItem{}
 	for inventoryId := range specifiedInventories {
