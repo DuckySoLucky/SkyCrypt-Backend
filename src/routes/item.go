@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"encoding/json"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/lib"
 	"strings"
@@ -27,9 +29,18 @@ func ItemHandlers(c *fiber.Ctx) error {
 	}
 
 	disabledPacks := []string{""}
-	disabledResourcePacks := c.Query("disabledPacks", "")
-	if disabledResourcePacks != "" {
-		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	disabledPacksCookies := c.Cookies("disabledPacks", "FAILED")
+	if disabledPacksCookies != "FAILED" {
+		var parsedPacks []string
+		err := json.Unmarshal([]byte(disabledPacksCookies), &parsedPacks)
+		if err == nil {
+			disabledPacks = append(disabledPacks, parsedPacks...)
+		}
+	} else if os.Getenv("DEV") == "true" {
+		disabledResourcePacks := c.Query("disabledPacks", "")
+		if disabledResourcePacks != "" {
+			disabledPacks = strings.Split(disabledResourcePacks, ",")
+		}
 	}
 
 	textureBytes, err := lib.RenderItem(textureId, disabledPacks)

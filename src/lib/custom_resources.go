@@ -303,13 +303,13 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) strin
 		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
 	}
 
-	disabledPacks := ""
+	disabledPacks := []string{}
 	if len(disabledPacksParam) > 0 {
-		// ? NOTE: Currently only 1 resource pack exists so this is fine for now, but in the future we may want to change thi
-		disabledPacks = disabledPacksParam[0][0]
+		disabledPacks = disabledPacksParam[0]
 	}
 
-	if disabledPacks != "FURFSKY_REBORN" {
+	// ? NOTE: Currently only 1 resource pack exists so this is fine for now, but in the future we may want to change this
+	if !slices.Contains(disabledPacks, "FURFSKY_REBORN") {
 		customTexture := GetTexture(item)
 		if customTexture != "" {
 			if !strings.Contains(customTexture, "Vanilla") && !strings.Contains(customTexture, "skull") {

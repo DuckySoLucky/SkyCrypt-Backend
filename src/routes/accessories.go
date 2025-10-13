@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"skycrypt/src/api"
 	"skycrypt/src/stats"
 	"strings"
@@ -72,9 +74,18 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 	}
 
 	disabledPacks := []string{""}
-	disabledResourcePacks := c.Query("disabledPacks", "")
-	if disabledResourcePacks != "" {
-		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	disabledPacksCookies := c.Cookies("disabledPacks", "FAILED")
+	if disabledPacksCookies != "FAILED" {
+		var parsedPacks []string
+		err := json.Unmarshal([]byte(disabledPacksCookies), &parsedPacks)
+		if err == nil {
+			disabledPacks = append(disabledPacks, parsedPacks...)
+		}
+	} else if os.Getenv("DEV") == "true" {
+		disabledResourcePacks := c.Query("disabledPacks", "")
+		if disabledResourcePacks != "" {
+			disabledPacks = strings.Split(disabledResourcePacks, ",")
+		}
 	}
 
 	fmt.Printf("Returning /api/accessories/%s in %s\n", profileId, time.Since(timeNow))

@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"skycrypt/src/api"
 	"skycrypt/src/models"
 	"skycrypt/src/stats"
@@ -34,9 +36,18 @@ func SkillsHandler(c *fiber.Ctx) error {
 	profileId := c.Params("profileId")
 
 	disabledPacks := []string{""}
-	disabledResourcePacks := c.Query("disabledPacks", "")
-	if disabledResourcePacks != "" {
-		disabledPacks = strings.Split(disabledResourcePacks, ",")
+	disabledPacksCookies := c.Cookies("disabledPacks", "FAILED")
+	if disabledPacksCookies != "FAILED" {
+		var parsedPacks []string
+		err := json.Unmarshal([]byte(disabledPacksCookies), &parsedPacks)
+		if err == nil {
+			disabledPacks = append(disabledPacks, parsedPacks...)
+		}
+	} else if os.Getenv("DEV") == "true" {
+		disabledResourcePacks := c.Query("disabledPacks", "")
+		if disabledResourcePacks != "" {
+			disabledPacks = strings.Split(disabledResourcePacks, ",")
+		}
 	}
 
 	profile, err := api.GetProfile(uuid, profileId)
