@@ -38,6 +38,7 @@ COPY --from=builder /app/main .
 # Copy assets and other necessary files
 COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/NotEnoughUpdates-REPO ./NotEnoughUpdates-REPO
+COPY --from=builder /app/docs ./docs
 
 # Expose port
 EXPOSE 8080
