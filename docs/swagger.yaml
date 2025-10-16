@@ -1192,6 +1192,23 @@ components:
         rankText:
           type: string
       type: object
+    models.ResourcePackConfig:
+      properties:
+        author:
+          type: string
+        disabled:
+          type: boolean
+        icon:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+        version:
+          type: string
+      type: object
     models.RiftCastleOutput:
       properties:
         grubberStacks:
@@ -2583,6 +2600,26 @@ paths:
       summary: Render and return a potion image
       tags:
       - potion
+  /api/resourcepacks/{uuid}/{profileId}:
+    get:
+      description: Returns a list of resource packs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/models.ResourcePackConfig'
+                type: array
+          description: OK
+      summary: Get list of resource packs
+      tags:
+      - resourcepacks
   /api/rift/{uuid}/{profileId}:
     get:
       description: Returns rift data for the given user and profile ID
