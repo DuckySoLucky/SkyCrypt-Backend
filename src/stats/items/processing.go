@@ -166,9 +166,10 @@ func ProcessItem(item *skycrypttypes.Item, source string, disabledPacks ...[]str
 			Tag:    item.Tag.ToMap(),
 		}
 
-		processedItem.Texture = lib.ApplyTexture(TextureItem, disabledPacks...)
-		if strings.Contains(processedItem.Texture, "/assets/resourcepacks/FurfSky/") {
-			processedItem.TexturePack = "FURFSKY_REBORN"
+		appliedTexture := lib.ApplyTexture(TextureItem, disabledPacks...)
+		processedItem.Texture = appliedTexture.Texture
+		if appliedTexture.TexturePack != "" {
+			processedItem.TexturePack = appliedTexture.TexturePack
 		}
 
 		if processedItem.Texture == "" {

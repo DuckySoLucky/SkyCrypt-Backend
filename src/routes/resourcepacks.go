@@ -50,6 +50,11 @@ func ResourcePackHandler(c *fiber.Ctx) error {
 				continue
 			}
 
+			// We don't want to include the vanilla resource pack in the list because it's not toggleable
+			if configData.Id == "VANILLA" {
+				continue
+			}
+
 			configData.Icon = fmt.Sprintf("/assets/resourcepacks/%s/pack.png", file.Name())
 			RESOURCE_PACKS = append(RESOURCE_PACKS, configData)
 		}

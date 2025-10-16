@@ -50,6 +50,17 @@ func getPetLevel(pet skycrypttypes.Pet) models.PetLevel {
 		rarityOffset = petData.PetRarityOffset[pet.Rarity]
 	}
 
+	for i := len(constants.RARITIES) - 1; i >= 1; i-- {
+		if rarityOffset != nil {
+			break
+		}
+
+		rarityOffset = petData.CustomPetLeveling[pet.Type].RarityOffset[strings.ToUpper(constants.RARITIES[i])]
+		if rarityOffset == nil {
+			rarityOffset = petData.PetRarityOffset[strings.ToUpper(constants.RARITIES[i])]
+		}
+	}
+
 	if rarityOffset == nil {
 		return models.PetLevel{}
 	}
@@ -202,13 +213,15 @@ func getProfilePets(userProfile *skycrypttypes.Member, pets *[]skycrypttypes.Pet
 		NEUItemId := fmt.Sprintf("%s;%d", pet.Type, slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity)))
 		NEUItem, err := notenoughupdates.GetItem(NEUItemId)
 		if err != nil {
-			NEUItemId = fmt.Sprintf("%s;%d", pet.Type, slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity))-1)
-			NEUItem, err = notenoughupdates.GetItem(NEUItemId)
-			petDataRarity = constants.RARITIES[slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity))-1]
-			if err != nil {
-				output = append(output, outputPet)
-				continue
+			for i := len(constants.RARITIES) - 1; i >= 1; i-- {
+				NEUItemId = fmt.Sprintf("%s;%d", pet.Type, i)
+				NEUItem, err = notenoughupdates.GetItem(NEUItemId)
+				petDataRarity = constants.RARITIES[i]
+				if err == nil {
+					break
+				}
 			}
+
 		}
 
 		if pet.Skin != "" {

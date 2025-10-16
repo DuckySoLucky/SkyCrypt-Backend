@@ -3,9 +3,30 @@ package models
 import skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 
 type ItemTexture struct {
-	Parent    string            `json:"parent"`
-	Textures  map[string]string `json:"textures"`
-	Overrides []Override        `json:"overrides"`
+	Parent         string            `json:"parent"`
+	Textures       map[string]string `json:"textures"`
+	Overrides      []Override        `json:"overrides"`
+	Elements       []TextureElement  `json:"elements,omitempty"`
+	HeadModel      string            `json:"firmament:head_model,omitempty"`
+	ResourcePackId string            `json:"resourcePackId,omitempty"`
+}
+
+type TextureElement struct {
+	From     [3]float64             `json:"from"`
+	To       [3]float64             `json:"to"`
+	Rotation *TextureRotation       `json:"rotation,omitempty"`
+	Faces    map[string]TextureFace `json:"faces"`
+}
+
+type TextureRotation struct {
+	Angle  float64    `json:"angle"`
+	Axis   string     `json:"axis"`
+	Origin [3]float64 `json:"origin"`
+}
+
+type TextureFace struct {
+	UV      [4]float64 `json:"uv"`
+	Texture string     `json:"texture"`
 }
 
 type Override struct {

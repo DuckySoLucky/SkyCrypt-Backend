@@ -10,9 +10,8 @@ import (
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
+	"slices"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 func GetTexturePath(texturePath string, textureString string) string {
@@ -35,10 +34,21 @@ func GetTexturePath(texturePath string, textureString string) string {
 	return "http://localhost:8080/assets/" + formattedPath
 }
 
-func GetTexture(item models.TextureItem) string {
+func GetTexture(item models.TextureItem, disabledPacksParam ...[]string) AppliedItemTexture {
 	textures := ITEM_MAP[strings.ToLower(item.Tag.ExtraAttributes["id"].(string))]
 	if len(textures) == 0 {
-		return ""
+		return AppliedItemTexture{}
+	}
+
+	disabledPacks := disabledPacksParam[0]
+	for _, disabledPack := range disabledPacks {
+		textures = slices.DeleteFunc(textures, func(t models.ItemTexture) bool {
+			return t.ResourcePackId == disabledPack
+		})
+	}
+
+	if len(textures) == 0 {
+		return AppliedItemTexture{}
 	}
 
 	// First, check all overrides with 'firmament:all' predicate
@@ -171,34 +181,34 @@ func GetTexture(item models.TextureItem) string {
 				}
 			}
 			if allMatch {
-				return override.Texture
+				return AppliedItemTexture{
+					Texture:     override.Texture,
+					TexturePack: texture.ResourcePackId,
+				}
 			}
 		}
 
 		if tex, ok := texture.Textures["layer0"]; ok {
-			return tex
+			return AppliedItemTexture{
+				Texture:     tex,
+				TexturePack: texture.ResourcePackId,
+			}
 		}
 
 		for _, tex := range texture.Textures {
-			return tex
+			return AppliedItemTexture{
+				Texture:     tex,
+				TexturePack: texture.ResourcePackId,
+			}
 		}
 
 	}
 
-	return ""
+	return AppliedItemTexture{}
 }
 
 var VANILLA_ITEM_MAP = map[string]models.ItemTexture{}
 var ITEM_MAP = map[string][]models.ItemTexture{}
-
-var ALLOWED_PARENTS = []string{
-	"minecraft:item/handheld",
-	"cittofirmgenerated:item/skyblock/item",
-	"minecraft:item/fishing_rod",
-	"cittofirmgenerated:item/skyblock/vacuum",
-	"cittofirmgenerated:item/skyblock/gun",
-	"cittofirmgenerated:item/metal_detector",
-}
 
 func init() {
 	assetsRoot := "assets/resourcepacks"
@@ -215,6 +225,27 @@ func init() {
 
 		packAssetsPath := filepath.Join(assetsRoot, packDir.Name(), "assets")
 		if _, err := os.Stat(packAssetsPath); os.IsNotExist(err) {
+			continue
+		}
+
+		configPath := filepath.Join(assetsRoot, packDir.Name(), "config.json")
+		if _, err := os.Stat(configPath); err != nil {
+			fmt.Printf("No config.json found for pack %s, skipping\n", packDir.Name())
+			continue
+		}
+
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			fmt.Printf("Failed to read config.json for pack %s: %v\n", packDir.Name(), err)
+		}
+
+		var config models.ResourcePackConfig
+		if err := json.Unmarshal(data, &config); err != nil {
+			fmt.Printf("Failed to parse config.json for pack %s: %v\n", packDir.Name(), err)
+		}
+
+		if config.Disabled {
+			fmt.Printf("Skipping disabled resource pack: %s\n", packDir.Name())
 			continue
 		}
 
@@ -242,13 +273,14 @@ func init() {
 			}
 
 			if packDir.Name() != "Vanilla" {
-				var model models.ItemTexture
+				var model models.ItemTexture = models.ItemTexture{ResourcePackId: config.Id}
 				if err := json.Unmarshal(data, &model); err != nil {
 					fmt.Printf("Failed to parse %s: %v\n", path, err)
 					return nil
 				}
 
-				if !slices.Contains(ALLOWED_PARENTS, model.Parent) {
+				// Skip 3D models for now
+				if len(model.Elements) > 0 || model.HeadModel != "" {
 					return nil
 				}
 
@@ -293,14 +325,19 @@ func init() {
 	}
 }
 
-func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) string {
+type AppliedItemTexture struct {
+	Texture     string
+	TexturePack string
+}
+
+func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) AppliedItemTexture {
 	// ? NOTE: we're ignoring enchanted books because they're quite expensive to render and not really worth the performance hit
 	if item.Tag.ExtraAttributes == nil || item.Tag.ExtraAttributes["id"] == "ENCHANTED_BOOK" {
 		if os.Getenv("DEV") == "true" {
-			return "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
+			return AppliedItemTexture{Texture: "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"}
 		}
 
-		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"
+		return AppliedItemTexture{Texture: "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/enchanted_book.png"}
 	}
 
 	disabledPacks := []string{}
@@ -308,32 +345,29 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) strin
 		disabledPacks = disabledPacksParam[0]
 	}
 
-	// ? NOTE: Currently only 1 resource pack exists so this is fine for now, but in the future we may want to change this
-	if !slices.Contains(disabledPacks, "FURFSKY_REBORN") {
-		customTexture := GetTexture(item)
-		if customTexture != "" {
-			if !strings.Contains(customTexture, "Vanilla") && !strings.Contains(customTexture, "skull") {
-				return customTexture
-			}
+	customTexture := GetTexture(item, disabledPacks)
+	if customTexture.Texture != "" {
+		if !strings.Contains(customTexture.Texture, "Vanilla") && !strings.Contains(customTexture.Texture, "skull") {
+			return customTexture
 		}
 	}
 
 	if item.Tag.SkullOwner != nil && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
 		skinHash := utility.GetSkinHash(item.Tag.SkullOwner.Properties.Textures[0].Value)
 		if os.Getenv("DEV") != "true" {
-			return fmt.Sprintf("/api/head/%s", skinHash)
+			return AppliedItemTexture{Texture: fmt.Sprintf("/api/head/%s", skinHash)}
 		}
 
-		return fmt.Sprintf("http://localhost:8080/api/head/%s", skinHash)
+		return AppliedItemTexture{Texture: fmt.Sprintf("http://localhost:8080/api/head/%s", skinHash)}
 	}
 
 	// Preparsed texture from /api/item endpoint
 	if item.Texture != "" {
 		if os.Getenv("DEV") != "true" {
-			return fmt.Sprintf("/api/head/%s", item.Texture)
+			return AppliedItemTexture{Texture: fmt.Sprintf("/api/head/%s", item.Texture)}
 		}
 
-		return fmt.Sprintf("http://localhost:8080/api/head/%s", item.Texture)
+		return AppliedItemTexture{Texture: fmt.Sprintf("http://localhost:8080/api/head/%s", item.Texture)}
 	}
 
 	if *item.ID >= 298 && *item.ID <= 301 {
@@ -356,16 +390,16 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) strin
 		}
 
 		if os.Getenv("DEV") != "true" {
-			return fmt.Sprintf("/api/leather/%s/%s", armorType, armorColor)
+			return AppliedItemTexture{Texture: fmt.Sprintf("/api/leather/%s/%s", armorType, armorColor)}
 		}
 
-		return fmt.Sprintf("http://localhost:8080/api/leather/%s/%s", armorType, armorColor)
+		return AppliedItemTexture{Texture: fmt.Sprintf("http://localhost:8080/api/leather/%s/%s", armorType, armorColor)}
 	}
 
 	textureId := fmt.Sprintf("%d:%d", *item.ID, *item.Damage)
 	if texture, ok := VANILLA_ITEM_MAP[textureId]; ok {
 		if tex, ok := texture.Textures["layer0"]; ok && tex != "" {
-			return tex
+			return AppliedItemTexture{Texture: tex}
 		}
 
 		for _, tex := range texture.Textures {
@@ -373,23 +407,23 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) strin
 				continue
 			}
 
-			return tex
+			return AppliedItemTexture{Texture: tex}
 		}
 	}
 
 	vanillaPath := fmt.Sprintf("assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/%s.png", strings.ToLower(item.RawId))
 	if _, err := os.Stat(vanillaPath); err == nil {
 		if os.Getenv("DEV") != "true" {
-			return "/" + vanillaPath
+			return AppliedItemTexture{Texture: "/" + vanillaPath}
 		}
 
-		return "http://localhost:8080/" + vanillaPath
+		return AppliedItemTexture{Texture: "http://localhost:8080/" + vanillaPath}
 	}
 
 	fmt.Printf("[CUSTOM_RESOURCES] No custom texture found for item %s, returning default barrier texture\n", item.Tag.ExtraAttributes["id"])
 	if os.Getenv("DEV") != "true" {
-		return "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"
+		return AppliedItemTexture{Texture: "/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"}
 	}
 
-	return "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"
+	return AppliedItemTexture{Texture: "http://localhost:8080/assets/resourcepacks/Vanilla/assets/firmskyblock/models/item/barrier.png"}
 }
