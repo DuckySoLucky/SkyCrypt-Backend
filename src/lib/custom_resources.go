@@ -352,7 +352,7 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) Appli
 		}
 	}
 
-	if item.Tag.SkullOwner != nil && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
+	if item.Tag.SkullOwner != nil && len(item.Tag.SkullOwner.Properties.Textures) > 0 && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
 		skinHash := utility.GetSkinHash(item.Tag.SkullOwner.Properties.Textures[0].Value)
 		if os.Getenv("DEV") != "true" {
 			return AppliedItemTexture{Texture: fmt.Sprintf("/api/head/%s", skinHash)}
