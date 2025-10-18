@@ -8,7 +8,6 @@ import (
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats"
 	statsItems "skycrypt/src/stats/items"
-	"skycrypt/src/utility"
 	"strings"
 
 	"time"
@@ -85,9 +84,6 @@ func GearHandler(c *fiber.Ctx) error {
 			disabledPacks = strings.Split(disabledResourcePacks, ",")
 		}
 	}
-
-	// disabledPacks = append(disabledPacks, "FURFSKY_REBORN", "HYPIXEL_PLUS")
-	utility.SendWebhook("RESOURCE PACKS", fmt.Sprintf("Disabled packs: %v", disabledPacks), []byte{})
 
 	processedItems := map[string][]models.ProcessedItem{}
 	for inventoryId := range specifiedInventories {
