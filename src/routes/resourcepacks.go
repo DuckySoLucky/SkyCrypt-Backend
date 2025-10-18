@@ -19,7 +19,7 @@ var RESOURCE_PACKS = []models.ResourcePackConfig{}
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} []models.ResourcePackConfig
-// @Router /api/resourcepacks/{uuid}/{profileId} [get]
+// @Router /api/resourcepacks [get]
 func ResourcePackHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
