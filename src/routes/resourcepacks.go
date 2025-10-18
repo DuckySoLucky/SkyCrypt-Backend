@@ -56,6 +56,10 @@ func ResourcePackHandler(c *fiber.Ctx) error {
 			}
 
 			configData.Icon = fmt.Sprintf("/assets/resourcepacks/%s/pack.png", file.Name())
+			if os.Getenv("DEV") == "true" {
+				configData.Icon = fmt.Sprintf("http://localhost:8080%s", configData.Icon)
+			}
+
 			RESOURCE_PACKS = append(RESOURCE_PACKS, configData)
 		}
 	}

@@ -112,7 +112,6 @@ func InventoryHandler(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"items": statsItems.StripItems(&museumItems),
 		})
-
 	}
 
 	profile, err := api.GetProfile(uuid, profileId)
@@ -124,6 +123,20 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
+
+	// TODO: Implement sacks
+	if inventoryId == "sacks" {
+		/*
+			userProfile.SackCounts
+			userProfile.Inventory.BagContents.SacksBag.Data
+		*/
+		itemSlice := stats.GetInventory(userProfile, inventoryId)
+		output := statsItems.ProcessItems(itemSlice, inventoryId, disabledPacks)
+
+		return c.JSON(fiber.Map{
+			"items": output,
+		})
+	}
 
 	if inventoryId == "search" {
 		var items map[string][]*skycrypttypes.Item

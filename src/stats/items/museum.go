@@ -334,11 +334,11 @@ func GetMuseum(museum *skycrypttypes.Museum, disabledPacks ...[]string) []models
 	for _, item := range constants.MUSEUM_INVENTORY {
 		// Setup the frame for the museum
 		itemSlot := formatMuseumItemProgress(&item, museumItems)
-		if itemSlot.InventoryType == "" {
-			if os.Getenv("DEV") == "true" {
-				itemSlot.ProcessedItem.Texture = strings.Replace(itemSlot.ProcessedItem.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
-			}
+		if os.Getenv("DEV") == "true" {
+			itemSlot.ProcessedItem.Texture = strings.Replace(itemSlot.ProcessedItem.Texture, "/api/", "http://localhost:8080/api/", 1)
+		}
 
+		if itemSlot.InventoryType == "" {
 			output[itemSlot.Position] = itemSlot.ProcessedItem
 			continue
 		}
@@ -384,7 +384,7 @@ func GetMuseum(museum *skycrypttypes.Museum, disabledPacks ...[]string) []models
 				if museumItem.SkyblockID == "" || museumItem.Missing {
 					itemData := constants.MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE[itemSlot.InventoryType]
 					if os.Getenv("DEV") == "true" {
-						itemData.Texture = strings.Replace(itemData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+						itemData.Texture = strings.Replace(itemData.Texture, "/api/", "http://localhost:8080/api/", 1)
 					}
 
 					itemName := constants.MUSEUM.ArmorSetToId[itemId]
@@ -401,7 +401,7 @@ func GetMuseum(museum *skycrypttypes.Museum, disabledPacks ...[]string) []models
 				if museumItem.DonatedAsAChild {
 					itemData := constants.MUSEUM_INVENTORY_HIGHER_TIER_DONATED_TEMPLATE
 					if os.Getenv("DEV") == "true" {
-						itemData.Texture = strings.Replace(itemData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+						itemData.Texture = strings.Replace(itemData.Texture, "/api/", "http://localhost:8080/api/", 1)
 					}
 
 					itemName := constants.MUSEUM.ArmorSetToId[itemId]

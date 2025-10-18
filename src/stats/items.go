@@ -12,37 +12,39 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-func GetRawInventory(useProfile *skycrypttypes.Member, inventoryId string) string {
+func GetRawInventory(userProfile *skycrypttypes.Member, inventoryId string) string {
 	switch inventoryId {
 	case "inventory":
-		return useProfile.Inventory.Inventory.Data
+		return userProfile.Inventory.Inventory.Data
 	case "enderchest":
-		return useProfile.Inventory.Enderchest.Data
+		return userProfile.Inventory.Enderchest.Data
 	case "armor":
-		return useProfile.Inventory.Armor.Data
+		return userProfile.Inventory.Armor.Data
 	case "equipment":
-		return useProfile.Inventory.Equipment.Data
+		return userProfile.Inventory.Equipment.Data
 	case "personal_vault":
-		return useProfile.Inventory.PersonalVault.Data
+		return userProfile.Inventory.PersonalVault.Data
 	case "wardrobe":
-		return useProfile.Inventory.Wardrobe.Data
+		return userProfile.Inventory.Wardrobe.Data
+	case "sacks":
+		return userProfile.Inventory.BagContents.SacksBag.Data
 
 	case "rift_inventory":
-		return useProfile.Rift.Inventory.Inventory.Data
+		return userProfile.Rift.Inventory.Inventory.Data
 	case "rift_enderchest":
-		return useProfile.Rift.Inventory.Enderchest.Data
+		return userProfile.Rift.Inventory.Enderchest.Data
 	case "rift_armor":
-		return useProfile.Rift.Inventory.Armor.Data
+		return userProfile.Rift.Inventory.Armor.Data
 	case "rift_equipment":
-		return useProfile.Rift.Inventory.Equipment.Data
+		return userProfile.Rift.Inventory.Equipment.Data
 	case "potion_bag":
-		return useProfile.Inventory.BagContents.PotionBag.Data
+		return userProfile.Inventory.BagContents.PotionBag.Data
 	case "talisman_bag":
-		return useProfile.Inventory.BagContents.TalismanBag.Data
+		return userProfile.Inventory.BagContents.TalismanBag.Data
 	case "fishing_bag":
-		return useProfile.Inventory.BagContents.FishingBag.Data
+		return userProfile.Inventory.BagContents.FishingBag.Data
 	case "quiver":
-		return useProfile.Inventory.BagContents.Quiver.Data
+		return userProfile.Inventory.BagContents.Quiver.Data
 	}
 
 	return ""
