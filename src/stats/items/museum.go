@@ -2,25 +2,29 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
+	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func decodeMuseumItems(museumData *models.Museum) models.DecodedMuseumItems {
+func decodeMuseumItems(museumData *skycrypttypes.Museum, disabledPacks ...[]string) models.DecodedMuseumItems {
 	output := models.DecodedMuseumItems{
 		Items:   make(map[string]models.ProcessedMuseumItem),
 		Special: []models.ProcessedMuseumItem{},
 		Value:   0,
 	}
 
-	for itemId, itemData := range museumData.Items {
+	for itemId, itemData := range *museumData.Items {
 		decodedItem, err := utility.DecodeInventory(&itemData.Items.Data)
 		if err != nil {
 			continue
 		}
 
-		processedItems := ProcessItems(&decodedItem.Items, "museum")
+		processedItems := ProcessItems(decodedItem.Items, "museum", disabledPacks...)
 		data := models.ProcessedMuseumItem{
 			Items:           processedItems,
 			SkyblockID:      itemId,
@@ -31,13 +35,13 @@ func decodeMuseumItems(museumData *models.Museum) models.DecodedMuseumItems {
 		output.Items[itemId] = data
 	}
 
-	for _, itemData := range museumData.Special {
+	for _, itemData := range *museumData.Special {
 		decodedItem, err := utility.DecodeInventory(&itemData.Items.Data)
 		if err != nil {
 			continue
 		}
 
-		processedItem := ProcessItems(&decodedItem.Items, "museum")
+		processedItem := ProcessItems(decodedItem.Items, "museum", disabledPacks...)
 		data := models.ProcessedMuseumItem{
 			Items:           processedItem,
 			Missing:         false,
@@ -120,12 +124,16 @@ func getMaxMissingItems(category string, output map[string]ProcessedMuseumItem) 
 }
 */
 
-func ProcessMuseumItems(museumData *models.Museum) models.MuseumResult {
-	decodedMuseum := decodeMuseumItems(museumData)
+func ProcessMuseumItems(museumData *skycrypttypes.Museum, disabledPacks ...[]string) models.MuseumResult {
+	if museumData.Items == nil || museumData.Special == nil {
+		return models.MuseumResult{}
+	}
+
+	decodedMuseum := decodeMuseumItems(museumData, disabledPacks...)
 
 	output := make(map[string]models.ProcessedMuseumItem)
 	for _, itemId := range constants.MUSEUM.GetAllItems() {
-		_, exists := museumData.Items[itemId]
+		_, exists := (*museumData.Items)[itemId]
 		_, alreadySet := output[itemId]
 		if !exists && !alreadySet {
 			output[itemId] = models.ProcessedMuseumItem{
@@ -260,28 +268,28 @@ func formatMuseumItemProgress(item *models.MuseumInventoryItem, museumData model
 		item.Lore = append(item.Lore, fmt.Sprintf(`§7Items Donated: §b%d`, museumData.Special.Amount), "", "§eClick to view!")
 	case "weapons":
 		item.Lore = append(item.Lore,
-			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Weapons.Amount*100)/museumData.Weapons.Total),
+			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Weapons.Amount*100)/max(museumData.Weapons.Total, 1)),
 			fmt.Sprintf("%s §b%d §9/ §b%d", formatProgressBar(museumData.Weapons.Amount, museumData.Weapons.Total, "9", "f"), museumData.Weapons.Amount, museumData.Weapons.Total),
 			"",
 			"§eClick to view!",
 		)
 	case "armor":
 		item.Lore = append(item.Lore,
-			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Armor.Amount*100)/museumData.Armor.Total),
+			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Armor.Amount*100)/max(museumData.Armor.Total, 1)),
 			fmt.Sprintf("%s §b%d §9/ §b%d", formatProgressBar(museumData.Armor.Amount, museumData.Armor.Total, "9", "f"), museumData.Armor.Amount, museumData.Armor.Total),
 			"",
 			"§eClick to view!",
 		)
 	case "rarities":
 		item.Lore = append(item.Lore,
-			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Rarities.Amount*100)/museumData.Rarities.Total),
+			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Rarities.Amount*100)/max(museumData.Rarities.Total, 1)),
 			fmt.Sprintf("%s §b%d §9/ §b%d", formatProgressBar(museumData.Rarities.Amount, museumData.Rarities.Total, "9", "f"), museumData.Rarities.Amount, museumData.Rarities.Total),
 			"",
 			"§eClick to view!",
 		)
 	case "total":
 		item.Lore = append(item.Lore,
-			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Total.Amount*100)/museumData.Total.Total),
+			fmt.Sprintf("§7Items Donated: §e%d§6%%", (museumData.Total.Amount*100)/max(museumData.Total.Total, 1)),
 			fmt.Sprintf("%s §b%d §9/ §b%d", formatProgressBar(museumData.Total.Amount, museumData.Total.Total, "9", "f"), museumData.Total.Amount, museumData.Total.Total),
 			"",
 			"§eClick to view!",
@@ -319,13 +327,17 @@ func getMuseumItems(section string) []string {
 	}
 }
 
-func GetMuseum(museum *models.Museum) []models.ProcessedItem {
-	museumItems := ProcessMuseumItems(museum)
+func GetMuseum(museum *skycrypttypes.Museum, disabledPacks ...[]string) []models.ProcessedItem {
+	museumItems := ProcessMuseumItems(museum, disabledPacks...)
 
 	output := make([]models.ProcessedItem, 6*9)
 	for _, item := range constants.MUSEUM_INVENTORY {
 		// Setup the frame for the museum
 		itemSlot := formatMuseumItemProgress(&item, museumItems)
+		if os.Getenv("DEV") == "true" {
+			itemSlot.ProcessedItem.Texture = strings.Replace(itemSlot.ProcessedItem.Texture, "/api/", "http://localhost:8080/api/", 1)
+		}
+
 		if itemSlot.InventoryType == "" {
 			output[itemSlot.Position] = itemSlot.ProcessedItem
 			continue
@@ -371,6 +383,9 @@ func GetMuseum(museum *models.Museum) []models.ProcessedItem {
 				// MISSING ITEM
 				if museumItem.SkyblockID == "" || museumItem.Missing {
 					itemData := constants.MUSEUM_INVENTORY_MISSING_ITEM_TEMPLATE[itemSlot.InventoryType]
+					if os.Getenv("DEV") == "true" {
+						itemData.Texture = strings.Replace(itemData.Texture, "/api/", "http://localhost:8080/api/", 1)
+					}
 
 					itemName := constants.MUSEUM.ArmorSetToId[itemId]
 					if itemName == "" {
@@ -385,6 +400,9 @@ func GetMuseum(museum *models.Museum) []models.ProcessedItem {
 				// DONATED HIGHER TIER
 				if museumItem.DonatedAsAChild {
 					itemData := constants.MUSEUM_INVENTORY_HIGHER_TIER_DONATED_TEMPLATE
+					if os.Getenv("DEV") == "true" {
+						itemData.Texture = strings.Replace(itemData.Texture, "/api/", "http://localhost:8080/api/", 1)
+					}
 
 					itemName := constants.MUSEUM.ArmorSetToId[itemId]
 					if itemName == "" {

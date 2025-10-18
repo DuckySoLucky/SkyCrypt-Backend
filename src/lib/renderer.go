@@ -24,6 +24,8 @@ import (
 	"skycrypt/src/utility"
 	"strconv"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 var textureDir = "assets/static"
@@ -722,7 +724,15 @@ func main() {
 }
 */
 
-func RenderItem(itemID string) ([]byte, error) {
+type RedirectError struct {
+	URL string
+}
+
+func (e RedirectError) Error() string {
+	return "redirect:" + e.URL
+}
+
+func RenderItem(itemID string, disabledPacks ...[]string) ([]byte, error) {
 	damage := 0
 	if strings.Contains(itemID, ":") {
 		splitId := strings.Split(itemID, ":")
@@ -733,11 +743,11 @@ func RenderItem(itemID string) ([]byte, error) {
 		}
 	}
 
-	itemData := constants.ITEMS[itemID]
+	itemData := constants.ITEMS[strings.ToUpper(itemID)]
 	TextureItem := models.TextureItem{
 		Damage: &itemData.Damage,
 		ID:     &itemData.ItemId,
-		Tag: models.TextureItemExtraAttributes{
+		Tag: skycrypttypes.TextureItemExtraAttributes{
 			ExtraAttributes: map[string]interface{}{
 				"id": itemData.SkyblockID,
 			},
@@ -750,16 +760,21 @@ func RenderItem(itemID string) ([]byte, error) {
 		TextureItem.Damage = &damage
 	}
 
-	output := ApplyTexture(TextureItem)
-	if output == "" {
+	appliedTexure := ApplyTexture(TextureItem, disabledPacks...)
+	if appliedTexure.Texture == "" {
 		return nil, fmt.Errorf("couldn't find the texture")
 	}
 
+	// If output is a redirect path (starts with /api/), return redirect error
+	if strings.HasPrefix(appliedTexure.Texture, "/api/") {
+		return nil, RedirectError{URL: appliedTexure.Texture}
+	}
+
 	// If output is a localhost asset, read from disk (performance optimization)
-	if (strings.HasPrefix(output, "http://localhost") || strings.HasPrefix(output, "https://localhost")) && !strings.Contains(output, "/api/") {
-		assetsIdx := strings.Index(output, "/assets/")
+	if strings.Contains(appliedTexure.Texture, "/assets/") && !strings.Contains(appliedTexure.Texture, "/api/") {
+		assetsIdx := strings.Index(appliedTexure.Texture, "/assets/")
 		if assetsIdx != -1 {
-			localPath := output[assetsIdx+1:] // skip the leading slash
+			localPath := appliedTexure.Texture[assetsIdx+1:] // skip the leading slash
 			if _, err := os.Stat(localPath); err == nil {
 				data, err := os.ReadFile(localPath)
 				if err != nil {
@@ -771,10 +786,11 @@ func RenderItem(itemID string) ([]byte, error) {
 			}
 		}
 
-		return nil, fmt.Errorf("invalid localhost asset path: %s", output)
+		return nil, fmt.Errorf("invalid localhost asset path: %s", appliedTexure.Texture)
 	}
 
-	response, err := http.Get(output)
+	// Otherwise, fetch from the URL (this shouldn't ever happen but just as a fallback)
+	response, err := http.Get(appliedTexure.Texture)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching item texture: %v", err)
 	}

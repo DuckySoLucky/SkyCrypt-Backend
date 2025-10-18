@@ -9,10 +9,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"skycrypt/src/models"
 	"strconv"
 	"strings"
 	"unicode"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
 type TagParsingException struct {
@@ -340,28 +341,28 @@ func (p *NBTTagParser) ParseIdentifier() string {
 	})
 }
 
-func ParseNBTToItem(nbtString string) (models.Tag, bool) {
+func ParseNBTToItem(nbtString string) (skycrypttypes.Tag, bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Error parsing NBT: %v\n", r)
 		}
 	}()
 
-	try := func() (models.Tag, bool) {
+	try := func() (skycrypttypes.Tag, bool) {
 		parsed := ParseNBT(nbtString)
 		if tagMap, ok := parsed.(map[string]interface{}); ok {
 			// Marshal the map to JSON, then unmarshal into the struct (So we can cast it as models.Tag)
 			data, err := json.Marshal(tagMap)
 			if err != nil {
-				return models.Tag{}, false
+				return skycrypttypes.Tag{}, false
 			}
-			var item models.Tag
+			var item skycrypttypes.Tag
 			if err := json.Unmarshal(data, &item); err != nil {
-				return models.Tag{}, false
+				return skycrypttypes.Tag{}, false
 			}
 			return item, true
 		}
-		return models.Tag{}, false
+		return skycrypttypes.Tag{}, false
 	}
 
 	return try()

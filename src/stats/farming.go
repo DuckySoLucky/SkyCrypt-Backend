@@ -5,9 +5,11 @@ import (
 	"skycrypt/src/models"
 	statsItems "skycrypt/src/stats/items"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getMedalType(contest *models.JacobContest) string {
+func getMedalType(contest *skycrypttypes.JacobContestData) string {
 	position := contest.ClaimedPosition
 	participants := contest.ClaimedParticipants
 	if participants == nil || position == nil {
@@ -36,7 +38,7 @@ func getMedalType(contest *models.JacobContest) string {
 	return medal
 }
 
-func GetFarming(userProfile *models.Member, items []models.ProcessedItem) models.FarmingOutput {
+func GetFarming(userProfile *skycrypttypes.Member, items []models.ProcessedItem) models.FarmingOutput {
 	output := models.FarmingOutput{
 		UniqueGolds: len(userProfile.JacobsContest.UniqueBrackets["gold"]),
 		Pelts:       userProfile.Quests.TrapperQuest.PeltCount,

@@ -9,6 +9,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// UUIDHandler godoc
+// @Summary Get UUID for a specified username
+// @Description Returns the UUID associated with the given username
+// @Tags uuid
+// @Accept  json
+// @Produce  json
+// @Param username path string true "Username"
+// @Success 200 {object} models.PlayerResolve
+// @Failure 400 {object} models.ProcessingError
+// @Router /api/uuid/{username} [get]
 func UUIDHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 	username := c.Params("username")

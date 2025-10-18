@@ -1,14 +1,17 @@
 package stats
 
 import (
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	"skycrypt/src/utility"
 	"slices"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getMinionSlots(profile *models.Profile, tiers int) *models.MinionSlotsOutput {
+func getMinionSlots(profile *skycrypttypes.Profile, tiers int) *models.MinionSlotsOutput {
 	keys := make([]int, 0, len(constants.MINION_SLOTS))
 	for k := range constants.MINION_SLOTS {
 		keys = append(keys, k)
@@ -26,6 +29,10 @@ func getMinionSlots(profile *models.Profile, tiers int) *models.MinionSlotsOutpu
 		}
 	}
 
+	if profile.CommunityUpgrades == nil {
+		profile.CommunityUpgrades = &skycrypttypes.CommunityUpgrades{}
+	}
+
 	bonusSlots := 0
 	for _, upgrade := range profile.CommunityUpgrades.UpgradeStates {
 		if upgrade.Upgrade == "minion_slots" {
@@ -40,9 +47,13 @@ func getMinionSlots(profile *models.Profile, tiers int) *models.MinionSlotsOutpu
 	}
 }
 
-func getCraftedMinions(profile *models.Profile) map[string][]int {
+func getCraftedMinions(profile *skycrypttypes.Profile) map[string][]int {
 	craftedMinions := make(map[string][]int)
 	for _, member := range profile.Members {
+		if member.PlayerData == nil {
+			return craftedMinions
+		}
+
 		for _, minion := range member.PlayerData.Minions {
 			parts := strings.Split(minion, "_")
 			tierStr := parts[len(parts)-1]
@@ -68,7 +79,7 @@ func getCraftedMinions(profile *models.Profile) map[string][]int {
 	return craftedMinions
 }
 
-func GetMinions(profile *models.Profile) models.MinionsOutput {
+func GetMinions(profile *skycrypttypes.Profile) models.MinionsOutput {
 	craftedMinions := getCraftedMinions(profile)
 
 	output := models.MinionsOutput{
@@ -83,6 +94,10 @@ func GetMinions(profile *models.Profile) models.MinionsOutput {
 			MaxedMinions: 0,
 			TotalTiers:   0,
 			MaxedTiers:   0,
+		}
+
+		if os.Getenv("DEV") == "true" {
+			category.Texture = strings.Replace(category.Texture, "/api/", "http://localhost:8080/api/", 1)
 		}
 
 		totalTiers := 0
@@ -102,12 +117,18 @@ func GetMinions(profile *models.Profile) models.MinionsOutput {
 				craftedTiers = []int{}
 			}
 
-			category.Minions = append(category.Minions, models.Minion{
+			minionData := models.Minion{
 				Name:    name,
 				Texture: minionData.Texture,
 				MaxTier: maxTier,
 				Tiers:   craftedTiers,
-			})
+			}
+
+			if os.Getenv("DEV") == "true" {
+				minionData.Texture = strings.Replace(minionData.Texture, "/api/", "http://localhost:8080/api/", 1)
+			}
+
+			category.Minions = append(category.Minions, minionData)
 
 			totalTiers += maxTier
 			category.MaxedTiers += len(craftedMinions[minionId])

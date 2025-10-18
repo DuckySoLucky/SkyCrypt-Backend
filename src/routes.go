@@ -8,17 +8,18 @@ import (
 	"skycrypt/src/api"
 	redis "skycrypt/src/db"
 	"skycrypt/src/routes"
+	"skycrypt/src/utility"
 	"time"
 
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/joho/godotenv"
 )
 
 func SetupApplication() error {
-	// Load environment variables first (only log if this is the main process)
+	timeNow := time.Now()
+
 	err := godotenv.Load()
 	if err != nil && os.Getenv("FIBER_PREFORK_CHILD") == "" {
 		log.Println("No .env file found, using environment variables")
@@ -60,9 +61,20 @@ func SetupApplication() error {
 		return fmt.Errorf("error parsing NEU repository: %v", err)
 	}
 
-	// Only log success message from main process to avoid spam
 	if os.Getenv("FIBER_PREFORK_CHILD") == "" {
+		_, err = skyhelpernetworthgo.GetPrices(true, 0, 0)
+		if err != nil {
+			return fmt.Errorf("error fetching SkyHelper prices: %v", err)
+		}
+
+		_, err = skyhelpernetworthgo.GetItems(true, 0, 0)
+		if err != nil {
+			return fmt.Errorf("error fetching SkyHelper items: %v", err)
+		}
+
 		fmt.Print("[SKYCRYPT] SkyCrypt initialized successfully\n")
+
+		utility.SendWebhook("BACKEND", "SkyCrypt Backend has started successfully!", fmt.Appendf(nil, "Startup Time: %s", time.Since(timeNow).String()))
 	}
 
 	return nil
@@ -77,15 +89,40 @@ func SetupRoutes(app *fiber.App) {
 	app.Static("/assets", "assets")
 
 	if os.Getenv("DEV") != "true" {
-		fmt.Println("[ENVIROMENT] Running in production mode")
-		app.Use(etag.New())
-		app.Use("/api", cache.New(cache.Config{
-			Expiration:   5 * time.Minute,
-			CacheControl: true,
-		}))
+		if os.Getenv("FIBER_PREFORK_CHILD") == "" {
+			fmt.Println("[ENVIROMENT] Running in production mode")
+		}
+
+		/*
+			app.Use(etag.New())
+			app.Use("/api", cache.New(cache.Config{
+				Expiration:   5 * time.Minute,
+				CacheControl: true,
+			})
+		*/
 	}
 
 	api := app.Group("/api")
+
+	// Documentation - serve openapi files directly
+	api.Static("/openapi/doc.json", "./docs/swagger.json")
+
+	api.Get("/openapi/", func(c *fiber.Ctx) error {
+		html := `<!DOCTYPE html>
+					<html>
+					<head>
+						<title>API Documentation</title>
+						<meta charset="utf-8" />
+						<meta name="viewport" content="width=device-width, initial-scale=1" />
+					</head>
+					<body>
+						<script id="api-reference" data-url="/api/openapi/doc.json"></script>
+						<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+					</body>
+					</html>`
+		c.Set("Content-Type", "text/html")
+		return c.SendString(html)
+	})
 
 	// USERNAME AND UUID RESOLVING
 	api.Get("/uuid/:username", routes.UUIDHandler)
@@ -100,6 +137,8 @@ func SetupRoutes(app *fiber.App) {
 	// STATS ENDPOINTS
 	api.Get("/stats/:uuid/:profileId", routes.StatsHandler)
 	api.Get("/stats/:uuid", routes.StatsHandler)
+
+	api.Get("/playerStats/:uuid/:profileId", routes.PlayerStatsHandler)
 
 	api.Get("/networth/:uuid/:profileId", routes.NetworthHandler)
 
@@ -131,6 +170,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/misc/:uuid/:profileId", routes.MiscHandler)
 
 	api.Get("/embed/:uuid/:profileId", routes.EmbedHandler)
+	api.Get("/embed/:uuid", routes.EmbedHandler)
 
 	// RENDERING ENDPOINTS
 	api.Get("/head/:textureId", routes.HeadHandlers)
@@ -141,4 +181,5 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Get("/leather/:type/:color", routes.LeatherHandlers)
 
+	api.Get("/resourcepacks", routes.ResourcePackHandler)
 }

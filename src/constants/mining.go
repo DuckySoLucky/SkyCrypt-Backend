@@ -62,10 +62,10 @@ var FOSSILS = []string{
 }
 
 var CORPSES = map[string]string{
-	"lapis":    "http://localhost:8080/api/item/LAPIS_ARMOR_HELMET",
-	"umber":    "http://localhost:8080/api/item/ARMOR_OF_YOG_HELMET",
-	"tungsten": "http://localhost:8080/api/item/MINERAL_HELMET",
-	"vanguard": "http://localhost:8080/api/item/VANGUARD_HELMET",
+	"lapis":    "/api/item/LAPIS_ARMOR_HELMET",
+	"umber":    "/api/item/ARMOR_OF_YOG_HELMET",
+	"tungsten": "/api/item/MINERAL_HELMET",
+	"vanguard": "/api/item/VANGUARD_HELMET",
 }
 
 type forgeItem struct {

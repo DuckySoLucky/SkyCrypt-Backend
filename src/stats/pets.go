@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	stats "skycrypt/src/stats/items"
 
@@ -11,6 +12,9 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
 )
 
 func getMaxPetIds() map[string]int {
@@ -38,12 +42,23 @@ func getMaxPetIds() map[string]int {
 	return maxPetIds
 }
 
-func getPetLevel(pet models.Pet) models.PetLevel {
+func getPetLevel(pet skycrypttypes.Pet) models.PetLevel {
 	petData := notenoughupdates.NEUConstants.Pets
 
 	rarityOffset := petData.CustomPetLeveling[pet.Type].RarityOffset[pet.Rarity]
 	if rarityOffset == nil {
 		rarityOffset = petData.PetRarityOffset[pet.Rarity]
+	}
+
+	for i := len(constants.RARITIES) - 1; i >= 1; i-- {
+		if rarityOffset != nil {
+			break
+		}
+
+		rarityOffset = petData.CustomPetLeveling[pet.Type].RarityOffset[strings.ToUpper(constants.RARITIES[i])]
+		if rarityOffset == nil {
+			rarityOffset = petData.PetRarityOffset[strings.ToUpper(constants.RARITIES[i])]
+		}
 	}
 
 	if rarityOffset == nil {
@@ -161,8 +176,11 @@ func getPetData(level int, petType string, rarity string) map[string]float64 {
 	return output
 }
 
-func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.ProcessedPet {
+func getProfilePets(userProfile *skycrypttypes.Member, pets *[]skycrypttypes.Pet) []models.ProcessedPet {
 	output := []models.ProcessedPet{}
+
+	prices, _ := skyhelpernetworthgo.GetPrices(true, 0, 0)
+	networthService := skyhelpernetworthgo.NewCalculatorService()
 	for _, pet := range *pets {
 		if pet.Rarity == "" {
 			continue
@@ -172,6 +190,11 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 			pet.Rarity = constants.RARITIES[slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity))+1]
 		}
 
+		texture := "/api/head/bc8ea1f51f253ff5142ca11ae45193a4ad8c3ab5e9c6eec8ba7a4fcb7bac40"
+		if os.Getenv("DEV") == "true" {
+			texture = "http://localhost:8080/api/head/bc8ea1f51f253ff5142ca11ae45193a4ad8c3ab5e9c6eec8ba7a4fcb7bac40"
+		}
+
 		outputPet := models.ProcessedPet{
 			Type:      pet.Type,
 			Name:      utility.TitleCase(pet.Type),
@@ -179,7 +202,7 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 			Active:    pet.Active,
 			Price:     0,
 			Level:     getPetLevel(pet),
-			Texture:   "http://localhost:8080/api/head/bc8ea1f51f253ff5142ca11ae45193a4ad8c3ab5e9c6eec8ba7a4fcb7bac40",
+			Texture:   texture,
 			Lore:      []string{"§cThis pet is not saved in the repository", "", "§cIf you expected it to be there please send a message in", "§c§l#neu-support §r§con §ldiscord.gg/moulberry"},
 			Stats:     map[string]float64{},
 			CandyUsed: pet.CandyUsed,
@@ -190,13 +213,15 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 		NEUItemId := fmt.Sprintf("%s;%d", pet.Type, slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity)))
 		NEUItem, err := notenoughupdates.GetItem(NEUItemId)
 		if err != nil {
-			NEUItemId = fmt.Sprintf("%s;%d", pet.Type, slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity))-1)
-			NEUItem, err = notenoughupdates.GetItem(NEUItemId)
-			petDataRarity = constants.RARITIES[slices.Index(constants.RARITIES, strings.ToLower(pet.Rarity))-1]
-			if err != nil {
-				output = append(output, outputPet)
-				continue
+			for i := len(constants.RARITIES) - 1; i >= 1; i-- {
+				NEUItemId = fmt.Sprintf("%s;%d", pet.Type, i)
+				NEUItem, err = notenoughupdates.GetItem(NEUItemId)
+				petDataRarity = constants.RARITIES[i]
+				if err == nil {
+					break
+				}
 			}
+
 		}
 
 		if pet.Skin != "" {
@@ -204,12 +229,21 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 			skinData, err := notenoughupdates.GetItem(skinId)
 			if err == nil && skinData.NBT.SkullOwner != nil && len(skinData.NBT.SkullOwner.Properties.Textures) > 0 {
 				var textureId = utility.GetSkinHash(skinData.NBT.SkullOwner.Properties.Textures[0].Value)
-				outputPet.Texture = fmt.Sprintf("http://localhost:8080/api/head/%s", textureId)
+				if os.Getenv("DEV") == "true" {
+					outputPet.Texture = fmt.Sprintf("http://localhost:8080/api/head/%s", textureId)
+				} else {
+					outputPet.Texture = fmt.Sprintf("/api/head/%s", textureId)
+				}
+
 				outputPet.Name += " ✦"
 			}
 		} else if NEUItem.NBT.SkullOwner != nil && len(NEUItem.NBT.SkullOwner.Properties.Textures) > 0 {
 			var textureId = utility.GetSkinHash(NEUItem.NBT.SkullOwner.Properties.Textures[0].Value)
-			outputPet.Texture = fmt.Sprintf("http://localhost:8080/api/head/%s", textureId)
+			if os.Getenv("DEV") == "true" {
+				outputPet.Texture = fmt.Sprintf("http://localhost:8080/api/head/%s", textureId)
+			} else {
+				outputPet.Texture = fmt.Sprintf("/api/head/%s", textureId)
+			}
 		}
 
 		data := getPetData(outputPet.Level.Level, pet.Type, strings.ToUpper(petDataRarity))
@@ -298,6 +332,15 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 			fmt.Sprintf("§7Candy Used: §e%d §6/ §e10", outputPet.CandyUsed),
 		)
 
+		// TODO: Gotta improve this one day, its kinda ugly
+		networthResult := networthService.NewSkyBlockPetCalculator(&pet, prices, skyhelpernetworthgo.NetworthOptions(skyhelpernetworthgo.NetworthOptions{}.ToInternal()))
+		networthService.CalculatePet(networthResult)
+		price := networthResult.Price + networthResult.BasePrice
+		if price > 0 {
+			outputPet.Lore = append(outputPet.Lore, "", fmt.Sprintf("§7Item Value: §6%s Coins §7(§6%s§7)", utility.AddCommas(int(price)), utility.FormatNumber(price)))
+
+		}
+
 		output = append(output, outputPet)
 	}
 
@@ -314,13 +357,13 @@ func getProfilePets(userProfile *models.Member, pets *[]models.Pet) []models.Pro
 	return output
 }
 
-func getMissingPets(userProfile *models.Member, pets []models.ProcessedPet, gameMode string) []models.ProcessedPet {
+func getMissingPets(userProfile *skycrypttypes.Member, pets []models.ProcessedPet, gameMode string) []models.ProcessedPet {
 	ownedPetTypes := make(map[string]struct{})
 	for _, pet := range pets {
 		ownedPetTypes[pet.Type] = struct{}{}
 	}
 
-	missingPets := []models.Pet{}
+	missingPets := []skycrypttypes.Pet{}
 	maxPetIds := getMaxPetIds()
 	for pet := range notenoughupdates.NEUConstants.PetNums {
 		if _, ok := ownedPetTypes[pet]; ok || (pet == "BINGO" && gameMode != "bingo") {
@@ -332,7 +375,7 @@ func getMissingPets(userProfile *models.Member, pets []models.ProcessedPet, game
 			continue
 		}
 
-		missingPets = append(missingPets, models.Pet{
+		missingPets = append(missingPets, skycrypttypes.Pet{
 			Type:       pet,
 			Active:     false,
 			Experience: 0,
@@ -410,9 +453,12 @@ func GetPetScore(pets []models.ProcessedPet) models.PetScore {
 	return output
 }
 
-func GetPets(userProfile *models.Member, profile *models.Profile) (models.OutputPets, error) {
+func GetPets(userProfile *skycrypttypes.Member, profile *skycrypttypes.Profile) models.OutputPets {
+	if userProfile.Pets == nil {
+		userProfile.Pets = &skycrypttypes.Pets{}
+	}
 
-	allPets := []models.Pet{}
+	allPets := []skycrypttypes.Pet{}
 	allPets = append(allPets, userProfile.Pets.Pets...)
 	if userProfile.Rift.DeadCats.Montezuma.Rarity != "" {
 		userProfile.Rift.DeadCats.Montezuma.Active = false
@@ -446,5 +492,5 @@ func GetPets(userProfile *models.Member, profile *models.Profile) (models.Output
 
 	output.MissingPets = stats.StripPets(getMissingPets(userProfile, pets, profile.GameMode))
 
-	return output, nil
+	return output
 }

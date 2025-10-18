@@ -1,25 +1,53 @@
 package models
 
+import (
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+)
+
 type HypixelGardenResponse struct {
-	Success bool      `json:"success"`
-	Cause   string    `json:"cause,omitempty"`
-	Garden  GardenRaw `json:"garden"`
+	Success bool                 `json:"success"`
+	Cause   string               `json:"cause,omitempty"`
+	Garden  skycrypttypes.Garden `json:"garden"`
 }
 
-type GardenRaw struct {
-	UnlockedPlotsIds []string `json:"unlocked_plots_ids"`
-	CommissionData   struct {
-		Visits           map[string]int `json:"visits"`
-		Completed        map[string]int `json:"completed"`
-		TotalCompleted   int            `json:"total_completed"`
-		UniqueNpcsServed int            `json:"unique_npcs_served"`
-	} `json:"commission_data"`
-	ResourcesCollected map[string]float64 `json:"resources_collected"`
-	ComposterData      struct {
-		Upgrades map[string]int `json:"upgrades"`
-	} `json:"composter_data"`
-	Experience        float64        `json:"garden_experience"`
-	SelectedBarnSkin  string         `json:"selected_barn_skin"`
-	CropUpgradeLevels    map[string]int `json:"crop_upgrade_levels"`
-	UnlockedBarnSkins []string       `json:"unlocked_barn_skins"`
+type Garden struct {
+	Level          Skill           `json:"level"`
+	Visitors       Visitors        `json:"visitors"`
+	CropMilestones []CropMilestone `json:"cropMilestones"`
+	CropUpgrades   []CropUpgrade   `json:"cropUpgrades"`
+	Composter      map[string]int  `json:"composter"`
+	Plot           PlotLayout      `json:"plot"`
+}
+
+type Visitors struct {
+	Visited        int                          `json:"visited"`
+	Completed      int                          `json:"completed"`
+	UniqueVisitors int                          `json:"uniqueVisitors"`
+	Visitors       map[string]VisitorRarityData `json:"visitors"`
+}
+
+type VisitorRarityData struct {
+	Visited   int `json:"visited"`
+	Completed int `json:"completed"`
+	Unique    int `json:"unique"`
+	MaxUnique int `json:"maxUnique"`
+}
+
+type CropMilestone struct {
+	Name    string `json:"name"`
+	Texture string `json:"texture"`
+	Level   Skill  `json:"level"`
+}
+
+type CropUpgrade struct {
+	Name    string `json:"name"`
+	Texture string `json:"texture"`
+	Level   Skill  `json:"level"`
+}
+
+type PlotLayout struct {
+	Unlocked int             `json:"unlocked"`
+	Total    int             `json:"total"`
+	BarnSkin string          `json:"barnSkin"`
+	Layout   []ProcessedItem `json:"layout"`
 }

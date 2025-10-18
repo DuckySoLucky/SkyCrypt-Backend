@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	statsItems "skycrypt/src/stats/items"
@@ -10,16 +11,18 @@ import (
 	"skycrypt/src/utility"
 	"slices"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getPeakOfTheMountain(userProfile *models.Member) models.PeakOfTheMountain {
+func getPeakOfTheMountain(userProfile *skycrypttypes.Member) models.PeakOfTheMountain {
 	return models.PeakOfTheMountain{
 		Level:    userProfile.Mining.Nodes["special_0"],
 		MaxLevel: constants.MAX_PEAK_OF_THE_MOUNTAIN_LEVEL,
 	}
 }
 
-func getSelectedPickaxeAbility(userProfile *models.Member) string {
+func getSelectedPickaxeAbility(userProfile *skycrypttypes.Member) string {
 	if userProfile.Mining.SelectedPickaxeAbility == "" {
 		return "None"
 	}
@@ -45,7 +48,7 @@ func calcHotmTokens(hotmTier int, potmTier int) int {
 	return tokens
 }
 
-func getHotmTokens(hotmLevel models.Skill, userProfile *models.Member) models.HotmTokens {
+func getHotmTokens(hotmLevel models.Skill, userProfile *skycrypttypes.Member) models.HotmTokens {
 	potmTier := userProfile.Mining.Nodes["special_0"]
 	hotmTokensAmount := calcHotmTokens(hotmLevel.Level, potmTier)
 	return models.HotmTokens{
@@ -55,7 +58,7 @@ func getHotmTokens(hotmLevel models.Skill, userProfile *models.Member) models.Ho
 	}
 }
 
-func getCommissions(userProfile *models.Member, player *models.Player) models.Commissions {
+func getCommissions(userProfile *skycrypttypes.Member, player *skycrypttypes.Player) models.Commissions {
 	var milestone = 0
 	for _, tutorial := range userProfile.Objectives.Tutorial {
 		if strings.HasPrefix(tutorial, "commission_milestone_reward_mining_xp_tier_") {
@@ -80,7 +83,7 @@ func getCommissions(userProfile *models.Member, player *models.Player) models.Co
 	}
 }
 
-func getCrystalHollows(userProfile *models.Member) models.CrystalHollows {
+func getCrystalHollows(userProfile *skycrypttypes.Member) models.CrystalHollows {
 	totalRuns := 0
 	for _, crystalData := range userProfile.Mining.Crystals {
 		if crystalData.TotalPlaced > totalRuns {
@@ -121,7 +124,7 @@ func getCrystalHollows(userProfile *models.Member) models.CrystalHollows {
 	return crystalHollows
 }
 
-func getPowderAmount(userProfile *models.Member, powderType string) models.PowderAmount {
+func getPowderAmount(userProfile *skycrypttypes.Member, powderType string) models.PowderAmount {
 	spent := 0
 	total := 0
 	available := 0
@@ -148,7 +151,7 @@ func getPowderAmount(userProfile *models.Member, powderType string) models.Powde
 	}
 }
 
-func getPowder(userProfile *models.Member) models.PowderOutput {
+func getPowder(userProfile *skycrypttypes.Member) models.PowderOutput {
 	return models.PowderOutput{
 		Mithril:  getPowderAmount(userProfile, "mithril"),
 		Gemstone: getPowderAmount(userProfile, "gemstone"),
@@ -157,7 +160,7 @@ func getPowder(userProfile *models.Member) models.PowderOutput {
 
 }
 
-func getForge(userProfile *models.Member) []models.ForgeOutput {
+func getForge(userProfile *skycrypttypes.Member) []models.ForgeOutput {
 	output := []models.ForgeOutput{}
 
 	quickForgeLevel := userProfile.Mining.Nodes["forge_time"]
@@ -189,7 +192,7 @@ func getForge(userProfile *models.Member) []models.ForgeOutput {
 	return output
 }
 
-func getGlaciteTunnels(userProfile *models.Member) models.GlaciteTunnels {
+func getGlaciteTunnels(userProfile *skycrypttypes.Member) models.GlaciteTunnels {
 	if userProfile.GlaciteTunnels == nil {
 		return models.GlaciteTunnels{}
 	}
@@ -210,6 +213,10 @@ func getGlaciteTunnels(userProfile *models.Member) models.GlaciteTunnels {
 			Texture: corpseTexture,
 		}
 
+		if os.Getenv("DEV") == "true" {
+			corpseData.Texture = strings.Replace(corpseData.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
 		output.Corpses.Corpses = append(output.Corpses.Corpses, corpseData)
 	}
 
@@ -223,9 +230,13 @@ func getGlaciteTunnels(userProfile *models.Member) models.GlaciteTunnels {
 			found++
 		}
 
-		texture := fmt.Sprintf("http://localhost:8080/api/item/%s_FOSSIL", fossil)
+		texture := fmt.Sprintf("/api/item/%s_FOSSIL", fossil)
 		if fossil == "HELIX" {
-			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", fossil)
+			texture = fmt.Sprintf("/api/item/%s", fossil)
+		}
+
+		if os.Getenv("DEV") == "true" {
+			texture = strings.Replace(texture, "/api/item/", "http://localhost:8080/api/item/", 1)
 		}
 
 		fossilData := models.Fossil{
@@ -243,7 +254,7 @@ func getGlaciteTunnels(userProfile *models.Member) models.GlaciteTunnels {
 	return output
 }
 
-func GetMining(userProfile *models.Member, player *models.Player, items []models.ProcessedItem) models.MiningOutput {
+func GetMining(userProfile *skycrypttypes.Member, player *skycrypttypes.Player, items []models.ProcessedItem) models.MiningOutput {
 	HOTMLevel := stats.GetLevelByXp(int(userProfile.Mining.Experience), &stats.ExtraSkillData{Type: "hotm"})
 
 	return models.MiningOutput{

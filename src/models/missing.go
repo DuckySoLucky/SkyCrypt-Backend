@@ -10,8 +10,8 @@ type GetMissingAccessoresOutput struct {
 	SelectedPower       string                `json:"selectedPower"`
 	MagicalPower        GetMagicalPowerOutput `json:"magicalPower"`
 	Accessories         []StrippedItem        `json:"accessories"`
-	Missing             []ProcessedItem       `json:"missing"`
-	Upgrades            []ProcessedItem       `json:"upgrades"`
+	Missing             []StrippedItem        `json:"missing"`
+	Upgrades            []StrippedItem        `json:"upgrades"`
 }
 
 type MissingOutput struct {

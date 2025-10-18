@@ -9,6 +9,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// StatsHandler godoc
+// @Summary Get stats of a specified player
+// @Description Returns stats for the given user and profile ID
+// @Tags stats
+// @Accept  json
+// @Produce  json
+// @Param uuid path string true "User UUID"
+// @Param profileId path string true "Profile ID"
+// @Success 200 {object} models.StatsOutput
+// @Failure 400 {object} models.ProcessingError
+// @Failure 500 {object} models.ProcessingError
+// @Router /api/stats/{uuid}/{profileId} [get]
 func StatsHandler(c *fiber.Ctx) error {
 	timeNow := time.Now()
 
@@ -20,35 +32,35 @@ func StatsHandler(c *fiber.Ctx) error {
 
 	mowojang, err := api.ResolvePlayer(uuid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to resolve player: %v", err),
 		})
 	}
 
 	profiles, err := api.GetProfiles(mowojang.UUID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
 
 	player, err := api.GetPlayer(mowojang.UUID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get player: %v", err),
 		})
 	}
 
 	profile, err := stats.GetProfile(profiles, profileId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get profile: %v", err),
 		})
 	}
 
 	profileMuseum, err := api.GetMuseum(profile.ProfileID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to get museum: %v", err),
 		})
 	}
@@ -70,8 +82,6 @@ func StatsHandler(c *fiber.Ctx) error {
 			"error": fmt.Sprintf("Failed to get stats: %v", err),
 		})
 	}
-
-	stats.GetItems(userProfile, profile.ProfileID)
 
 	fmt.Printf("Returning /api/stats/%s in %s\n", uuid, time.Since(timeNow))
 

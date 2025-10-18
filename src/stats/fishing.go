@@ -2,14 +2,17 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	statsItems "skycrypt/src/stats/items"
 	"skycrypt/src/utility"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func getTrophyFishProgress(userProfile *models.Member) []models.TrophyFishProgress {
+func getTrophyFishProgress(userProfile *skycrypttypes.Member) []models.TrophyFishProgress {
 	if len(userProfile.TrophyFish.Rewards) == 0 {
 		return nil
 	}
@@ -30,7 +33,7 @@ func getTrophyFishProgress(userProfile *models.Member) []models.TrophyFishProgre
 	return output
 }
 
-func getTrophyFish(userProfile *models.Member) models.TrophyFishOutput {
+func getTrophyFish(userProfile *skycrypttypes.Member) models.TrophyFishOutput {
 	output := []models.TrophyFish{}
 	for id, data := range constants.TROPHY_FISH {
 		tf := models.TrophyFish{
@@ -67,6 +70,10 @@ func getTrophyFish(userProfile *models.Member) models.TrophyFishOutput {
 		}
 
 		tf.Texture = data.Textures[highestTier]
+		if os.Getenv("DEV") == "true" {
+			tf.Texture = strings.Replace(tf.Texture, "/api/head/", "http://localhost:8080/api/head/", 1)
+		}
+
 		tf.Maxed = highestTier == constants.TROPHY_FISH_TIERS[len(constants.TROPHY_FISH_TIERS)-1]
 		output = append(output, tf)
 	}
@@ -88,7 +95,7 @@ func getTrophyFish(userProfile *models.Member) models.TrophyFishOutput {
 	}
 }
 
-func GetFishing(userProfile *models.Member, items []models.ProcessedItem) models.FishingOuput {
+func GetFishing(userProfile *skycrypttypes.Member, items []models.ProcessedItem) models.FishingOuput {
 	output := models.FishingOuput{
 		ItemsFished:        int(userProfile.PlayerStats.ItemsFished.Total),
 		Treasure:           int(userProfile.PlayerStats.ItemsFished.Treasure),

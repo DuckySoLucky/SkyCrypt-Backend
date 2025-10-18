@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"skycrypt/src/constants"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
@@ -88,18 +89,25 @@ func processItems(items *[]models.HypixelItem) map[string]models.ProcessedHypixe
 			item.Rarity = "common"
 		}
 
+		texture := fmt.Sprintf("/api/item/%s", item.SkyBlockID)
+		if os.Getenv("DEV") == "true" {
+			texture = fmt.Sprintf("http://localhost:8080/api/item/%s", item.SkyBlockID)
+		}
+
 		processed[item.SkyBlockID] = models.ProcessedHypixelItem{
 			SkyblockID:        item.SkyBlockID,
 			Name:              item.Name,
 			ItemId:            constants.BUKKIT_TO_ID[item.Material],
 			Rarity:            strings.ToLower(item.Rarity),
 			Damage:            item.Damage,
-			Texture:           fmt.Sprintf("http://localhost:8080/api/item/%s", item.SkyBlockID),
+			Texture:           texture,
 			TextureId:         utility.GetSkinHash(item.Skin.Value),
 			Category:          strings.ToLower(item.Category),
 			Origin:            item.Origin,
 			RiftTransferrable: item.RiftTransferrable,
 			MuseumData:        item.MuseumData,
+			Color:             utility.GetHexColor(item.Color),
+			GemstoneSlots:     item.GemstoneSlots,
 		}
 	}
 
@@ -115,13 +123,21 @@ func processCollections(collections map[string]models.HypixelCollection) models.
 			Collections: []models.ProcessedHypixelCollectionItem{},
 		}
 
+		if os.Getenv("DEV") == "true" {
+			category.Texture = strings.Replace(category.Texture, "/api/item/", "http://localhost:8080/api/item/", 1)
+		}
+
 		for collectionId, collectionData := range categoryData.Items {
 			processedItem := models.ProcessedHypixelCollectionItem{
 				Id:      collectionId,
 				Name:    collectionData.Name,
-				Texture: fmt.Sprintf("http://localhost:8080/api/item/%s", collectionId),
+				Texture: fmt.Sprintf("/api/item/%s", collectionId),
 				MaxTier: collectionData.MaxTiers,
 				Tiers:   collectionData.Tiers,
+			}
+
+			if os.Getenv("DEV") == "true" {
+				processedItem.Texture = fmt.Sprintf("http://localhost:8080/api/item/%s", collectionId)
 			}
 
 			category.Collections = append(category.Collections, processedItem)

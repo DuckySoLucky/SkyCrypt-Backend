@@ -9,9 +9,11 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
-func GetAccessories(useProfile *models.Member, items map[string][]models.Item) models.GetMissingAccessoresOutput {
+func GetAccessories(useProfile *skycrypttypes.Member, items map[string][]*skycrypttypes.Item, disabledPacks ...[]string) models.GetMissingAccessoresOutput {
 	if items == nil {
 		return models.GetMissingAccessoresOutput{}
 	}
@@ -19,7 +21,7 @@ func GetAccessories(useProfile *models.Member, items map[string][]models.Item) m
 	talismanBag := items["talisman_bag"]
 	accessoryIds := make([]models.AccessoryIds, 0)
 	accessories := make([]models.InsertAccessory, 0)
-	for _, item := range stats.ProcessItems(&talismanBag, "talisman_bag") {
+	for _, item := range stats.ProcessItems(talismanBag, "talisman_bag", disabledPacks...) {
 		id := stats.GetId(item)
 		if len(id) == 0 {
 			continue
@@ -48,7 +50,7 @@ func GetAccessories(useProfile *models.Member, items map[string][]models.Item) m
 			continue
 		}
 
-		processedItems[inventoryId] = stats.ProcessItems(&inventoryData, inventoryId)
+		processedItems[inventoryId] = stats.ProcessItems(inventoryData, inventoryId, disabledPacks...)
 	}
 
 	for _, inventoryId := range inventoryKeys {
@@ -156,11 +158,11 @@ func GetAccessories(useProfile *models.Member, items map[string][]models.Item) m
 		riftPrismItem, _ := notenoughupdates.GetItem("RIFT_PRISM")
 
 		itemId := 397
-		processedItem := stats.ProcessItem(&models.Item{
+		processedItem := stats.ProcessItem(&skycrypttypes.Item{
 			Tag:    &riftPrismItem.NBT,
 			ID:     &itemId,
 			Damage: &riftPrismItem.Damage,
-		}, "Rift")
+		}, "Rift", disabledPacks...)
 
 		// Remove the three lines from the lore which say that player should use the prism in Wizard Portal
 		for i, lore := range processedItem.Lore {

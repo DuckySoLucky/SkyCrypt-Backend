@@ -1,15 +1,19 @@
 package models
 
-import neu "skycrypt/src/models/NEU"
+import (
+	neu "skycrypt/src/models/NEU"
+
+	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
+)
 
 type NEUItem struct {
-	MinecraftId string   `json:"itemid,omitempty"`
-	Name        string   `json:"displayname,omitempty"`
-	Damage      int      `json:"damage,omitempty"`
-	Lore        []string `json:"lore,omitempty"`
-	NEUId       string   `json:"internalname,omitempty"`
-	NBT         Tag      `json:"nbttag"`
-	Wiki        []string `json:"info,omitempty"`
+	MinecraftId string            `json:"itemid,omitempty"`
+	Name        string            `json:"displayname,omitempty"`
+	Damage      int               `json:"damage,omitempty"`
+	Lore        []string          `json:"lore,omitempty"`
+	NEUId       string            `json:"internalname,omitempty"`
+	NBT         skycrypttypes.Tag `json:"nbttag"`
+	Wiki        []string          `json:"info,omitempty"`
 }
 
 type RawNEUItem struct {

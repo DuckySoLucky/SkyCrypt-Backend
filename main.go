@@ -6,14 +6,21 @@ import (
 	"skycrypt/src"
 	"skycrypt/src/utility"
 
+	_ "skycrypt/docs"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
+// @title SkyCrypt API
+// @version 1.0
+// @description API for SkyCrypt - A Hypixel SkyBlock Stats Viewer
+// @host localhost:8080
+// @BasePath /
 func main() {
 	app := fiber.New(fiber.Config{
-		Prefork:                   true,  // Fork processes for max CPU utilization
+		Prefork:                   true,  // Enable prefork (requires --pid=host in Docker)
 		ServerHeader:              "",    // Remove server header for slight perf gain
 		DisableKeepalive:          false, // Keep connections alive
 		DisableDefaultDate:        true,  // Disable date header

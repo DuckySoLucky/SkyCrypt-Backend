@@ -35,6 +35,17 @@ var (
 	cacheDuration   = 15 * time.Minute
 )
 
+var (
+	skinHashCacheMutex sync.RWMutex
+	skinHashCache      = make(map[string]string)
+	base64Encodings    = []*base64.Encoding{
+		base64.RawStdEncoding, // Standard base64 without padding
+		base64.StdEncoding,    // Standard base64 with padding
+		base64.RawURLEncoding, // URL-safe base64 without padding
+		base64.URLEncoding,    // URL-safe base64 with padding
+	}
+)
+
 func GetRawLore(text string) string {
 	return colorCodeRegex.ReplaceAllString(text, "")
 }
@@ -148,14 +159,17 @@ func FormatNumber(n any) string {
 		if value == float64(int(value)) {
 			return strconv.Itoa(int(value))
 		}
-		return strconv.FormatFloat(value, 'f', -1, 64)
+		rounded := Round(value, 2)
+		return strconv.FormatFloat(rounded, 'f', -1, 64)
 	}
 
 	result := value / divisor
-	if result == float64(int(result)) {
-		return strconv.Itoa(int(result)) + suffix
+	rounded := Round(result, 2)
+
+	if rounded == float64(int(rounded)) {
+		return strconv.Itoa(int(rounded)) + suffix
 	}
-	return strconv.FormatFloat(result, 'f', 1, 64) + suffix
+	return strconv.FormatFloat(rounded, 'f', -1, 64) + suffix
 }
 
 func AddCommas(n int) string {
@@ -203,12 +217,35 @@ func GetSkinHash(base64String string) string {
 		return ""
 	}
 
-	data, err := base64.RawStdEncoding.DecodeString(base64String)
-	if err != nil {
-		data, err = base64.StdEncoding.DecodeString(base64String)
-		if err != nil {
-			return ""
+	skinHashCacheMutex.RLock()
+	if cached, exists := skinHashCache[base64String]; exists {
+		skinHashCacheMutex.RUnlock()
+		return cached
+	}
+	skinHashCacheMutex.RUnlock()
+
+	result := computeSkinHash(base64String)
+
+	skinHashCacheMutex.Lock()
+	skinHashCache[base64String] = result
+	skinHashCacheMutex.Unlock()
+
+	return result
+}
+
+func computeSkinHash(base64String string) string {
+	var data []byte
+
+	for _, encoding := range base64Encodings {
+		var err error
+		data, err = encoding.DecodeString(base64String)
+		if err == nil {
+			break
 		}
+	}
+
+	if data == nil {
+		return ""
 	}
 
 	var jsonData struct {
@@ -258,11 +295,15 @@ func ReplaceVariables(template string, variables map[string]float64) string {
 		// fmt.Printf("Replacing variable %s with value %.2f\n", name, value)
 		if _, err := strconv.ParseFloat(name, 64); err != nil {
 			if intValue, err := strconv.Atoi(fmt.Sprintf("%.0f", value)); err == nil && intValue > 0 {
+				if strings.Contains(match, "+") {
+					return "+" + strconv.Itoa(intValue)
+				}
+
 				return "+" + fmt.Sprintf("%.0f", value)
 			}
 		}
 
-		return fmt.Sprintf("%.0f", value)
+		return fmt.Sprintf("%.0f", math.Abs(value))
 	})
 }
 
@@ -516,4 +557,17 @@ func getErrorCount(errorHash string) int {
 		return cache.count
 	}
 	return 1
+}
+
+func GetHexColor(color string) string {
+	parts := strings.Split(color, ",")
+	if len(parts) == 3 {
+		var r, g, b int
+		fmt.Sscanf(parts[0], "%d", &r)
+		fmt.Sscanf(parts[1], "%d", &g)
+		fmt.Sscanf(parts[2], "%d", &b)
+		return fmt.Sprintf("%02X%02X%02X", r, g, b)
+	}
+
+	return "FFFFFF"
 }

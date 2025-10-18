@@ -2,21 +2,48 @@ package neustats
 
 import (
 	"fmt"
+	"os"
 	neu "skycrypt/src/models/NEU"
 	"skycrypt/src/utility"
 )
 
 func GetTexture(mob neu.NEUBestiaryRawMob) string {
 	if mob.Texture == "" {
+		if os.Getenv("DEV") != "true" {
+			return fmt.Sprintf("/api/item/%s", mob.Item)
+		}
+
 		return fmt.Sprintf(`http://localhost:8080/api/item/%s`, mob.Item)
 	}
 
-	return fmt.Sprintf("http://localhost:8080/api/head/%s", utility.GetSkinHash(mob.Texture))
+	skinHash := utility.GetSkinHash(mob.Texture)
+	if skinHash == "" {
+		if os.Getenv("DEV") != "true" {
+			return "/api/item/BARRIER"
+		}
+
+		return "http://localhost:8080/api/item/BARRIER"
+
+	}
+
+	if os.Getenv("DEV") != "true" {
+		return fmt.Sprintf("/api/head/%s", skinHash)
+	}
+
+	return fmt.Sprintf("http://localhost:8080/api/head/%s", skinHash)
 }
 
 func GetIslandTexture(island neu.NEUBestiaryRawIslandData) string {
 	if island.Icon.Texture == "" {
+		if os.Getenv("DEV") != "true" {
+			return fmt.Sprintf("/api/item/%s", island.Icon.Item)
+		}
+
 		return fmt.Sprintf(`http://localhost:8080/api/item/%s`, island.Icon.Item)
+	}
+
+	if os.Getenv("DEV") != "true" {
+		return fmt.Sprintf("/api/head/%s", utility.GetSkinHash(island.Icon.Texture))
 	}
 
 	return fmt.Sprintf("http://localhost:8080/api/head/%s", utility.GetSkinHash(island.Icon.Texture))
