@@ -14,6 +14,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.4 h1:FIYSrJWOmx1quVvmfmRLeoZFHQTq1WTIWDPLxZludMk=
 github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.4/go.mod h1:8AdNFYBlDU8YGIDj0tIrlPkW5J1ojrvvbxyHzHvcCXw=
+github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.5 h1:SpvSdgisl531bEChOIdCmMX5Ac2EvifTwlR/IzXFfdM=
+github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.5/go.mod h1:8AdNFYBlDU8YGIDj0tIrlPkW5J1ojrvvbxyHzHvcCXw=
 github.com/Tnze/go-mc v1.20.2 h1:arHCE/WxLCxY73C/4ZNLdOymRYtdwoXE05ohB7HVN6Q=
 github.com/Tnze/go-mc v1.20.2/go.mod h1:geoRj2HsXSkB3FJBuhr7wCzXegRlzWsVXd7h7jiJ6aQ=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
