@@ -13,6 +13,7 @@ import (
 // @Summary Get misc stats of a specified player
 // @Description Returns misc stats for the given user and profile ID
 // @Tags misc
+// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -42,9 +43,9 @@ func MiscHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
-	output := stats.GetMisc(userProfile, profile, player)
-
 	fmt.Printf("Returning /api/misc/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(output)
+	return c.JSON(fiber.Map{
+		"misc": stats.GetMisc(userProfile, profile, player),
+	})
 }
