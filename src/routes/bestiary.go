@@ -35,9 +35,9 @@ func BestiaryHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetBestiary(userProfile)
+
 	fmt.Printf("Returning /api/bestiary/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"bestiary": stats.GetBestiary(userProfile),
-	})
+	return c.JSON(output)
 }

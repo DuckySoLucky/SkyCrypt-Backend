@@ -29,9 +29,9 @@ func GardenHandler(c *fiber.Ctx) error {
 		return c.JSON(constants.InvalidUserError)
 	}
 
+	output := stats.GetGarden(garden)
+
 	fmt.Printf("Returning /api/garden/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"garden": stats.GetGarden(garden),
-	})
+	return c.JSON(output)
 }

@@ -117,9 +117,9 @@ func GearHandler(c *fiber.Ctx) error {
 		allItems = append(allItems, processedItems[inventoryId]...)
 	}
 
+	output := stats.GetGear(processedItems, allItems)
+
 	fmt.Printf("Returning /api/gear/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"gear": stats.GetGear(processedItems, allItems),
-	})
+	return c.JSON(output)
 }

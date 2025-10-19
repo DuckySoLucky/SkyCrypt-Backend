@@ -35,9 +35,9 @@ func CollectionsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetCollections(userProfile, profile)
+
 	fmt.Printf("Returning /api/collections/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"collections": stats.GetCollections(userProfile, profile),
-	})
+	return c.JSON(output)
 }

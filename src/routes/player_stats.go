@@ -35,9 +35,9 @@ func PlayerStatsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetPlayerStats(userProfile, profile, profileId)
+
 	fmt.Printf("Returning /api/playerStats/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"stats": stats.GetPlayerStats(userProfile, profile, profileId),
-	})
+	return c.JSON(output)
 }

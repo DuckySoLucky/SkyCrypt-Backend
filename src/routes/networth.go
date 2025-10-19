@@ -87,10 +87,8 @@ func NetworthHandler(c *fiber.Ctx) error {
 	fmt.Printf("Returning /api/networth/%s in %s\n", uuid, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"networth": map[string]any{
-			"normal":      networth,
-			"nonCosmetic": nonCosmeticNetworth,
-		},
+		"normal":      networth,
+		"nonCosmetic": nonCosmeticNetworth,
 	})
 
 }

@@ -84,7 +84,5 @@ func StatsHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/stats/%s in %s\n", uuid, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"stats": output,
-	})
+	return c.JSON(output)
 }

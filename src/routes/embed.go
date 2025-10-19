@@ -68,7 +68,5 @@ func EmbedHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/embed/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"embed": embedData,
-	})
+	return c.JSON(embedData)
 }

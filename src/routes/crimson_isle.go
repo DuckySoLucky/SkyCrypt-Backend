@@ -35,9 +35,9 @@ func CrimsonIsleHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetCrimsonIsle(userProfile)
+
 	fmt.Printf("Returning /api/crimson_isle/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"crimson_isle": stats.GetCrimsonIsle(userProfile),
-	})
+	return c.JSON(output)
 }

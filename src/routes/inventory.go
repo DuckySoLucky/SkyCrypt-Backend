@@ -99,18 +99,16 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 		museum := profileMuseum[uuid]
 		if museum == nil {
-			return c.JSON(fiber.Map{
-				"items": []models.StrippedItem{},
-			})
+			return c.JSON([]models.StrippedItem{})
 		}
 
 		fmt.Printf("Returning /api/inventory/%s/%s in %s\n", uuid, inventoryId, time.Since(timeNow))
 
 		museumItems := statsItems.GetMuseum(museum, disabledPacks)
 
-		return c.JSON(fiber.Map{
-			"items": statsItems.StripItems(&museumItems),
-		})
+		output := statsItems.StripItems(&museumItems)
+
+		return c.JSON(output)
 	}
 
 	profile, err := api.GetProfile(uuid, profileId)
@@ -132,9 +130,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 		itemSlice := stats.GetInventory(userProfile, inventoryId)
 		output := statsItems.ProcessItems(itemSlice, inventoryId, disabledPacks)
 
-		return c.JSON(fiber.Map{
-			"items": output,
-		})
+		return c.JSON(output)
 	}
 
 	if inventoryId == "search" {
@@ -199,10 +195,7 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 		fmt.Printf("Returning /api/inventory/%s/%s/%s in %s\n", uuid, inventoryId, searchString, time.Since(timeNow))
 
-		return c.JSON(fiber.Map{
-			"items": searchResults,
-		})
-
+		return c.JSON(searchResults)
 	}
 
 	itemSlice := stats.GetInventory(userProfile, inventoryId)
@@ -217,7 +210,5 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/inventory/%s/%s in %s\n", uuid, inventoryId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"items": strippedItems,
-	})
+	return c.JSON(strippedItems)
 }

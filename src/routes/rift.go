@@ -97,9 +97,9 @@ func RiftHandler(c *fiber.Ctx) error {
 		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId, disabledPacks)
 	}
 
+	output := stats.GetRift(userProfile, processedItems)
+
 	fmt.Printf("Returning /api/rift/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"rift": stats.GetRift(userProfile, processedItems),
-	})
+	return c.JSON(output)
 }

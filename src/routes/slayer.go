@@ -35,9 +35,9 @@ func SlayersHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetSlayers(userProfile)
+
 	fmt.Printf("Returning /api/slayer/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"slayer": stats.GetSlayers(userProfile),
-	})
+	return c.JSON(output)
 }

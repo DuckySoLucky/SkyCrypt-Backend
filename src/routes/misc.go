@@ -42,9 +42,9 @@ func MiscHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetMisc(userProfile, profile, player)
+
 	fmt.Printf("Returning /api/misc/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"misc": stats.GetMisc(userProfile, profile, player),
-	})
+	return c.JSON(output)
 }

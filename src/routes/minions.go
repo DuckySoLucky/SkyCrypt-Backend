@@ -32,9 +32,9 @@ func MinionsHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	output := stats.GetMinions(profile)
+
 	fmt.Printf("Returning /api/minions/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"minions": stats.GetMinions(profile),
-	})
+	return c.JSON(output)
 }

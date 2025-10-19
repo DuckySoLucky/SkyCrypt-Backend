@@ -35,9 +35,9 @@ func PetsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetPets(userProfile, profile)
+
 	fmt.Printf("Returning /api/pets/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"pets": stats.GetPets(userProfile, profile),
-	})
+	return c.JSON(output)
 }

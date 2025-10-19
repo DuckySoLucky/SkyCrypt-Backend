@@ -65,7 +65,5 @@ func ResourcePackHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/resourcepacks in %s\n", time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"resourcepacks": RESOURCE_PACKS,
-	})
+	return c.JSON(RESOURCE_PACKS)
 }

@@ -87,9 +87,9 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 		}
 	}
 
+	output := stats.GetAccessories(&userProfile, items, disabledPacks)
+
 	fmt.Printf("Returning /api/accessories/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"accessories": stats.GetAccessories(&userProfile, items, disabledPacks),
-	})
+	return c.JSON(output)
 }
