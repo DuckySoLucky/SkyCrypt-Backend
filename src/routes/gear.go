@@ -21,7 +21,6 @@ import (
 // @Summary Get gear stats of a specified player
 // @Description Returns gear for the given user and profile ID
 // @Tags gear
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -118,9 +117,9 @@ func GearHandler(c *fiber.Ctx) error {
 		allItems = append(allItems, processedItems[inventoryId]...)
 	}
 
+	output := stats.GetGear(processedItems, allItems)
+
 	fmt.Printf("Returning /api/gear/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"gear": stats.GetGear(processedItems, allItems),
-	})
+	return c.JSON(output)
 }

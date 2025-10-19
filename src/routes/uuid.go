@@ -13,7 +13,6 @@ import (
 // @Summary Get UUID for a specified username
 // @Description Returns the UUID associated with the given username
 // @Tags uuid
-// @Accept  json
 // @Produce  json
 // @Param username path string true "Username"
 // @Success 200 {object} models.PlayerResolve

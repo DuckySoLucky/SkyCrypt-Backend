@@ -13,7 +13,6 @@ import (
 // @Summary Get dungeons stats of a specified player
 // @Description Returns dungeons for the given user and profile ID
 // @Tags dungeons
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -36,9 +35,9 @@ func DungeonsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetDungeons(userProfile)
+
 	fmt.Printf("Returning /api/dungeons/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"dungeons": stats.GetDungeons(userProfile),
-	})
+	return c.JSON(output)
 }

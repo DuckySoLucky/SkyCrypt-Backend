@@ -13,7 +13,6 @@ import (
 // @Summary Get slayer stats of a specified player
 // @Description Returns slayer statistics for the given user and profile ID
 // @Tags slayers
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -36,9 +35,9 @@ func SlayersHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetSlayers(userProfile)
+
 	fmt.Printf("Returning /api/slayer/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"slayer": stats.GetSlayers(userProfile),
-	})
+	return c.JSON(output)
 }
