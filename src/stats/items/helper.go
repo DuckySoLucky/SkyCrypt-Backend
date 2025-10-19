@@ -70,6 +70,9 @@ func ParseItemTypeFromLore(lore []string, item skycrypttypes.Item) itemDataType 
 
 func getCategories(itemType string, item skycrypttypes.Item) []string {
 	categories := []string{}
+	if item.Tag == nil || item.Tag.ExtraAttributes == nil {
+		return append(categories, constants.TYPE_TO_CATEGORIES[itemType]...)
+	}
 
 	enchantments := item.Tag.ExtraAttributes.Enchantments
 	for enchantment := range enchantments {
