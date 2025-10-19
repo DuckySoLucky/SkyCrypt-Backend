@@ -21,8 +21,11 @@ func InitializeNEURepository() error {
 		fmt.Println("[NOT-ENOUGH-UPDATES] Cloning NEU repository...")
 
 		_, err := git.PlainClone("NotEnoughUpdates-REPO", false, &git.CloneOptions{
-			URL:      "https://github.com/NotEnoughUpdates/NotEnoughUpdates-REPO",
-			Progress: os.Stdout,
+			URL:           "https://github.com/NotEnoughUpdates/NotEnoughUpdates-REPO",
+			Progress:      os.Stdout,
+			Depth:         1,
+			ReferenceName: "master",
+			SingleBranch:  true,
 		})
 
 		if err != nil {
@@ -53,6 +56,7 @@ func UpdateNEURepository() error {
 	err = workTree.Pull(&git.PullOptions{
 		RemoteName: "origin",
 		Progress:   os.Stdout,
+		Depth:      1,
 	})
 
 	if err != nil {
