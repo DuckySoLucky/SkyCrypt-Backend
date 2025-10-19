@@ -21,7 +21,6 @@ import (
 // @Summary Get gear stats of a specified player
 // @Description Returns gear for the given user and profile ID
 // @Tags gear
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

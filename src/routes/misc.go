@@ -13,7 +13,6 @@ import (
 // @Summary Get misc stats of a specified player
 // @Description Returns misc stats for the given user and profile ID
 // @Tags misc
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

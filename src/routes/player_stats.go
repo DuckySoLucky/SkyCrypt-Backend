@@ -13,7 +13,6 @@ import (
 // @Summary Get player stats of a specified player
 // @Description Returns player stats for the given user and profile ID
 // @Tags playerStats
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

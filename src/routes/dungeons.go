@@ -13,7 +13,6 @@ import (
 // @Summary Get dungeons stats of a specified player
 // @Description Returns dungeons for the given user and profile ID
 // @Tags dungeons
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

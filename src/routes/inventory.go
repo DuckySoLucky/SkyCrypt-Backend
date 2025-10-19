@@ -58,7 +58,6 @@ func getIcon(source string, uuid string) string {
 // @Summary Get inventory items for a specified player
 // @Description Returns inventory items for the given user, profile ID, and inventory ID. Supports museum, search, and other inventories.
 // @Tags inventory
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

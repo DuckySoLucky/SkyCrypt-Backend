@@ -14,7 +14,6 @@ import (
 // @Summary Get networth of a specified player
 // @Description Returns networth for the given user and profile ID
 // @Tags networth
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

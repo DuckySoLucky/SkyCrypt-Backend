@@ -21,7 +21,6 @@ import (
 // @Summary Get skills stats of a specified player
 // @Description Returns skills for the given user and profile ID
 // @Tags skills
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"

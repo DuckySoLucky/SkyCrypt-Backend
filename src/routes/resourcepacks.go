@@ -16,7 +16,6 @@ var RESOURCE_PACKS = []models.ResourcePackConfig{}
 // @Summary Get list of resource packs
 // @Description Returns a list of resource packs
 // @Tags resourcepacks
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} []models.ResourcePackConfig
 // @Router /api/resourcepacks [get]

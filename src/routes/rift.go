@@ -20,7 +20,6 @@ import (
 // @Summary Get rift stats of a specified player
 // @Description Returns rift data for the given user and profile ID
 // @Tags rift
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
