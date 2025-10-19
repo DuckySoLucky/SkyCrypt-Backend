@@ -60,6 +60,13 @@ func getHotmTokens(hotmLevel models.Skill, userProfile *skycrypttypes.Member) mo
 
 func getCommissions(userProfile *skycrypttypes.Member, player *skycrypttypes.Player) models.Commissions {
 	var milestone = 0
+	if userProfile.Objectives == nil {
+		return models.Commissions{
+			Milestone:   milestone,
+			Completions: player.Achievements.HotMCommissions,
+		}
+	}
+
 	for _, tutorial := range userProfile.Objectives.Tutorial {
 		if strings.HasPrefix(tutorial, "commission_milestone_reward_mining_xp_tier_") {
 			tier := strings.Split(tutorial, "_")
@@ -69,7 +76,6 @@ func getCommissions(userProfile *skycrypttypes.Member, player *skycrypttypes.Pla
 				if err == nil {
 					if parsedTier > milestone {
 						milestone = parsedTier
-
 					}
 				}
 			}

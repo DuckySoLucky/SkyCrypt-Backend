@@ -2600,7 +2600,7 @@ paths:
       summary: Render and return a potion image
       tags:
       - potion
-  /api/resourcepacks/{uuid}/{profileId}:
+  /api/resourcepacks:
     get:
       description: Returns a list of resource packs
       requestBody:

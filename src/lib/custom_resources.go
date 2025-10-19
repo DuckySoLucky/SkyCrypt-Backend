@@ -352,7 +352,7 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) Appli
 		}
 	}
 
-	if item.Tag.SkullOwner != nil && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
+	if item.Tag.SkullOwner != nil && len(item.Tag.SkullOwner.Properties.Textures) > 0 && item.Tag.SkullOwner.Properties.Textures[0].Value != "" {
 		skinHash := utility.GetSkinHash(item.Tag.SkullOwner.Properties.Textures[0].Value)
 		if os.Getenv("DEV") != "true" {
 			return AppliedItemTexture{Texture: fmt.Sprintf("/api/head/%s", skinHash)}
@@ -374,19 +374,16 @@ func ApplyTexture(item models.TextureItem, disabledPacksParam ...[]string) Appli
 		armorType := constants.ARMOR_TYPES[*item.ID-298]
 
 		armorColor := fmt.Sprintf("%06X", item.Tag.Display.Color)
-		if item.Tag.ExtraAttributes["dye_item"] != "" {
-			idStr, ok := item.Tag.ExtraAttributes["id"].(string)
-			if ok {
-				defaultHexColor := constants.ITEMS[idStr].Color
-				if defaultHexColor != "" {
-					armorColor = defaultHexColor
-				}
-
-				if defaultHexColor != "" {
-					armorColor = defaultHexColor
+		if os.Getenv("ENABLE_ARMOR_HEX") != "true" {
+			if item.Tag.ExtraAttributes["dye_item"] != "" {
+				idStr, ok := item.Tag.ExtraAttributes["id"].(string)
+				if ok {
+					defaultHexColor := constants.ITEMS[idStr].Color
+					if defaultHexColor != "" && defaultHexColor != "FFFFFF" && defaultHexColor != "000000" {
+						armorColor = defaultHexColor
+					}
 				}
 			}
-
 		}
 
 		if os.Getenv("DEV") != "true" {
