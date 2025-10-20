@@ -1601,6 +1601,34 @@ components:
         official:
           type: string
       type: object
+    routes.NetworthResult:
+      properties:
+        bank:
+          type: number
+        isNonCosmetic:
+          type: boolean
+        networth:
+          type: number
+        noInventory:
+          type: boolean
+        personalBank:
+          type: number
+        purse:
+          type: number
+        types:
+          additionalProperties:
+            $ref: '#/components/schemas/routes.NetworthType'
+          type: object
+        unsoulboundNetworth:
+          type: number
+      type: object
+    routes.NetworthType:
+      properties:
+        total:
+          type: number
+        unsoulboundTotal:
+          type: number
+      type: object
     skycrypttypes.Display:
       properties:
         Lore:
@@ -2399,7 +2427,8 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: {}
+                additionalProperties:
+                  $ref: '#/components/schemas/routes.NetworthResult'
                 type: object
           description: OK
         "400":
