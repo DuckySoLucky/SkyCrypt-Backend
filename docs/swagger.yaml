@@ -1023,9 +1023,9 @@ components:
       type: object
     models.Networth:
       properties:
-        networth:
+        nonCosmetic:
           $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
-        nonCosmeticNetworth:
+        normal:
           $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
       type: object
     models.OutputPets:

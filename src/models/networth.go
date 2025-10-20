@@ -17,6 +17,6 @@ type NetworthType struct {
 }
 
 type Networth struct {
-	Networth            NetworthResult `json:"networth"`
-	NonCosmeticNetworth NetworthResult `json:"nonCosmeticNetworth"`
+	Networth            NetworthResult `json:"normal"`
+	NonCosmeticNetworth NetworthResult `json:"nonCosmetic"`
 }
