@@ -1021,6 +1021,13 @@ components:
         type:
           type: string
       type: object
+    models.Networth:
+      properties:
+        networth:
+          $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
+        nonCosmeticNetworth:
+          $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
+      type: object
     models.OutputPets:
       properties:
         amount:
@@ -1601,7 +1608,7 @@ components:
         official:
           type: string
       type: object
-    routes.NetworthResult:
+    skycrypt_src_models.NetworthResult:
       properties:
         bank:
           type: number
@@ -1617,12 +1624,12 @@ components:
           type: number
         types:
           additionalProperties:
-            $ref: '#/components/schemas/routes.NetworthType'
+            $ref: '#/components/schemas/skycrypt_src_models.NetworthType'
           type: object
         unsoulboundNetworth:
           type: number
       type: object
-    routes.NetworthType:
+    skycrypt_src_models.NetworthType:
       properties:
         total:
           type: number
@@ -2427,9 +2434,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  $ref: '#/components/schemas/routes.NetworthResult'
-                type: object
+                $ref: '#/components/schemas/models.Networth'
           description: OK
         "400":
           content:

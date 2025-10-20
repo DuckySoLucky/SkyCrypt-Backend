@@ -10,22 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type NetworthResult struct {
-	Networth            float64                  `json:"networth"`
-	UnsoulboundNetworth float64                  `json:"unsoulboundNetworth"`
-	NoInventory         bool                     `json:"noInventory"`
-	IsNonCosmetic       bool                     `json:"isNonCosmetic"`
-	Purse               float64                  `json:"purse"`
-	Bank                float64                  `json:"bank"`
-	PersonalBank        float64                  `json:"personalBank"`
-	Types               map[string]*NetworthType `json:"types"`
-}
-
-type NetworthType struct {
-	Total            float64 `json:"total"`
-	UnsoulboundTotal float64 `json:"unsoulboundTotal"`
-}
-
 // NetworthHandler godoc
 // @Summary Get networth of a specified player
 // @Description Returns networth for the given user and profile ID
@@ -33,7 +17,7 @@ type NetworthType struct {
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
-// @Success 200 {object} map[string]NetworthResult
+// @Success 200 {object} models.Networth
 // @Failure 400 {object} models.ProcessingError
 // @Failure 500 {object} models.ProcessingError
 // @Router /api/networth/{uuid}/{profileId} [get]
@@ -91,8 +75,8 @@ func NetworthHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	networth := calculator.GetNetworth()
-	nonCosmeticNetworth := calculator.GetNonCosmeticNetworth()
+	networth := calculator.GetNetworth(skyhelpernetworthgo.NetworthOptions{OnlyNetworth: true})
+	nonCosmeticNetworth := calculator.GetNonCosmeticNetworth(skyhelpernetworthgo.NetworthOptions{OnlyNetworth: true})
 	formattedNetworth := map[string]float64{
 		"normal":      networth.Networth,
 		"nonCosmetic": nonCosmeticNetworth.Networth,
@@ -106,5 +90,4 @@ func NetworthHandler(c *fiber.Ctx) error {
 		"normal":      networth,
 		"nonCosmetic": nonCosmeticNetworth,
 	})
-
 }
