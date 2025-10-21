@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"skycrypt/src/api"
+	"skycrypt/src/models"
 	"skycrypt/src/stats"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
-// @Success 200 {object} map[string]models.StatsInfo
+// @Success 200 {object} models.Stats
 // @Failure 400 {object} models.ProcessingError
 // @Router /api/playerStats/{uuid}/{profileId} [get]
 func PlayerStatsHandler(c *fiber.Ctx) error {
@@ -39,5 +40,9 @@ func PlayerStatsHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/playerStats/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(output)
+	formattedStats := models.Stats{
+		Stats: output,
+	}
+
+	return c.JSON(formattedStats)
 }
