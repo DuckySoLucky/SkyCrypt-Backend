@@ -59,6 +59,11 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 		bank = *profile.Banking.Balance
 	}
 
+	formattedNetworth := models.EmbedNetworth{
+		Normal:      networth["normal"],
+		NonCosmetic: networth["nonCosmetic"],
+	}
+
 	output := models.EmbedData{
 		DisplayName:     mowojang.Name,
 		Username:        mowojang.Name,
@@ -69,7 +74,7 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 		GameMode:        profile.GameMode,
 		SkyBlockLevel:   GetSkyBlockLevel(userProfile).LevelWithProgress,
 		Skills:          getSkillsForEmbed(skills),
-		Networth:        networth,
+		Networth:        formattedNetworth,
 		Purse:           userProfile.Currencies.CoinPurse,
 		Bank:            bank,
 		Dungeons:        getDungeonsForEmbed(&dungeons),

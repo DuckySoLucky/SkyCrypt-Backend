@@ -387,9 +387,7 @@ components:
         joined:
           type: integer
         networth:
-          additionalProperties:
-            type: number
-          type: object
+          $ref: '#/components/schemas/models.EmbedNetworth'
         profile_cute_name:
           type: string
         profile_id:
@@ -434,6 +432,13 @@ components:
             type: integer
           type: object
         xp:
+          type: number
+      type: object
+    models.EmbedNetworth:
+      properties:
+        nonCosmetic:
+          type: number
+        normal:
           type: number
       type: object
     models.EnchantingGame:
