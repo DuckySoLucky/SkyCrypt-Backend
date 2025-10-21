@@ -183,6 +183,8 @@ components:
           type: integer
         collected:
           type: integer
+        maxed:
+          type: boolean
         medals:
           additionalProperties:
             type: integer
@@ -1405,6 +1407,13 @@ components:
         totalSlayerExp:
           type: integer
       type: object
+    models.SourceTab:
+      properties:
+        icon:
+          type: string
+        name:
+          type: string
+      type: object
     models.StatsInfo:
       additionalProperties:
         type: integer
@@ -1484,6 +1493,8 @@ components:
           type: boolean
         source:
           type: string
+        sourceTab:
+          $ref: '#/components/schemas/models.SourceTab'
         texture_pack:
           type: string
         texture_path:
