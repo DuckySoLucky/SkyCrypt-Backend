@@ -761,11 +761,11 @@ components:
           uniqueItems: false
         level:
           $ref: '#/components/schemas/models.Skill'
-        peak_of_the_mountain:
+        peakOfTheMountain:
           $ref: '#/components/schemas/models.PeakOfTheMountain'
         powder:
           $ref: '#/components/schemas/models.PowderOutput'
-        selected_pickaxe_ability:
+        selectedPickaxeAbility:
           type: string
         tokens:
           $ref: '#/components/schemas/models.HotmTokens'
