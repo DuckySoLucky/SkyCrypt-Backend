@@ -32,16 +32,6 @@ var ICONS map[string]string = map[string]string{
 	"rift_enderchest": "/api/head/a6cc486c2be1cb9dfcb2e53dd9a3e9a883bfadb27cb956f1896d602b4067",
 }
 
-type SearchItem struct {
-	models.StrippedItem
-	SourceTab SourceTab `json:"sourceTab"`
-}
-
-type SourceTab struct {
-	Icon string `json:"icon"`
-	Name string `json:"name"`
-}
-
 func getIcon(source string, uuid string) string {
 	if icon, exists := ICONS[source]; exists {
 		if os.Getenv("DEV") == "true" {
@@ -182,15 +172,14 @@ func InventoryHandler(c *fiber.Ctx) error {
 
 		strippedItems := statsItems.StripItems(&formattedItems, true)
 
-		searchResults := make([]SearchItem, len(strippedItems))
+		searchResults := make([]models.StrippedItem, len(strippedItems))
 		for i, item := range strippedItems {
-			searchResults[i] = SearchItem{
-				StrippedItem: item,
-				SourceTab: SourceTab{
-					Icon: getIcon(item.Source, uuid),
-					Name: utility.TitleCase(item.Source),
-				},
+			item.SourceTab = &models.SourceTab{
+				Icon: getIcon(item.Source, uuid),
+				Name: utility.TitleCase(item.Source),
 			}
+
+			searchResults[i] = item
 		}
 
 		fmt.Printf("Returning /api/inventory/%s/%s/%s in %s\n", uuid, inventoryId, searchString, time.Since(timeNow))

@@ -21,4 +21,5 @@ type Contest struct {
 	Collected int            `json:"collected"`
 	Amount    int            `json:"amount"`
 	Medals    map[string]int `json:"medals"`
+	Maxed     bool           `json:"maxed"`
 }

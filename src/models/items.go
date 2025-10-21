@@ -59,4 +59,10 @@ type StrippedItem struct {
 	Shiny          bool            `json:"shiny,omitempty"`
 	Wiki           *WikipediaLinks `json:"wiki,omitempty"`
 	TexturePack    string          `json:"texture_pack,omitempty"`
+	SourceTab      *SourceTab      `json:"sourceTab"`
+}
+
+type SourceTab struct {
+	Icon string `json:"icon"`
+	Name string `json:"name"`
 }
