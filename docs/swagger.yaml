@@ -1414,13 +1414,6 @@ components:
         name:
           type: string
       type: object
-    models.Stats:
-      properties:
-        stats:
-          additionalProperties:
-            $ref: '#/components/schemas/models.StatsInfo'
-          type: object
-      type: object
     models.StatsInfo:
       additionalProperties:
         type: integer
@@ -2522,7 +2515,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/models.Stats'
+                additionalProperties:
+                  $ref: '#/components/schemas/models.StatsInfo'
+                type: object
           description: OK
         "400":
           content:
