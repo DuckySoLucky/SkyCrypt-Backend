@@ -1902,6 +1902,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -1940,6 +1945,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -1972,6 +1982,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2004,6 +2019,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2036,6 +2056,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2068,6 +2093,11 @@ paths:
         name: profileId
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2100,6 +2130,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2132,6 +2167,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2218,6 +2258,11 @@ paths:
         name: search
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2270,6 +2315,11 @@ paths:
         name: search
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2388,6 +2438,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2420,6 +2475,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2452,6 +2512,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2490,6 +2555,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2522,6 +2592,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2583,6 +2658,11 @@ paths:
   /api/resourcepacks:
     get:
       description: Returns a list of resource packs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2611,6 +2691,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2649,6 +2734,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2687,6 +2777,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2719,6 +2814,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2751,6 +2851,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:
@@ -2777,6 +2882,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           content:

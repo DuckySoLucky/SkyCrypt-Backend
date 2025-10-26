@@ -13,6 +13,7 @@ import (
 // @Summary Get pets stats of a specified player
 // @Description Returns pets for the given user and profile ID
 // @Tags pets
+// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -35,9 +36,9 @@ func PetsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
-	output := stats.GetPets(userProfile, profile)
-
 	fmt.Printf("Returning /api/pets/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(output)
+	return c.JSON(fiber.Map{
+		"pets": stats.GetPets(userProfile, profile),
+	})
 }

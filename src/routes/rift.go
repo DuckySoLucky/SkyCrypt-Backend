@@ -20,6 +20,7 @@ import (
 // @Summary Get rift stats of a specified player
 // @Description Returns rift data for the given user and profile ID
 // @Tags rift
+// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -97,9 +98,9 @@ func RiftHandler(c *fiber.Ctx) error {
 		processedItems[inventoryId] = statsItems.ProcessItems(combinedItems, inventoryId, disabledPacks)
 	}
 
-	output := stats.GetRift(userProfile, processedItems)
-
 	fmt.Printf("Returning /api/rift/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(output)
+	return c.JSON(fiber.Map{
+		"rift": stats.GetRift(userProfile, processedItems),
+	})
 }

@@ -21,6 +21,7 @@ import (
 // @Summary Get skills stats of a specified player
 // @Description Returns skills for the given user and profile ID
 // @Tags skills
+// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -123,12 +124,10 @@ func SkillsHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/skills/%s in %s\n", profileId, time.Since(timeNow))
 
-	output := models.SkillsOutput{
-		Mining:     stats.GetMining(userProfile, player, allItems),
-		Farming:    stats.GetFarming(userProfile, allItems),
-		Fishing:    stats.GetFishing(userProfile, allItems),
-		Enchanting: stats.GetEnchanting(userProfile),
-	}
-
-	return c.JSON(output)
+	return c.JSON(fiber.Map{
+		"mining":     stats.GetMining(userProfile, player, allItems),
+		"farming":    stats.GetFarming(userProfile, allItems),
+		"fishing":    stats.GetFishing(userProfile, allItems),
+		"enchanting": stats.GetEnchanting(userProfile),
+	})
 }

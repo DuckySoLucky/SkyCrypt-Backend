@@ -14,6 +14,7 @@ import (
 // @Summary Get networth of a specified player
 // @Description Returns networth for the given user and profile ID
 // @Tags networth
+// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -87,7 +88,9 @@ func NetworthHandler(c *fiber.Ctx) error {
 	fmt.Printf("Returning /api/networth/%s in %s\n", uuid, time.Since(timeNow))
 
 	return c.JSON(fiber.Map{
-		"normal":      networth,
-		"nonCosmetic": nonCosmeticNetworth,
+		"networth": map[string]any{
+			"normal":      networth,
+			"nonCosmetic": nonCosmeticNetworth,
+		},
 	})
 }
