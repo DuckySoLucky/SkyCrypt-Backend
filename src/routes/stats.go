@@ -13,7 +13,6 @@ import (
 // @Summary Get stats of a specified player
 // @Description Returns stats for the given user and profile ID
 // @Tags stats
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -85,7 +84,5 @@ func StatsHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/stats/%s in %s\n", uuid, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"stats": output,
-	})
+	return c.JSON(output)
 }

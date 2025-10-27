@@ -13,7 +13,6 @@ import (
 // @Summary Get Crimson Isle stats of a specified player
 // @Description Returns Crimson Isle stats for the given user and profile ID
 // @Tags crimson_isle
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -36,9 +35,9 @@ func CrimsonIsleHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetCrimsonIsle(userProfile)
+
 	fmt.Printf("Returning /api/crimson_isle/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"crimson_isle": stats.GetCrimsonIsle(userProfile),
-	})
+	return c.JSON(output)
 }

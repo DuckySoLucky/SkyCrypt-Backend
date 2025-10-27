@@ -13,7 +13,6 @@ import (
 // @Summary Get minions stats of a specified player
 // @Description Returns minions for the given user and profile ID
 // @Tags minions
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -33,9 +32,9 @@ func MinionsHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	output := stats.GetMinions(profile)
+
 	fmt.Printf("Returning /api/minions/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"minions": stats.GetMinions(profile),
-	})
+	return c.JSON(output)
 }
