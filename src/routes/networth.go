@@ -18,7 +18,7 @@ import (
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
-// @Success 200 {object} map[string]any
+// @Success 200 {object} models.Networth
 // @Failure 400 {object} models.ProcessingError
 // @Failure 500 {object} models.ProcessingError
 // @Router /api/networth/{uuid}/{profileId} [get]
@@ -76,8 +76,8 @@ func NetworthHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	networth := calculator.GetNetworth()
-	nonCosmeticNetworth := calculator.GetNonCosmeticNetworth()
+	networth := calculator.GetNetworth(skyhelpernetworthgo.NetworthOptions{OnlyNetworth: true})
+	nonCosmeticNetworth := calculator.GetNonCosmeticNetworth(skyhelpernetworthgo.NetworthOptions{OnlyNetworth: true})
 	formattedNetworth := map[string]float64{
 		"normal":      networth.Networth,
 		"nonCosmetic": nonCosmeticNetworth.Networth,
@@ -93,5 +93,4 @@ func NetworthHandler(c *fiber.Ctx) error {
 			"nonCosmetic": nonCosmeticNetworth,
 		},
 	})
-
 }

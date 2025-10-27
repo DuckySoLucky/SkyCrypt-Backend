@@ -95,6 +95,10 @@ func GetFarming(userProfile *skycrypttypes.Member, items []models.ProcessedItem)
 		if medal != "" {
 			output.Medals[medal].Total += 1
 			output.Contests[cropId].Medals[medal] += 1
+
+			if medal == "diamond" {
+				output.Contests[cropId].Maxed = true
+			}
 		}
 	}
 

@@ -183,6 +183,8 @@ components:
           type: integer
         collected:
           type: integer
+        maxed:
+          type: boolean
         medals:
           additionalProperties:
             type: integer
@@ -385,9 +387,7 @@ components:
         joined:
           type: integer
         networth:
-          additionalProperties:
-            type: number
-          type: object
+          $ref: '#/components/schemas/models.EmbedNetworth'
         profile_cute_name:
           type: string
         profile_id:
@@ -432,6 +432,13 @@ components:
             type: integer
           type: object
         xp:
+          type: number
+      type: object
+    models.EmbedNetworth:
+      properties:
+        nonCosmetic:
+          type: number
+        normal:
           type: number
       type: object
     models.EnchantingGame:
@@ -761,11 +768,11 @@ components:
           uniqueItems: false
         level:
           $ref: '#/components/schemas/models.Skill'
-        peak_of_the_mountain:
+        peakOfTheMountain:
           $ref: '#/components/schemas/models.PeakOfTheMountain'
         powder:
           $ref: '#/components/schemas/models.PowderOutput'
-        selected_pickaxe_ability:
+        selectedPickaxeAbility:
           type: string
         tokens:
           $ref: '#/components/schemas/models.HotmTokens'
@@ -1020,6 +1027,13 @@ components:
           type: number
         type:
           type: string
+      type: object
+    models.Networth:
+      properties:
+        nonCosmetic:
+          $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
+        normal:
+          $ref: '#/components/schemas/skycrypt_src_models.NetworthResult'
       type: object
     models.OutputPets:
       properties:
@@ -1398,6 +1412,20 @@ components:
         totalSlayerExp:
           type: integer
       type: object
+    models.SourceTab:
+      properties:
+        icon:
+          type: string
+        name:
+          type: string
+      type: object
+    models.Stats:
+      properties:
+        stats:
+          additionalProperties:
+            $ref: '#/components/schemas/models.StatsInfo'
+          type: object
+      type: object
     models.StatsInfo:
       additionalProperties:
         type: integer
@@ -1477,6 +1505,8 @@ components:
           type: boolean
         source:
           type: string
+        sourceTab:
+          $ref: '#/components/schemas/models.SourceTab'
         texture_pack:
           type: string
         texture_path:
@@ -1600,6 +1630,34 @@ components:
           type: string
         official:
           type: string
+      type: object
+    skycrypt_src_models.NetworthResult:
+      properties:
+        bank:
+          type: number
+        isNonCosmetic:
+          type: boolean
+        networth:
+          type: number
+        noInventory:
+          type: boolean
+        personalBank:
+          type: number
+        purse:
+          type: number
+        types:
+          additionalProperties:
+            $ref: '#/components/schemas/skycrypt_src_models.NetworthType'
+          type: object
+        unsoulboundNetworth:
+          type: number
+      type: object
+    skycrypt_src_models.NetworthType:
+      properties:
+        total:
+          type: number
+        unsoulboundTotal:
+          type: number
       type: object
     skycrypttypes.Display:
       properties:
@@ -2464,8 +2522,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: {}
-                type: object
+                $ref: '#/components/schemas/models.Networth'
           description: OK
         "400":
           content:
@@ -2545,9 +2602,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  $ref: '#/components/schemas/models.StatsInfo'
-                type: object
+                $ref: '#/components/schemas/models.Stats'
           description: OK
         "400":
           content:
