@@ -17,7 +17,6 @@ import (
 // @Summary Get embed data for a specified player
 // @Description Returns embed data for the given user (UUID or username) and optional profile ID
 // @Tags embed
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID or username"
 // @Param profileId path string false "Profile ID (optional)"
@@ -69,7 +68,5 @@ func EmbedHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/embed/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"embed": embedData,
-	})
+	return c.JSON(embedData)
 }

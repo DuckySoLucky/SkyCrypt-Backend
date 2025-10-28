@@ -16,7 +16,6 @@ var RESOURCE_PACKS = []models.ResourcePackConfig{}
 // @Summary Get list of resource packs
 // @Description Returns a list of resource packs
 // @Tags resourcepacks
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} []models.ResourcePackConfig
 // @Router /api/resourcepacks [get]
@@ -66,7 +65,5 @@ func ResourcePackHandler(c *fiber.Ctx) error {
 
 	fmt.Printf("Returning /api/resourcepacks in %s\n", time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"resourcepacks": RESOURCE_PACKS,
-	})
+	return c.JSON(RESOURCE_PACKS)
 }

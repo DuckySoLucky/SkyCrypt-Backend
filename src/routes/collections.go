@@ -13,7 +13,6 @@ import (
 // @Summary Get collections stats of a specified player
 // @Description Returns collections for the given user and profile ID
 // @Tags collections
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -36,9 +35,9 @@ func CollectionsHandler(c *fiber.Ctx) error {
 	userProfileValue := profile.Members[uuid]
 	userProfile := &userProfileValue
 
+	output := stats.GetCollections(userProfile, profile)
+
 	fmt.Printf("Returning /api/collections/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"collections": stats.GetCollections(userProfile, profile),
-	})
+	return c.JSON(output)
 }

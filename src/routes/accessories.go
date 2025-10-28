@@ -18,7 +18,6 @@ import (
 // @Summary Get accessories stats of a specified player
 // @Description Returns accessories for the given user and profile ID
 // @Tags accessories
-// @Accept  json
 // @Produce  json
 // @Param uuid path string true "User UUID"
 // @Param profileId path string true "Profile ID"
@@ -88,9 +87,9 @@ func AccessoriesHandler(c *fiber.Ctx) error {
 		}
 	}
 
+	output := stats.GetAccessories(&userProfile, items, disabledPacks)
+
 	fmt.Printf("Returning /api/accessories/%s in %s\n", profileId, time.Since(timeNow))
 
-	return c.JSON(fiber.Map{
-		"accessories": stats.GetAccessories(&userProfile, items, disabledPacks),
-	})
+	return c.JSON(output)
 }
