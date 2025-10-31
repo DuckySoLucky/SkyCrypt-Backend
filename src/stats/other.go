@@ -55,19 +55,21 @@ func FormatProfiles(profiles *models.HypixelProfilesResponse) []*models.Profiles
 	return profileStats
 }
 
-func FormatMembers(profiles *skycrypttypes.Profile) ([]*models.MemberStats, error) {
-	memberStats := make([]*models.MemberStats, 0, len(profiles.Members))
+func FormatMembers(profile *skycrypttypes.Profile) ([]*models.MemberStats, error) {
+	memberStats := make([]*models.MemberStats, 0, len(profile.Members))
 
-	for memberUUID, memberData := range profiles.Members {
+	for memberUUID, memberData := range profile.Members {
 		mowojang, err := api.ResolvePlayer(memberUUID)
 		if err != nil {
 			return nil, err
 		}
 
 		memberStats = append(memberStats, &models.MemberStats{
-			UUID:    mowojang.UUID,
-			Name:    mowojang.Name,
-			Removed: isMemberRemoved(&memberData),
+			UUID:      mowojang.UUID,
+			CuteName:  profile.CuteName,
+			ProfileId: profile.ProfileID,
+			Name:      mowojang.Name,
+			Removed:   isMemberRemoved(&memberData),
 		})
 	}
 

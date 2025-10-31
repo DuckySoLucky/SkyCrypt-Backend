@@ -2,11 +2,13 @@ package stats
 
 import (
 	"fmt"
+	notenoughupdates "skycrypt/src/NotEnoughUpdates"
 	"skycrypt/src/constants"
 	"skycrypt/src/models"
 	stats "skycrypt/src/stats/items"
 	"skycrypt/src/utility"
 	"slices"
+	"strings"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 	skyhelpernetworthgo "github.com/SkyCryptWebsite/SkyHelper-Networth-Go"
@@ -197,6 +199,27 @@ func getMissing(accessories *[]models.InsertAccessory, accessoryIds []models.Acc
 			DisplayName: accessory.Name,
 			Rarity:      missingAccessory.Rarity,
 			Id:          missingAccessory.Id,
+		}
+
+		// Wiki links
+		NEUItem, err := notenoughupdates.GetItem(missingAccessory.Id)
+		if err == nil && len(NEUItem.Wiki) > 0 {
+			object.Wiki = &models.WikipediaLinks{}
+			if len(NEUItem.Wiki) == 1 {
+				if strings.HasPrefix(NEUItem.Wiki[0], "https://wiki.hypixel.net/") {
+					object.Wiki.Official = NEUItem.Wiki[0]
+				} else {
+					object.Wiki.Fandom = NEUItem.Wiki[0]
+				}
+			} else {
+				if strings.HasPrefix(NEUItem.Wiki[0], "https://wiki.hypixel.net/") {
+					object.Wiki.Official = NEUItem.Wiki[0]
+					object.Wiki.Fandom = NEUItem.Wiki[1]
+				} else {
+					object.Wiki.Fandom = NEUItem.Wiki[0]
+					object.Wiki.Official = NEUItem.Wiki[1]
+				}
+			}
 		}
 
 		upgradeList := constants.GetUpgradeList(missingAccessory.Id)

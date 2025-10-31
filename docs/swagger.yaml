@@ -741,6 +741,10 @@ components:
       type: object
     models.MemberStats:
       properties:
+        cute_name:
+          type: string
+        profile_id:
+          type: string
         removed:
           type: boolean
         username:

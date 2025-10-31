@@ -12,9 +12,11 @@ type ProfilesStats struct {
 }
 
 type MemberStats struct {
-	UUID    string `json:"uuid"`
-	Name    string `json:"username"`
-	Removed bool   `json:"removed"`
+	UUID      string `json:"uuid"`
+	CuteName  string `json:"cute_name"`
+	ProfileId string `json:"profile_id"`
+	Name      string `json:"username"`
+	Removed   bool   `json:"removed"`
 }
 
 type StatsOutput struct {

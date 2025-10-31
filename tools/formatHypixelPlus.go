@@ -51,7 +51,7 @@ func main() {
 						return nil
 					}
 					outputPath := filepath.Join("output/assets/textures", packDir.Name(), relPath)
-					fmt.Printf("Path: %s\n", outputPath)
+					// fmt.Printf("Path: %s\n", outputPath)
 					/*
 						if fmt.Sprintf("%s.png", packDir.Name()) == d.Name() {
 							outputPath = filepath.Join("output/assets/textures", d.Name())
@@ -88,7 +88,7 @@ func main() {
 						return nil
 					}
 
-					fmt.Printf("Copied: %s to %s\n", path, outputPath)
+					// fmt.Printf("Copied: %s to %s\n", path, outputPath)
 
 					mcmetaPath := path + ".mcmeta"
 					if _, err := os.Stat(mcmetaPath); err == nil {
@@ -191,78 +191,57 @@ func main() {
 		})
 	}
 
-	outputAssetsPath := "output/assets"
-	outputAssetsContents, err := os.ReadDir(outputAssetsPath)
-	if err != nil {
-		fmt.Printf("Failed to read output assets directory: %v\n", err)
-		return
-	}
+	outputAssetsPath := "output/assets/textures"
 
-	for _, entry := range outputAssetsContents {
-		if entry.IsDir() {
-			continue
-		}
-
-		if filepath.Ext(entry.Name()) != ".png" {
-			// fmt.Printf("Skipped non-PNG file: %s\n", entry.Name())
-			continue
-		}
-
-		file, err := os.Open(filepath.Join(outputAssetsPath, entry.Name()))
+	filepath.WalkDir(outputAssetsPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			fmt.Printf("Failed to open %s: %v\n", entry.Name(), err)
-			continue
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if filepath.Ext(d.Name()) != ".png" {
+			return nil
+		}
+
+		file, err := os.Open(path)
+		if err != nil {
+			fmt.Printf("Failed to open %s: %v\n", path, err)
+			return nil
 		}
 		defer file.Close()
 
 		img, _, err := image.Decode(file)
 		if err != nil {
-			fmt.Printf("Failed to decode %s: %v\n", entry.Name(), err)
-			continue
+			fmt.Printf("Failed to decode %s: %v\n", path, err)
+			return nil
 		}
 
 		width := img.Bounds().Dx()
 		height := img.Bounds().Dy()
 		if width != height && height%width == 0 {
-			mcmetaPath := filepath.Join(outputAssetsPath, entry.Name()+".mcmeta")
+			mcmetaPath := path + ".mcmeta"
 			if _, err := os.Stat(mcmetaPath); os.IsNotExist(err) {
-				fmt.Printf("Coudln't find %+v\n", mcmetaPath)
-				continue
+				fmt.Printf("Couldn't find %+v\n", mcmetaPath)
+				return nil
 			}
 
 			mcmetaData, err := os.ReadFile(mcmetaPath)
 			if err != nil {
 				fmt.Printf("Failed to read %s: %v\n", mcmetaPath, err)
-				continue
+				return nil
 			}
 
 			var mcMeta McMeta
 			if err := json.Unmarshal(mcmetaData, &mcMeta); err != nil {
 				fmt.Printf("Failed to parse %s: %v\n", mcmetaPath, err)
-				continue
+				return nil
 			}
 
 			frameCount := height / width
-			frames := make([]image.Image, frameCount)
-			for i := 0; i < frameCount; i++ {
-				frameRect := image.Rect(0, i*width, width, (i+1)*width)
-				subImg := img.(interface {
-					SubImage(r image.Rectangle) image.Image
-				}).SubImage(frameRect)
-				frames[i] = subImg
-			}
-
-			delay := uint16(mcMeta.Animation.Frametime * 50 / 10) // APNG delay is in 1/100s
-
-			delays := make([]uint16, frameCount)
-			for i := 0; i < frameCount; i++ {
-				frameRect := image.Rect(0, i*width, width, (i+1)*width)
-				subImg := img.(interface {
-					SubImage(r image.Rectangle) image.Image
-				}).SubImage(frameRect)
-				frames[i] = subImg
-				delays[i] = delay
-			}
+			delay := uint16(mcMeta.Animation.Frametime * 50 / 10)
 
 			apngImg := apng.APNG{}
 			for i := 0; i < frameCount; i++ {
@@ -277,20 +256,20 @@ func main() {
 				})
 			}
 
-			outFile, err := os.Create(filepath.Join(outputAssetsPath, entry.Name()))
+			outFile, err := os.Create(path)
 			if err != nil {
-				fmt.Printf("Failed to create APNG %s: %v\n", entry.Name(), err)
-				continue
+				fmt.Printf("Failed to create APNG %s: %v\n", path, err)
+				return nil
 			}
 			defer outFile.Close()
 			if err := apng.Encode(outFile, apngImg); err != nil {
-				fmt.Printf("Failed to encode APNG %s: %v\n", entry.Name(), err)
-				continue
+				fmt.Printf("Failed to encode APNG %s: %v\n", path, err)
+				return nil
 			}
 
-			fmt.Printf("Created APNG: %s\n", entry.Name())
-		} else {
-			// fmt.Printf("Valid: %+v\n", entry.Name())
+			fmt.Printf("Created APNG: %s\n", path)
 		}
-	}
+
+		return nil
+	})
 }

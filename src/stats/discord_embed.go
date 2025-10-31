@@ -3,15 +3,25 @@ package stats
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	redis "skycrypt/src/db"
 	"skycrypt/src/models"
 
 	skycrypttypes "github.com/DuckySoLucky/SkyCrypt-Types"
 )
 
+func roundToTwoDecimals(value float64) float64 {
+	rounded := math.Round(value*100) / 100
+	if rounded == math.Floor(rounded) {
+		return math.Floor(rounded)
+	}
+
+	return rounded
+}
+
 func getSkillsForEmbed(skills *models.Skills) models.EmbedDataSkills {
 	output := models.EmbedDataSkills{
-		SkillAverage: skills.AverageSkillLevelWithProgress,
+		SkillAverage: roundToTwoDecimals(skills.AverageSkillLevelWithProgress),
 		Skills:       make(map[string]int, len(skills.Skills)),
 	}
 
@@ -24,8 +34,8 @@ func getSkillsForEmbed(skills *models.Skills) models.EmbedDataSkills {
 
 func getDungeonsForEmbed(dungeons *models.DungeonsOutput) models.EmbedDataDungeons {
 	output := models.EmbedDataDungeons{
-		Dungeoneering: dungeons.Level.LevelWithProgress,
-		ClassAverage:  dungeons.Classes.ClassAverageWithProgress,
+		Dungeoneering: roundToTwoDecimals(dungeons.Level.LevelWithProgress),
+		ClassAverage:  roundToTwoDecimals(dungeons.Classes.ClassAverageWithProgress),
 		Classes:       make(map[string]int, len(dungeons.Classes.Classes)),
 	}
 
@@ -38,7 +48,7 @@ func getDungeonsForEmbed(dungeons *models.DungeonsOutput) models.EmbedDataDungeo
 
 func getSlayersForEmbed(slayers *models.SlayersOutput) models.EmbedDataSlayers {
 	output := models.EmbedDataSlayers{
-		Experience: float64(slayers.TotalSlayerExperience),
+		Experience: roundToTwoDecimals(float64(slayers.TotalSlayerExperience)),
 		Slayers:    make(map[string]int, len(slayers.Data)),
 	}
 
@@ -60,8 +70,8 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 	}
 
 	formattedNetworth := models.EmbedNetworth{
-		Normal:      networth["normal"],
-		NonCosmetic: networth["nonCosmetic"],
+		Normal:      roundToTwoDecimals(networth["normal"]),
+		NonCosmetic: roundToTwoDecimals(networth["nonCosmetic"]),
 	}
 
 	output := models.EmbedData{
@@ -72,11 +82,11 @@ func StoreEmbedData(mowojang *models.MowojangReponse, userProfile *skycrypttypes
 		ProfileCuteName: profile.CuteName,
 		Joined:          userProfile.Profile.FirstJoin,
 		GameMode:        profile.GameMode,
-		SkyBlockLevel:   GetSkyBlockLevel(userProfile).LevelWithProgress,
+		SkyBlockLevel:   roundToTwoDecimals(GetSkyBlockLevel(userProfile).LevelWithProgress),
 		Skills:          getSkillsForEmbed(skills),
 		Networth:        formattedNetworth,
-		Purse:           userProfile.Currencies.CoinPurse,
-		Bank:            bank,
+		Purse:           roundToTwoDecimals(userProfile.Currencies.CoinPurse),
+		Bank:            roundToTwoDecimals(bank),
 		Dungeons:        getDungeonsForEmbed(&dungeons),
 		Slayers:         getSlayersForEmbed(&slayers),
 	}
