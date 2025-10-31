@@ -66,7 +66,7 @@ func FormatMembers(profile *skycrypttypes.Profile) ([]*models.MemberStats, error
 
 		memberStats = append(memberStats, &models.MemberStats{
 			UUID:      mowojang.UUID,
-			CuteName:  profile.ProfileID,
+			CuteName:  profile.CuteName,
 			ProfileId: profile.ProfileID,
 			Name:      mowojang.Name,
 			Removed:   isMemberRemoved(&memberData),

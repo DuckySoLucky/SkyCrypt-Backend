@@ -32,6 +32,10 @@ func GetUUID(username string) (string, error) {
 		return post.UUID, fmt.Errorf("error reading response: %v", err)
 	}
 
+	if resp.StatusCode == http.StatusNotFound || string(body) == "player not found" {
+		return "Player not Found", nil
+	}
+
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.Unmarshal(body, &post)
 	if err != nil {
@@ -61,6 +65,10 @@ func GetUsername(uuid string) (string, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return post.Name, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound || string(body) == "player not found" {
+		return "Player not Found", nil
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -103,6 +111,13 @@ func ResolvePlayer(uuid string) (*models.MowojangReponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &post, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound || string(body) == "player not found" {
+		return &models.MowojangReponse{
+			Name: "Player not Found",
+			UUID: uuid,
+		}, nil
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
