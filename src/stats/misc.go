@@ -249,6 +249,10 @@ func getUncategorized(userProfile *skycrypttypes.Member) map[string]any {
 		personalBank = "Unknown"
 	}
 
+	if userProfile.PlayerData == nil {
+		userProfile.PlayerData = &skycrypttypes.PlayerData{}
+	}
+
 	return map[string]any{
 		"soulflow":                 userProfile.ItemData.Soulflow,
 		"teleporter_pill_consumed": userProfile.ItemData.TeleporterPillConsumed,
