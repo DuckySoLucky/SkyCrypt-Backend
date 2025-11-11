@@ -25,7 +25,7 @@ func GetRank(player *skycrypttypes.Player) *models.RankOutput {
 		rankName = player.Rank
 	} else if player.MonthlyPackageRank != "" && player.MonthlyPackageRank != "NONE" {
 		rankName = player.MonthlyPackageRank
-	} else if player.NewPackageRank != "" {
+	} else if player.NewPackageRank != "" && player.NewPackageRank != "NONE" {
 		rankName = player.NewPackageRank
 	} else if player.PackageRank != "" {
 		rankName = player.PackageRank
