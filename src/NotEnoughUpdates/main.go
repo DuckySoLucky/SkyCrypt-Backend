@@ -64,7 +64,19 @@ func UpdateNEURepository() error {
 			// fmt.Println("[NOT-ENOUGH-UPDATES] Already up to date")
 			return nil
 		}
-		return fmt.Errorf("failed to pull: %w", err)
+		
+		fmt.Printf("[NOT-ENOUGH-UPDATES] Pull failed (%v), removing and re-cloning repository...\n", err)
+		
+		if removeErr := os.RemoveAll("NotEnoughUpdates-REPO"); removeErr != nil {
+			return fmt.Errorf("failed to remove corrupted repository: %w", removeErr)
+		}
+		
+		if initErr := InitializeNEURepository(); initErr != nil {
+			return fmt.Errorf("failed to re-clone repository: %w", initErr)
+		}
+		
+		fmt.Println("[NOT-ENOUGH-UPDATES] Repository re-cloned successfully")
+		return nil
 	}
 
 	ref, err := repo.Head()
