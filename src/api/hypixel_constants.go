@@ -31,9 +31,17 @@ func getSkyBlockItems() ([]models.HypixelItem, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return nil, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -65,9 +73,17 @@ func GetSkyBlockCollections() (map[string]models.HypixelCollection, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return nil, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary

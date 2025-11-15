@@ -13,7 +13,12 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-func GetUUID(username string) (string, error) {
+func GetUUID(username string, throwAnError ...bool) (string, error) {
+	shouldThrowError := true
+	if len(throwAnError) > 0 {
+		shouldThrowError = throwAnError[0]
+	}
+
 	var post models.MowojangReponse
 
 	cache, err := redis.Get(fmt.Sprintf("uuid:%s", strings.ToLower(username)))
@@ -23,23 +28,43 @@ func GetUUID(username string) (string, error) {
 
 	resp, err := http.Get(fmt.Sprintf("https://mowojang.matdoes.dev/%s", username))
 	if err != nil {
-		return post.UUID, fmt.Errorf("error making request: %v", err)
+		if shouldThrowError {
+			return post.UUID, fmt.Errorf("error making request: %v", err)
+		}
+		return "", nil
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return post.UUID, fmt.Errorf("error reading response: %v", err)
+		if shouldThrowError {
+			return post.UUID, fmt.Errorf("error reading response: %v", err)
+		}
+		return "", nil
 	}
 
 	if resp.StatusCode == http.StatusNotFound || string(body) == "player not found" {
+		if shouldThrowError {
+			return post.UUID, fmt.Errorf("invalid username or UUID provided")
+		}
+
 		return "Player not Found", nil
+	}
+
+	if len(body) == 0 {
+		if shouldThrowError {
+			return post.UUID, fmt.Errorf("received empty response from API")
+		}
+		return "", nil
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.Unmarshal(body, &post)
 	if err != nil {
-		return post.UUID, fmt.Errorf("error parsing JSON: %v", err)
+		if shouldThrowError {
+			return post.UUID, fmt.Errorf("error parsing JSON: %v", err)
+		}
+		return "", nil
 	}
 
 	redis.Set(fmt.Sprintf("uuid:%s", strings.ToLower(post.Name)), post.UUID, 24*60*60) // Cache for 24 hours
@@ -48,7 +73,12 @@ func GetUUID(username string) (string, error) {
 	return post.UUID, nil
 }
 
-func GetUsername(uuid string) (string, error) {
+func GetUsername(uuid string, throwAnError ...bool) (string, error) {
+	shouldThrowError := true
+	if len(throwAnError) > 0 {
+		shouldThrowError = throwAnError[0]
+	}
+
 	var post models.MowojangReponse
 
 	cache, err := redis.Get(fmt.Sprintf("username:%s", uuid))
@@ -58,23 +88,39 @@ func GetUsername(uuid string) (string, error) {
 
 	resp, err := http.Get(fmt.Sprintf("https://mowojang.matdoes.dev/%s", uuid))
 	if err != nil {
-		return post.Name, fmt.Errorf("error making request: %v", err)
+		if shouldThrowError {
+			return post.Name, fmt.Errorf("error making request: %v", err)
+		}
+		return "", nil
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return post.Name, fmt.Errorf("error reading response: %v", err)
+		if shouldThrowError {
+			return post.Name, fmt.Errorf("error reading response: %v", err)
+		}
+		return "", nil
 	}
 
 	if resp.StatusCode == http.StatusNotFound || string(body) == "player not found" {
 		return "Player not Found", nil
 	}
 
+	if len(body) == 0 {
+		if shouldThrowError {
+			return post.Name, fmt.Errorf("received empty response from API")
+		}
+		return "", nil
+	}
+
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.Unmarshal(body, &post)
 	if err != nil {
-		return post.Name, fmt.Errorf("error parsing JSON: %v", err)
+		if shouldThrowError {
+			return post.Name, fmt.Errorf("error parsing JSON: %v", err)
+		}
+		return "", nil
 	}
 
 	redis.Set(fmt.Sprintf("uuid:%s", strings.ToLower(post.Name)), uuid, 24*60*60) // Cache for 24 hours
@@ -83,12 +129,20 @@ func GetUsername(uuid string) (string, error) {
 	return post.Name, nil
 }
 
-func ResolvePlayer(uuid string) (*models.MowojangReponse, error) {
+func ResolvePlayer(uuid string, throwAnError ...bool) (*models.MowojangReponse, error) {
+	shouldThrowError := true
+	if len(throwAnError) > 0 {
+		shouldThrowError = throwAnError[0]
+	}
+
 	var post models.MowojangReponse
 	if !utility.IsUUID(uuid) {
-		tempUUID, err := GetUUID(uuid)
+		tempUUID, err := GetUUID(uuid, shouldThrowError)
 		if err != nil {
-			return &post, fmt.Errorf("error resolving UUID for username '%s': %v", uuid, err)
+			if shouldThrowError {
+				return &post, fmt.Errorf("error resolving UUID for username '%s': %v", uuid, err)
+			}
+			return &post, nil
 		}
 		uuid = tempUUID
 	}
@@ -118,6 +172,10 @@ func ResolvePlayer(uuid string) (*models.MowojangReponse, error) {
 			Name: "Player not Found",
 			UUID: uuid,
 		}, nil
+	}
+
+	if len(body) == 0 {
+		return &post, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
