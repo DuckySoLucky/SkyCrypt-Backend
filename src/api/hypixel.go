@@ -44,9 +44,17 @@ func GetPlayer(uuid string) (*skycrypttypes.Player, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return &response, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &response, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return &response, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -85,9 +93,17 @@ func GetProfiles(uuid string) (*models.HypixelProfilesResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return &response, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &response, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return &response, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -154,9 +170,17 @@ func GetMuseum(profileId string) (map[string]*skycrypttypes.Museum, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return nil, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -187,9 +211,17 @@ func GetGarden(profileId string) (*skycrypttypes.Garden, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %v", err)
+	}
+
+	if len(body) == 0 {
+		return nil, fmt.Errorf("received empty response from API")
 	}
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
