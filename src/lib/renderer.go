@@ -274,16 +274,52 @@ func To3DHead(img image.Image) *image.RGBA {
 
 	out := image.NewRGBA(image.Rect(0, 0, int(size), int(size)))
 
-	// Left overlay
+	// Bottom (base)
+	overlay3DSection(out, img, &OverlaySectionOptions{
+		Size:       size,
+		X:          2,
+		Y:          0,
+		Matrix:     TRANSFORM_TOP_BOTTOM_MATRIX,
+		TranslateX: float32(size)*(-145.0/256.0)/(8.0/8.1) + float32(size)*(10.0/256.0),
+		TranslateY: float32(size) * (177.0 / 256.0),
+		Flip:       false,
+		Scale:      float32(size / 20),
+	})
+
+	// Back (base)
+	overlay3DSection(out, img, &OverlaySectionOptions{
+		Size:       size,
+		X:          3,
+		Y:          1,
+		Matrix:     TRANSFORM_FRONT_BACK_MATRIX,
+		TranslateX: float32(size)*(26.0/256.0)*(8.0/9.0) + 10,
+		TranslateY: float32(size)*(70.0/256.0)*(8.0/9.0) + 12,
+		Flip:       false,
+		Scale:      float32(size / 20),
+	})
+
+	// Left (base)
+	overlay3DSection(out, img, &OverlaySectionOptions{
+		Size:       size,
+		X:          0,
+		Y:          1,
+		Matrix:     TRANSFORM_RIGHT_LEFT_MATRIX,
+		TranslateX: float32(size)*(231.0/256.0)/(8.0/8.1) - float32(size)*(10.0/256.0) - 6,
+		TranslateY: float32(size)*(-56.0/256.0) + 9,
+		Flip:       true,
+		Scale:      float32(size / 20),
+	})
+
+	// Bottom overlay
 	overlay3DSection(out, img, &OverlaySectionOptions{
 		Size:       size,
 		X:          6,
-		Y:          1,
-		Matrix:     TRANSFORM_RIGHT_LEFT_MATRIX,
-		TranslateX: float32(size) * (231.0 / 256.0) * (8.0 / 8.1),
-		TranslateY: float32(size) * (-56.0 / 256.0),
-		Flip:       true,
-		Scale:      float32(size/20) * (9.0 / 8.0),
+		Y:          0,
+		Matrix:     TRANSFORM_TOP_BOTTOM_MATRIX,
+		TranslateX: float32(size) * (-145.0 / 256.0),
+		TranslateY: float32(size) * (177.0 / 256.0),
+		Flip:       false,
+		Scale:      float32(size / 20),
 	})
 
 	// Back overlay
@@ -298,19 +334,19 @@ func To3DHead(img image.Image) *image.RGBA {
 		Scale:      float32(size/20) * (9.0 / 8.0),
 	})
 
-	// Bottom overlay
+	// Left overlay
 	overlay3DSection(out, img, &OverlaySectionOptions{
 		Size:       size,
 		X:          6,
-		Y:          0,
-		Matrix:     TRANSFORM_TOP_BOTTOM_MATRIX,
-		TranslateX: float32(size) * (-145.0 / 256.0),
-		TranslateY: float32(size) * (177.0 / 256.0),
-		Flip:       false,
+		Y:          1,
+		Matrix:     TRANSFORM_RIGHT_LEFT_MATRIX,
+		TranslateX: float32(size) * (231.0 / 256.0) * (8.0 / 8.1),
+		TranslateY: float32(size) * (-56.0 / 256.0),
+		Flip:       true,
 		Scale:      float32(size/20) * (9.0 / 8.0),
 	})
 
-	// Top
+	// Top (base)
 	overlay3DSection(out, img, &OverlaySectionOptions{
 		Size:       size,
 		X:          1,
