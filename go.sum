@@ -5,6 +5,8 @@ github.com/DuckySoLucky/SkyCrypt-Types v0.1.10 h1:65kEYXMhA6Ve/CcPCbdijncB7KO/c2
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.10/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.11 h1:QgHxtih7oLdUKheWMXf3K3yqZzJZx6IpD0iNJua3ARE=
 github.com/DuckySoLucky/SkyCrypt-Types v0.1.11/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
+github.com/DuckySoLucky/SkyCrypt-Types v0.1.13 h1:ITZ8hrsHxRUXIwn8LrM5itvrLxlb7D9epEBAbWCx8oc=
+github.com/DuckySoLucky/SkyCrypt-Types v0.1.13/go.mod h1:5tR65bmeXxmxzcWoM+8zQeN/1sC0NuA7//mxW2UlI5k=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
@@ -18,6 +20,8 @@ github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.4 h1:FIYSrJWOmx1quVvmfmRLe
 github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.4/go.mod h1:8AdNFYBlDU8YGIDj0tIrlPkW5J1ojrvvbxyHzHvcCXw=
 github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.5 h1:SpvSdgisl531bEChOIdCmMX5Ac2EvifTwlR/IzXFfdM=
 github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.5/go.mod h1:8AdNFYBlDU8YGIDj0tIrlPkW5J1ojrvvbxyHzHvcCXw=
+github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.6 h1:0KGv/qY/60Jj7f2Eq80d5izBJaljkQ9CKR84RKcitQM=
+github.com/SkyCryptWebsite/SkyHelper-Networth-Go v1.2.6/go.mod h1:KO71BXu+xc/9yBpfF2+u0u7WnW0004cYn31crOzkyj0=
 github.com/Tnze/go-mc v1.20.2 h1:arHCE/WxLCxY73C/4ZNLdOymRYtdwoXE05ohB7HVN6Q=
 github.com/Tnze/go-mc v1.20.2/go.mod h1:geoRj2HsXSkB3FJBuhr7wCzXegRlzWsVXd7h7jiJ6aQ=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
